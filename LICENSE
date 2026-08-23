@@ -1,0 +1,138 @@
+Copyright (c) 2026 JaMaLa1111. All Rights Reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software, associated documentation files, and included digital assets
+(such as textures, 3D models, and audio files) (collectively, the "Software"),
+to use, copy, modify, merge, publish, and distribute the Software, subject to
+the following conditions:
+
+1. ATTRIBUTION:
+   The above copyright notice, this permission notice, and a prominent credit
+   link to the original repository or project page must be included in all
+   copies or substantial portions of the Software, as well as any derivative
+   works or distributions. For video or streaming content where this Software
+   is the titular subject or main feature of the video (e.g., Mod Showcases or
+   Tutorials specifically for this mod), a prominent credit link in the video
+   description or equivalent public area is required. For general gameplay
+   (e.g., Let's Plays, SMP streams), attribution is appreciated but not required.
+
+2. NON-COMMERCIAL USE, SERVERS & EXCEPTIONS:
+   The Software and any derivative works may NOT be used, sold, licensed,
+   monetized, or distributed for commercial purposes, including but not
+   limited to paywalled downloads, commercial modpacks, or paid access
+   without explicit prior written consent from the copyright holder.
+
+   MULTIPLAYER SERVERS & PAY-TO-WIN RESTRICTION:
+   You are permitted to use the Software on public or private multiplayer
+   servers. However, you may NOT monetize the Software on these servers.
+   This includes locking server access, or locking items, mechanics, or
+   features provided by this Software, behind paywalls, real-money purchases,
+   mandatory donations, or "pay-to-win" monetization structures.
+
+   EXCEPTIONS:
+   - Content Creation: You are permitted to feature the Software in video
+     content, live streams, and media (e.g., YouTube, Twitch) and monetize
+     such content via ad revenue, subscriptions, or sponsorships, provided
+     attribution is given as outlined in Section 1.
+   - Modpacks & Modding Platforms: You are permitted to include the Software
+     in free-to-download modpacks distributed on standard modding platforms
+     (e.g., CurseForge, Modrinth), or shared privately among users for
+     multiplayer servers. Earning ad revenue or platform reward points through
+     these standard, non-paywalled distribution channels is  permitted, provided
+     attribution is given as outlined in Section 1. However, distributing modpacks
+     containing this Software behind "early access" paywalls (e.g., Patreon) or
+     any other form of paid access is strictly prohibited unless explicit prior
+     written permission is given by the copyright holder.
+
+3. DERIVATIVE WORKS & SOURCE AVAILABILITY:
+   You are permitted to modify, adapt, or build upon this Software, provided
+   that any redistributed modifications remain subject to these same terms
+   (non-commercial and with attribution). Additionally, if you distribute a
+   modified version of the Software, you must make the source code of your
+   modifications publicly available in a standard, freely accessible software
+   repository (e.g., GitHub, GitLab) or alongside the distributed mod file,
+   under these same terms.
+
+   ADD-ONS AND COMPATIBILITY:
+   Creating an independent add-on, plugin, or compatibility module that
+   merely interacts with, hooks into the Software's API, or applies runtime
+   bytecode modifications (e.g., via Mixins) for compatibility purposes,
+   without copying or distributing the original Software's code or assets,
+   is NOT considered a derivative work. Such independent projects may be
+   licensed at the creator's discretion and are not required to adopt these terms.
+
+4. NO ENDORSEMENT:
+   Neither the name of the copyright holder nor the names of any contributors
+   may be used to endorse or promote products derived from this Software
+   without specific prior written permission.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+THIRD-PARTY COMPONENTS / BUNDLED SOFTWARE:
+
+1. KotlinForNeoforge
+Portions of this software are derived from KotlinForNeoforge, which is
+licensed under the MIT License:
+
+Copyright (c) 2020 TheDarkColour
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+2. Piper TTS
+This software bundles the Piper text-to-speech engine, which is licensed
+under the MIT License:
+
+Copyright (c) 2023 Michael Hansen (Rhasspy)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+3. Downloaded Voice Models (Piper TTS)
+This Software provides a graphical interface to download third-party
+text-to-speech voice models. These models are not bundled with the Software
+and are not covered by this license. The models are subject to their own respective
+licenses (e.g., various Creative Commons licenses). In-game attribution is provided
+for these models as required by their original authors. The creator of this Software
+claims no ownership over downloaded voice models.

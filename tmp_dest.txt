@@ -1,0 +1,162 @@
+Compiled from "DestinationInstruction.java"
+public class com.simibubi.create.content.trains.schedule.destination.DestinationInstruction extends com.simibubi.create.content.trains.schedule.destination.TextScheduleInstruction {
+  public com.simibubi.create.content.trains.schedule.destination.DestinationInstruction();
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method com/simibubi/create/content/trains/schedule/destination/TextScheduleInstruction."<init>":()V
+       4: return
+
+  public net.createmod.catnip.data.Pair<net.minecraft.world.item.ItemStack, net.minecraft.network.chat.Component> getSummary();
+    Code:
+       0: getstatic     #7                  // Field com/simibubi/create/AllBlocks.TRACK_STATION:Lcom/tterrag/registrate/util/entry/BlockEntry;
+       3: invokevirtual #13                 // Method com/tterrag/registrate/util/entry/BlockEntry.asStack:()Lnet/minecraft/world/item/ItemStack;
+       6: aload_0
+       7: invokevirtual #19                 // Method getLabelText:()Ljava/lang/String;
+      10: invokestatic  #25                 // InterfaceMethod net/minecraft/network/chat/Component.literal:(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;
+      13: invokestatic  #31                 // Method net/createmod/catnip/data/Pair.of:(Ljava/lang/Object;Ljava/lang/Object;)Lnet/createmod/catnip/data/Pair;
+      16: areturn
+
+  public boolean supportsConditions();
+    Code:
+       0: iconst_1
+       1: ireturn
+
+  public net.minecraft.resources.ResourceLocation getId();
+    Code:
+       0: ldc           #37                 // String destination
+       2: invokestatic  #39                 // Method com/simibubi/create/Create.asResource:(Ljava/lang/String;)Lnet/minecraft/resources/ResourceLocation;
+       5: areturn
+
+  public net.minecraft.world.item.ItemStack getSecondLineIcon();
+    Code:
+       0: getstatic     #7                  // Field com/simibubi/create/AllBlocks.TRACK_STATION:Lcom/tterrag/registrate/util/entry/BlockEntry;
+       3: invokevirtual #13                 // Method com/tterrag/registrate/util/entry/BlockEntry.asStack:()Lnet/minecraft/world/item/ItemStack;
+       6: areturn
+
+  public java.lang.String getFilter();
+    Code:
+       0: aload_0
+       1: invokevirtual #19                 // Method getLabelText:()Ljava/lang/String;
+       4: areturn
+
+  public java.lang.String getFilterForRegex();
+    Code:
+       0: aload_0
+       1: invokevirtual #45                 // Method getFilter:()Ljava/lang/String;
+       4: ldc           #48                 // String
+       6: invokestatic  #50                 // Method net/createmod/catnip/data/Glob.toRegexPattern:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+       9: areturn
+
+  public java.util.List<net.minecraft.network.chat.Component> getSecondLineTooltip(int);
+    Code:
+       0: ldc           #56                 // String schedule.instruction.filter_edit_box
+       2: iconst_0
+       3: anewarray     #58                 // class java/lang/Object
+       6: invokestatic  #60                 // Method com/simibubi/create/foundation/utility/CreateLang.translateDirect:(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+       9: ldc           #66                 // String schedule.instruction.filter_edit_box_1
+      11: iconst_0
+      12: anewarray     #58                 // class java/lang/Object
+      15: invokestatic  #60                 // Method com/simibubi/create/foundation/utility/CreateLang.translateDirect:(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+      18: getstatic     #68                 // Field net/minecraft/ChatFormatting.GRAY:Lnet/minecraft/ChatFormatting;
+      21: invokevirtual #74                 // Method net/minecraft/network/chat/MutableComponent.withStyle:(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/MutableComponent;
+      24: ldc           #80                 // String schedule.instruction.filter_edit_box_2
+      26: iconst_0
+      27: anewarray     #58                 // class java/lang/Object
+      30: invokestatic  #60                 // Method com/simibubi/create/foundation/utility/CreateLang.translateDirect:(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+      33: getstatic     #82                 // Field net/minecraft/ChatFormatting.DARK_GRAY:Lnet/minecraft/ChatFormatting;
+      36: invokevirtual #74                 // Method net/minecraft/network/chat/MutableComponent.withStyle:(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/MutableComponent;
+      39: ldc           #85                 // String schedule.instruction.filter_edit_box_3
+      41: iconst_0
+      42: anewarray     #58                 // class java/lang/Object
+      45: invokestatic  #60                 // Method com/simibubi/create/foundation/utility/CreateLang.translateDirect:(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+      48: getstatic     #82                 // Field net/minecraft/ChatFormatting.DARK_GRAY:Lnet/minecraft/ChatFormatting;
+      51: invokevirtual #74                 // Method net/minecraft/network/chat/MutableComponent.withStyle:(Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/MutableComponent;
+      54: invokestatic  #87                 // Method com/google/common/collect/ImmutableList.of:(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Lcom/google/common/collect/ImmutableList;
+      57: areturn
+
+  protected void modifyEditBox(net.minecraft.client.gui.components.EditBox);
+    Code:
+       0: aload_1
+       1: invokedynamic #92,  0             // InvokeDynamic #0:test:()Ljava/util/function/Predicate;
+       6: invokevirtual #96                 // Method net/minecraft/client/gui/components/EditBox.setFilter:(Ljava/util/function/Predicate;)V
+       9: return
+
+  public com.simibubi.create.content.trains.graph.DiscoveredPath start(com.simibubi.create.content.trains.schedule.ScheduleRuntime, net.minecraft.world.level.Level);
+    Code:
+       0: aload_0
+       1: invokevirtual #102                // Method getFilterForRegex:()Ljava/lang/String;
+       4: astore_3
+       5: iconst_0
+       6: istore        4
+       8: new           #105                // class java/util/ArrayList
+      11: dup
+      12: invokespecial #107                // Method java/util/ArrayList."<init>":()V
+      15: astore        5
+      17: aload_1
+      18: getfield      #108                // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime.train:Lcom/simibubi/create/content/trains/entity/Train;
+      21: astore        6
+      23: aload         6
+      25: invokevirtual #114                // Method com/simibubi/create/content/trains/entity/Train.hasForwardConductor:()Z
+      28: ifne          53
+      31: aload         6
+      33: invokevirtual #120                // Method com/simibubi/create/content/trains/entity/Train.hasBackwardConductor:()Z
+      36: ifne          53
+      39: aload         6
+      41: getfield      #123                // Field com/simibubi/create/content/trains/entity/Train.status:Lcom/simibubi/create/content/trains/entity/TrainStatus;
+      44: invokevirtual #127                // Method com/simibubi/create/content/trains/entity/TrainStatus.missingConductor:()V
+      47: aload_1
+      48: invokevirtual #132                // Method com/simibubi/create/content/trains/schedule/ScheduleRuntime.startCooldown:()V
+      51: aconst_null
+      52: areturn
+      53: aload         6
+      55: getfield      #135                // Field com/simibubi/create/content/trains/entity/Train.graph:Lcom/simibubi/create/content/trains/graph/TrackGraph;
+      58: getstatic     #139                // Field com/simibubi/create/content/trains/graph/EdgePointType.STATION:Lcom/simibubi/create/content/trains/graph/EdgePointType;
+      61: invokevirtual #145                // Method com/simibubi/create/content/trains/graph/TrackGraph.getPoints:(Lcom/simibubi/create/content/trains/graph/EdgePointType;)Ljava/util/Collection;
+      64: invokeinterface #151,  1          // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
+      69: astore        7
+      71: aload         7
+      73: invokeinterface #157,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+      78: ifeq          122
+      81: aload         7
+      83: invokeinterface #162,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      88: checkcast     #166                // class com/simibubi/create/content/trains/station/GlobalStation
+      91: astore        8
+      93: aload         8
+      95: getfield      #168                // Field com/simibubi/create/content/trains/station/GlobalStation.name:Ljava/lang/String;
+      98: aload_3
+      99: invokevirtual #172                // Method java/lang/String.matches:(Ljava/lang/String;)Z
+     102: ifne          108
+     105: goto          71
+     108: iconst_1
+     109: istore        4
+     111: aload         5
+     113: aload         8
+     115: invokevirtual #178                // Method java/util/ArrayList.add:(Ljava/lang/Object;)Z
+     118: pop
+     119: goto          71
+     122: aload         6
+     124: getfield      #182                // Field com/simibubi/create/content/trains/entity/Train.navigation:Lcom/simibubi/create/content/trains/entity/Navigation;
+     127: aload         5
+     129: ldc2_w        #188                // double 1.7976931348623157E308d
+     132: invokevirtual #190                // Method com/simibubi/create/content/trains/entity/Navigation.findPathTo:(Ljava/util/ArrayList;D)Lcom/simibubi/create/content/trains/graph/DiscoveredPath;
+     135: astore        7
+     137: aload         7
+     139: ifnonnull     176
+     142: iload         4
+     144: ifeq          158
+     147: aload         6
+     149: getfield      #123                // Field com/simibubi/create/content/trains/entity/Train.status:Lcom/simibubi/create/content/trains/entity/TrainStatus;
+     152: invokevirtual #196                // Method com/simibubi/create/content/trains/entity/TrainStatus.failedNavigation:()V
+     155: goto          170
+     158: aload         6
+     160: getfield      #123                // Field com/simibubi/create/content/trains/entity/Train.status:Lcom/simibubi/create/content/trains/entity/TrainStatus;
+     163: aload_0
+     164: invokevirtual #45                 // Method getFilter:()Ljava/lang/String;
+     167: invokevirtual #199                // Method com/simibubi/create/content/trains/entity/TrainStatus.failedNavigationNoTarget:(Ljava/lang/String;)V
+     170: aload_1
+     171: invokevirtual #132                // Method com/simibubi/create/content/trains/schedule/ScheduleRuntime.startCooldown:()V
+     174: aconst_null
+     175: areturn
+     176: aload         7
+     178: areturn
+}

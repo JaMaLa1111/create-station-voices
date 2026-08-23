@@ -1,0 +1,1010 @@
+Compiled from "ScheduleRuntime.java"
+public class com.simibubi.create.content.trains.schedule.ScheduleRuntime {
+  public com.simibubi.create.content.trains.entity.Train train;
+
+  public com.simibubi.create.content.trains.schedule.Schedule schedule;
+
+  public boolean isAutoSchedule;
+
+  public boolean paused;
+
+  public boolean completed;
+
+  public int currentEntry;
+
+  public com.simibubi.create.content.trains.schedule.ScheduleRuntime$State state;
+
+  public java.util.List<java.lang.Integer> conditionProgress;
+
+  public java.util.List<net.minecraft.nbt.CompoundTag> conditionContext;
+
+  public java.lang.String currentTitle;
+
+  public int ticksInTransit;
+
+  public java.util.List<java.lang.Integer> predictionTicks;
+
+  public boolean displayLinkUpdateRequested;
+
+  public com.simibubi.create.content.trains.schedule.ScheduleRuntime(com.simibubi.create.content.trains.entity.Train);
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: aload_0
+       5: aload_1
+       6: putfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+       9: aload_0
+      10: invokevirtual #13                 // Method reset:()V
+      13: return
+
+  public void startCooldown();
+    Code:
+       0: aload_0
+       1: bipush        40
+       3: putfield      #16                 // Field cooldown:I
+       6: return
+
+  public void destinationReached();
+    Code:
+       0: aload_0
+       1: getfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+       4: getstatic     #24                 // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.IN_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+       7: if_acmpeq     11
+      10: return
+      11: aload_0
+      12: getstatic     #29                 // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.POST_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      15: putfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      18: aload_0
+      19: getfield      #32                 // Field conditionProgress:Ljava/util/List;
+      22: invokeinterface #36,  1           // InterfaceMethod java/util/List.clear:()V
+      27: aload_0
+      28: getfield      #41                 // Field conditionContext:Ljava/util/List;
+      31: invokeinterface #36,  1           // InterfaceMethod java/util/List.clear:()V
+      36: aload_0
+      37: iconst_1
+      38: putfield      #44                 // Field displayLinkUpdateRequested:Z
+      41: aload_0
+      42: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+      45: getfield      #48                 // Field com/simibubi/create/content/trains/entity/Train.carriages:Ljava/util/List;
+      48: invokeinterface #53,  1           // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+      53: astore_1
+      54: aload_1
+      55: invokeinterface #57,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+      60: ifeq          83
+      63: aload_1
+      64: invokeinterface #63,  1           // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+      69: checkcast     #67                 // class com/simibubi/create/content/trains/entity/Carriage
+      72: astore_2
+      73: aload_2
+      74: getfield      #69                 // Field com/simibubi/create/content/trains/entity/Carriage.storage:Lcom/simibubi/create/content/contraptions/minecart/TrainCargoManager;
+      77: invokevirtual #73                 // Method com/simibubi/create/content/contraptions/minecart/TrainCargoManager.resetIdleCargoTracker:()V
+      80: goto          54
+      83: aload_0
+      84: getfield      #78                 // Field ticksInTransit:I
+      87: ifle          147
+      90: aload_0
+      91: getfield      #81                 // Field predictionTicks:Ljava/util/List;
+      94: aload_0
+      95: getfield      #84                 // Field currentEntry:I
+      98: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     103: checkcast     #91                 // class java/lang/Integer
+     106: invokevirtual #93                 // Method java/lang/Integer.intValue:()I
+     109: istore_1
+     110: iload_1
+     111: ifle          126
+     114: aload_0
+     115: iload_1
+     116: aload_0
+     117: getfield      #78                 // Field ticksInTransit:I
+     120: iadd
+     121: iconst_2
+     122: idiv
+     123: putfield      #78                 // Field ticksInTransit:I
+     126: aload_0
+     127: getfield      #81                 // Field predictionTicks:Ljava/util/List;
+     130: aload_0
+     131: getfield      #84                 // Field currentEntry:I
+     134: aload_0
+     135: getfield      #78                 // Field ticksInTransit:I
+     138: invokestatic  #97                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     141: invokeinterface #101,  3          // InterfaceMethod java/util/List.set:(ILjava/lang/Object;)Ljava/lang/Object;
+     146: pop
+     147: aload_0
+     148: getfield      #84                 // Field currentEntry:I
+     151: aload_0
+     152: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+     155: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+     158: invokeinterface #114,  1          // InterfaceMethod java/util/List.size:()I
+     163: if_icmplt     167
+     166: return
+     167: aload_0
+     168: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+     171: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+     174: aload_0
+     175: getfield      #84                 // Field currentEntry:I
+     178: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     183: checkcast     #117                // class com/simibubi/create/content/trains/schedule/ScheduleEntry
+     186: getfield      #119                // Field com/simibubi/create/content/trains/schedule/ScheduleEntry.conditions:Ljava/util/List;
+     189: astore_1
+     190: iconst_0
+     191: istore_2
+     192: iload_2
+     193: aload_1
+     194: invokeinterface #114,  1          // InterfaceMethod java/util/List.size:()I
+     199: if_icmpge     239
+     202: aload_0
+     203: getfield      #32                 // Field conditionProgress:Ljava/util/List;
+     206: iconst_0
+     207: invokestatic  #97                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     210: invokeinterface #122,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     215: pop
+     216: aload_0
+     217: getfield      #41                 // Field conditionContext:Ljava/util/List;
+     220: new           #126                // class net/minecraft/nbt/CompoundTag
+     223: dup
+     224: invokespecial #128                // Method net/minecraft/nbt/CompoundTag."<init>":()V
+     227: invokeinterface #122,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     232: pop
+     233: iinc          2, 1
+     236: goto          192
+     239: return
+
+  public void transitInterrupted();
+    Code:
+       0: aload_0
+       1: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+       4: ifnull        17
+       7: aload_0
+       8: getfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      11: getstatic     #24                 // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.IN_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      14: if_acmpeq     18
+      17: return
+      18: aload_0
+      19: getstatic     #129                // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.PRE_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      22: putfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      25: aload_0
+      26: iconst_0
+      27: putfield      #16                 // Field cooldown:I
+      30: return
+
+  public void tick(net.minecraft.world.level.Level);
+    Code:
+       0: aload_0
+       1: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+       4: ifnonnull     8
+       7: return
+       8: aload_0
+       9: getfield      #132                // Field paused:Z
+      12: ifeq          16
+      15: return
+      16: aload_0
+      17: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+      20: getfield      #135                // Field com/simibubi/create/content/trains/entity/Train.derailed:Z
+      23: ifeq          27
+      26: return
+      27: aload_0
+      28: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+      31: getfield      #138                // Field com/simibubi/create/content/trains/entity/Train.navigation:Lcom/simibubi/create/content/trains/entity/Navigation;
+      34: getfield      #142                // Field com/simibubi/create/content/trains/entity/Navigation.destination:Lcom/simibubi/create/content/trains/station/GlobalStation;
+      37: ifnull        51
+      40: aload_0
+      41: dup
+      42: getfield      #78                 // Field ticksInTransit:I
+      45: iconst_1
+      46: iadd
+      47: putfield      #78                 // Field ticksInTransit:I
+      50: return
+      51: aload_0
+      52: invokevirtual #148                // Method checkEndOfScheduleReached:()Z
+      55: ifeq          59
+      58: return
+      59: aload_0
+      60: dup
+      61: getfield      #16                 // Field cooldown:I
+      64: dup_x1
+      65: iconst_1
+      66: isub
+      67: putfield      #16                 // Field cooldown:I
+      70: ifle          74
+      73: return
+      74: aload_0
+      75: getfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      78: getstatic     #24                 // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.IN_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      81: if_acmpne     85
+      84: return
+      85: aload_0
+      86: getfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      89: getstatic     #29                 // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.POST_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      92: if_acmpne     101
+      95: aload_0
+      96: aload_1
+      97: invokevirtual #151                // Method tickConditions:(Lnet/minecraft/world/level/Level;)V
+     100: return
+     101: aload_0
+     102: aload_1
+     103: invokevirtual #155                // Method startCurrentInstruction:(Lnet/minecraft/world/level/Level;)Lcom/simibubi/create/content/trains/graph/DiscoveredPath;
+     106: astore_2
+     107: aload_2
+     108: ifnonnull     112
+     111: return
+     112: aload_0
+     113: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     116: getfield      #159                // Field com/simibubi/create/content/trains/entity/Train.status:Lcom/simibubi/create/content/trains/entity/TrainStatus;
+     119: invokevirtual #163                // Method com/simibubi/create/content/trains/entity/TrainStatus.successfulNavigation:()V
+     122: aload_2
+     123: getfield      #168                // Field com/simibubi/create/content/trains/graph/DiscoveredPath.destination:Lcom/simibubi/create/content/trains/station/GlobalStation;
+     126: aload_0
+     127: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     130: invokevirtual #171                // Method com/simibubi/create/content/trains/entity/Train.getCurrentStation:()Lcom/simibubi/create/content/trains/station/GlobalStation;
+     133: if_acmpne     148
+     136: aload_0
+     137: getstatic     #24                 // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.IN_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+     140: putfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+     143: aload_0
+     144: invokevirtual #175                // Method destinationReached:()V
+     147: return
+     148: aload_0
+     149: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     152: getfield      #138                // Field com/simibubi/create/content/trains/entity/Train.navigation:Lcom/simibubi/create/content/trains/entity/Navigation;
+     155: aload_2
+     156: invokevirtual #178                // Method com/simibubi/create/content/trains/entity/Navigation.startNavigation:(Lcom/simibubi/create/content/trains/graph/DiscoveredPath;)D
+     159: ldc2_w        #182                // double -1.0d
+     162: dcmpl
+     163: ifeq          178
+     166: aload_0
+     167: getstatic     #24                 // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.IN_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+     170: putfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+     173: aload_0
+     174: iconst_0
+     175: putfield      #78                 // Field ticksInTransit:I
+     178: return
+
+  public void tickConditions(net.minecraft.world.level.Level);
+    Code:
+       0: aload_0
+       1: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+       4: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+       7: aload_0
+       8: getfield      #84                 // Field currentEntry:I
+      11: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      16: checkcast     #117                // class com/simibubi/create/content/trains/schedule/ScheduleEntry
+      19: astore_2
+      20: aload_2
+      21: getfield      #119                // Field com/simibubi/create/content/trains/schedule/ScheduleEntry.conditions:Ljava/util/List;
+      24: astore_3
+      25: aload_2
+      26: getfield      #190                // Field com/simibubi/create/content/trains/schedule/ScheduleEntry.instruction:Lcom/simibubi/create/content/trains/schedule/destination/ScheduleInstruction;
+      29: invokevirtual #194                // Method com/simibubi/create/content/trains/schedule/destination/ScheduleInstruction.supportsConditions:()Z
+      32: ifne          53
+      35: aload_0
+      36: getstatic     #129                // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.PRE_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      39: putfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      42: aload_0
+      43: dup
+      44: getfield      #84                 // Field currentEntry:I
+      47: iconst_1
+      48: iadd
+      49: putfield      #84                 // Field currentEntry:I
+      52: return
+      53: iconst_0
+      54: istore        4
+      56: iload         4
+      58: aload_3
+      59: invokeinterface #114,  1          // InterfaceMethod java/util/List.size:()I
+      64: if_icmpge     277
+      67: aload_3
+      68: iload         4
+      70: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      75: checkcast     #37                 // class java/util/List
+      78: astore        5
+      80: aload_0
+      81: getfield      #32                 // Field conditionProgress:Ljava/util/List;
+      84: iload         4
+      86: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      91: checkcast     #91                 // class java/lang/Integer
+      94: invokevirtual #93                 // Method java/lang/Integer.intValue:()I
+      97: istore        6
+      99: iload         6
+     101: aload         5
+     103: invokeinterface #114,  1          // InterfaceMethod java/util/List.size:()I
+     108: if_icmplt     129
+     111: aload_0
+     112: getstatic     #129                // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.PRE_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+     115: putfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+     118: aload_0
+     119: dup
+     120: getfield      #84                 // Field currentEntry:I
+     123: iconst_1
+     124: iadd
+     125: putfield      #84                 // Field currentEntry:I
+     128: return
+     129: aload_0
+     130: getfield      #41                 // Field conditionContext:Ljava/util/List;
+     133: iload         4
+     135: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     140: checkcast     #126                // class net/minecraft/nbt/CompoundTag
+     143: astore        7
+     145: aload         5
+     147: iload         6
+     149: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     154: checkcast     #199                // class com/simibubi/create/content/trains/schedule/condition/ScheduleWaitCondition
+     157: astore        8
+     159: aload         7
+     161: ldc           #201                // String StatusVersion
+     163: invokevirtual #203                // Method net/minecraft/nbt/CompoundTag.getInt:(Ljava/lang/String;)I
+     166: istore        9
+     168: aload         8
+     170: aload_1
+     171: aload_0
+     172: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     175: aload         7
+     177: invokevirtual #207                // Method com/simibubi/create/content/trains/schedule/condition/ScheduleWaitCondition.tickCompletion:(Lnet/minecraft/world/level/Level;Lcom/simibubi/create/content/trains/entity/Train;Lnet/minecraft/nbt/CompoundTag;)Z
+     180: ifeq          240
+     183: aload_0
+     184: getfield      #41                 // Field conditionContext:Ljava/util/List;
+     187: iload         4
+     189: new           #126                // class net/minecraft/nbt/CompoundTag
+     192: dup
+     193: invokespecial #128                // Method net/minecraft/nbt/CompoundTag."<init>":()V
+     196: invokeinterface #101,  3          // InterfaceMethod java/util/List.set:(ILjava/lang/Object;)Ljava/lang/Object;
+     201: pop
+     202: aload_0
+     203: getfield      #32                 // Field conditionProgress:Ljava/util/List;
+     206: iload         4
+     208: iload         6
+     210: iconst_1
+     211: iadd
+     212: invokestatic  #97                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     215: invokeinterface #101,  3          // InterfaceMethod java/util/List.set:(ILjava/lang/Object;)Ljava/lang/Object;
+     220: pop
+     221: aload_0
+     222: dup
+     223: getfield      #44                 // Field displayLinkUpdateRequested:Z
+     226: iload         4
+     228: ifne          235
+     231: iconst_1
+     232: goto          236
+     235: iconst_0
+     236: ior
+     237: putfield      #44                 // Field displayLinkUpdateRequested:Z
+     240: aload_0
+     241: dup
+     242: getfield      #44                 // Field displayLinkUpdateRequested:Z
+     245: iload         4
+     247: ifne          266
+     250: iload         9
+     252: aload         7
+     254: ldc           #201                // String StatusVersion
+     256: invokevirtual #203                // Method net/minecraft/nbt/CompoundTag.getInt:(Ljava/lang/String;)I
+     259: if_icmpeq     266
+     262: iconst_1
+     263: goto          267
+     266: iconst_0
+     267: ior
+     268: putfield      #44                 // Field displayLinkUpdateRequested:Z
+     271: iinc          4, 1
+     274: goto          56
+     277: aload_0
+     278: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     281: getfield      #48                 // Field com/simibubi/create/content/trains/entity/Train.carriages:Ljava/util/List;
+     284: invokeinterface #53,  1           // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+     289: astore        4
+     291: aload         4
+     293: invokeinterface #57,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+     298: ifeq          324
+     301: aload         4
+     303: invokeinterface #63,  1           // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+     308: checkcast     #67                 // class com/simibubi/create/content/trains/entity/Carriage
+     311: astore        5
+     313: aload         5
+     315: getfield      #69                 // Field com/simibubi/create/content/trains/entity/Carriage.storage:Lcom/simibubi/create/content/contraptions/minecart/TrainCargoManager;
+     318: invokevirtual #211                // Method com/simibubi/create/content/contraptions/minecart/TrainCargoManager.tickIdleCargoTracker:()V
+     321: goto          291
+     324: return
+
+  public com.simibubi.create.content.trains.graph.DiscoveredPath startCurrentInstruction(net.minecraft.world.level.Level);
+    Code:
+       0: aload_0
+       1: invokevirtual #148                // Method checkEndOfScheduleReached:()Z
+       4: ifeq          9
+       7: aconst_null
+       8: areturn
+       9: aload_0
+      10: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+      13: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+      16: aload_0
+      17: getfield      #84                 // Field currentEntry:I
+      20: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      25: checkcast     #117                // class com/simibubi/create/content/trains/schedule/ScheduleEntry
+      28: astore_2
+      29: aload_2
+      30: getfield      #190                // Field com/simibubi/create/content/trains/schedule/ScheduleEntry.instruction:Lcom/simibubi/create/content/trains/schedule/destination/ScheduleInstruction;
+      33: astore_3
+      34: aload_3
+      35: aload_0
+      36: aload_1
+      37: invokevirtual #214                // Method com/simibubi/create/content/trains/schedule/destination/ScheduleInstruction.start:(Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime;Lnet/minecraft/world/level/Level;)Lcom/simibubi/create/content/trains/graph/DiscoveredPath;
+      40: areturn
+
+  public void setSchedule(com.simibubi.create.content.trains.schedule.Schedule, boolean);
+    Code:
+       0: aload_0
+       1: invokevirtual #13                 // Method reset:()V
+       4: aload_0
+       5: aload_1
+       6: putfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+       9: aload_0
+      10: aload_1
+      11: getfield      #218                // Field com/simibubi/create/content/trains/schedule/Schedule.savedProgress:I
+      14: iconst_0
+      15: aload_1
+      16: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+      19: invokeinterface #114,  1          // InterfaceMethod java/util/List.size:()I
+      24: iconst_1
+      25: isub
+      26: invokestatic  #221                // Method net/minecraft/util/Mth.clamp:(III)I
+      29: putfield      #84                 // Field currentEntry:I
+      32: aload_0
+      33: iconst_0
+      34: putfield      #132                // Field paused:Z
+      37: aload_0
+      38: iload_2
+      39: putfield      #227                // Field isAutoSchedule:Z
+      42: aload_0
+      43: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+      46: getfield      #159                // Field com/simibubi/create/content/trains/entity/Train.status:Lcom/simibubi/create/content/trains/entity/TrainStatus;
+      49: invokevirtual #230                // Method com/simibubi/create/content/trains/entity/TrainStatus.newSchedule:()V
+      52: aload_0
+      53: new           #233                // class java/util/ArrayList
+      56: dup
+      57: invokespecial #235                // Method java/util/ArrayList."<init>":()V
+      60: putfield      #81                 // Field predictionTicks:Ljava/util/List;
+      63: aload_1
+      64: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+      67: aload_0
+      68: invokedynamic #236,  0            // InvokeDynamic #0:accept:(Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime;)Ljava/util/function/Consumer;
+      73: invokeinterface #240,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+      78: aload_0
+      79: iconst_1
+      80: putfield      #44                 // Field displayLinkUpdateRequested:Z
+      83: return
+
+  public com.simibubi.create.content.trains.schedule.Schedule getSchedule();
+    Code:
+       0: aload_0
+       1: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+       4: areturn
+
+  public void discardSchedule();
+    Code:
+       0: aload_0
+       1: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+       4: getfield      #138                // Field com/simibubi/create/content/trains/entity/Train.navigation:Lcom/simibubi/create/content/trains/entity/Navigation;
+       7: invokevirtual #244                // Method com/simibubi/create/content/trains/entity/Navigation.cancelNavigation:()V
+      10: aload_0
+      11: invokevirtual #13                 // Method reset:()V
+      14: return
+
+  public java.util.Collection<com.simibubi.create.content.trains.display.GlobalTrainDisplayData$TrainDeparturePrediction> submitPredictions();
+    Code:
+       0: new           #233                // class java/util/ArrayList
+       3: dup
+       4: invokespecial #235                // Method java/util/ArrayList."<init>":()V
+       7: astore_1
+       8: aload_0
+       9: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+      12: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+      15: invokeinterface #114,  1          // InterfaceMethod java/util/List.size:()I
+      20: istore_2
+      21: iconst_0
+      22: istore_3
+      23: aload_0
+      24: getfield      #84                 // Field currentEntry:I
+      27: istore        4
+      29: aload_0
+      30: getfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      33: getstatic     #29                 // Field com/simibubi/create/content/trains/schedule/ScheduleRuntime$State.POST_TRANSIT:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      36: if_acmpeq     45
+      39: iload         4
+      41: iload_2
+      42: if_icmplt     111
+      45: aload_0
+      46: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+      49: invokevirtual #171                // Method com/simibubi/create/content/trains/entity/Train.getCurrentStation:()Lcom/simibubi/create/content/trains/station/GlobalStation;
+      52: astore        5
+      54: aload         5
+      56: ifnull        82
+      59: aload_1
+      60: aload_0
+      61: iload         4
+      63: aload         5
+      65: getfield      #253                // Field com/simibubi/create/content/trains/station/GlobalStation.name:Ljava/lang/String;
+      68: aload_0
+      69: getfield      #249                // Field currentTitle:Ljava/lang/String;
+      72: iconst_0
+      73: invokevirtual #258                // Method createPrediction:(ILjava/lang/String;Ljava/lang/String;I)Lcom/simibubi/create/content/trains/display/GlobalTrainDisplayData$TrainDeparturePrediction;
+      76: invokeinterface #262,  2          // InterfaceMethod java/util/Collection.add:(Ljava/lang/Object;)Z
+      81: pop
+      82: aload_0
+      83: iload         4
+      85: invokevirtual #265                // Method estimateStayDuration:(I)I
+      88: istore        6
+      90: iload         6
+      92: bipush        -2
+      94: if_icmpne     103
+      97: bipush        -2
+      99: istore_3
+     100: goto          108
+     103: iload_3
+     104: iload         6
+     106: iadd
+     107: istore_3
+     108: goto          354
+     111: aload_0
+     112: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     115: getfield      #138                // Field com/simibubi/create/content/trains/entity/Train.navigation:Lcom/simibubi/create/content/trains/entity/Navigation;
+     118: getfield      #142                // Field com/simibubi/create/content/trains/entity/Navigation.destination:Lcom/simibubi/create/content/trains/station/GlobalStation;
+     121: astore        5
+     123: aload         5
+     125: ifnull        341
+     128: aload_0
+     129: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     132: getfield      #269                // Field com/simibubi/create/content/trains/entity/Train.throttle:D
+     135: aload_0
+     136: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     139: invokevirtual #273                // Method com/simibubi/create/content/trains/entity/Train.maxSpeed:()F
+     142: f2d
+     143: dmul
+     144: aload_0
+     145: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     148: invokevirtual #273                // Method com/simibubi/create/content/trains/entity/Train.maxSpeed:()F
+     151: aload_0
+     152: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     155: invokevirtual #277                // Method com/simibubi/create/content/trains/entity/Train.maxTurnSpeed:()F
+     158: fadd
+     159: fconst_2
+     160: fdiv
+     161: f2d
+     162: invokestatic  #280                // Method java/lang/Math.min:(DD)D
+     165: dstore        6
+     167: aload_0
+     168: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     171: getfield      #138                // Field com/simibubi/create/content/trains/entity/Train.navigation:Lcom/simibubi/create/content/trains/entity/Navigation;
+     174: getfield      #286                // Field com/simibubi/create/content/trains/entity/Navigation.distanceToDestination:D
+     177: dload         6
+     179: ddiv
+     180: d2i
+     181: iconst_2
+     182: imul
+     183: istore        8
+     185: aload_0
+     186: getfield      #81                 // Field predictionTicks:Ljava/util/List;
+     189: invokeinterface #114,  1          // InterfaceMethod java/util/List.size:()I
+     194: iload         4
+     196: if_icmple     284
+     199: aload_0
+     200: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     203: getfield      #138                // Field com/simibubi/create/content/trains/entity/Train.navigation:Lcom/simibubi/create/content/trains/entity/Navigation;
+     206: getfield      #289                // Field com/simibubi/create/content/trains/entity/Navigation.distanceStartedAt:D
+     209: dconst_0
+     210: dcmpl
+     211: ifeq          284
+     214: aload_0
+     215: getfield      #81                 // Field predictionTicks:Ljava/util/List;
+     218: iload         4
+     220: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     225: checkcast     #91                 // class java/lang/Integer
+     228: invokevirtual #93                 // Method java/lang/Integer.intValue:()I
+     231: i2f
+     232: fstore        9
+     234: fload         9
+     236: fconst_0
+     237: fcmpl
+     238: ifle          284
+     241: fload         9
+     243: f2d
+     244: aload_0
+     245: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     248: getfield      #138                // Field com/simibubi/create/content/trains/entity/Train.navigation:Lcom/simibubi/create/content/trains/entity/Navigation;
+     251: getfield      #286                // Field com/simibubi/create/content/trains/entity/Navigation.distanceToDestination:D
+     254: aload_0
+     255: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     258: getfield      #138                // Field com/simibubi/create/content/trains/entity/Train.navigation:Lcom/simibubi/create/content/trains/entity/Navigation;
+     261: getfield      #289                // Field com/simibubi/create/content/trains/entity/Navigation.distanceStartedAt:D
+     264: ddiv
+     265: dconst_0
+     266: dconst_1
+     267: invokestatic  #292                // Method net/minecraft/util/Mth.clamp:(DDD)D
+     270: dmul
+     271: d2f
+     272: fstore        9
+     274: iload         8
+     276: fload         9
+     278: f2i
+     279: iadd
+     280: iconst_2
+     281: idiv
+     282: istore        8
+     284: iload_3
+     285: iload         8
+     287: iadd
+     288: istore_3
+     289: aload_1
+     290: aload_0
+     291: iload         4
+     293: aload         5
+     295: getfield      #253                // Field com/simibubi/create/content/trains/station/GlobalStation.name:Ljava/lang/String;
+     298: aload_0
+     299: getfield      #249                // Field currentTitle:Ljava/lang/String;
+     302: iload_3
+     303: invokevirtual #258                // Method createPrediction:(ILjava/lang/String;Ljava/lang/String;I)Lcom/simibubi/create/content/trains/display/GlobalTrainDisplayData$TrainDeparturePrediction;
+     306: invokeinterface #262,  2          // InterfaceMethod java/util/Collection.add:(Ljava/lang/Object;)Z
+     311: pop
+     312: aload_0
+     313: iload         4
+     315: invokevirtual #265                // Method estimateStayDuration:(I)I
+     318: istore        9
+     320: iload         9
+     322: bipush        -2
+     324: if_icmpeq     335
+     327: iload_3
+     328: iload         9
+     330: iadd
+     331: istore_3
+     332: goto          338
+     335: bipush        -2
+     337: istore_3
+     338: goto          354
+     341: aload_0
+     342: iload         4
+     344: aload_0
+     345: getfield      #249                // Field currentTitle:Ljava/lang/String;
+     348: iload_3
+     349: aload_1
+     350: invokevirtual #295                // Method predictForEntry:(ILjava/lang/String;ILjava/util/Collection;)I
+     353: pop
+     354: aload_0
+     355: getfield      #249                // Field currentTitle:Ljava/lang/String;
+     358: astore        5
+     360: iconst_1
+     361: istore        6
+     363: iload         6
+     365: iload_2
+     366: if_icmpge     460
+     369: iload         6
+     371: iload         4
+     373: iadd
+     374: iload_2
+     375: irem
+     376: istore        7
+     378: iload         7
+     380: ifne          396
+     383: aload_0
+     384: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+     387: getfield      #184                // Field com/simibubi/create/content/trains/schedule/Schedule.cyclic:Z
+     390: ifne          396
+     393: goto          460
+     396: aload_0
+     397: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+     400: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+     403: iload         7
+     405: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     410: checkcast     #117                // class com/simibubi/create/content/trains/schedule/ScheduleEntry
+     413: getfield      #190                // Field com/simibubi/create/content/trains/schedule/ScheduleEntry.instruction:Lcom/simibubi/create/content/trains/schedule/destination/ScheduleInstruction;
+     416: astore        9
+     418: aload         9
+     420: instanceof    #299                // class com/simibubi/create/content/trains/schedule/destination/ChangeTitleInstruction
+     423: ifeq          443
+     426: aload         9
+     428: checkcast     #299                // class com/simibubi/create/content/trains/schedule/destination/ChangeTitleInstruction
+     431: astore        8
+     433: aload         8
+     435: invokevirtual #301                // Method com/simibubi/create/content/trains/schedule/destination/ChangeTitleInstruction.getScheduleTitle:()Ljava/lang/String;
+     438: astore        5
+     440: goto          454
+     443: aload_0
+     444: iload         7
+     446: aload         5
+     448: iload_3
+     449: aload_1
+     450: invokevirtual #295                // Method predictForEntry:(ILjava/lang/String;ILjava/util/Collection;)I
+     453: istore_3
+     454: iinc          6, 1
+     457: goto          363
+     460: aload_1
+     461: invokedynamic #305,  0            // InvokeDynamic #1:test:()Ljava/util/function/Predicate;
+     466: invokeinterface #309,  2          // InterfaceMethod java/util/Collection.removeIf:(Ljava/util/function/Predicate;)Z
+     471: pop
+     472: aload_1
+     473: areturn
+
+  public net.minecraft.nbt.CompoundTag write(net.minecraft.core.HolderLookup$Provider);
+    Code:
+       0: new           #126                // class net/minecraft/nbt/CompoundTag
+       3: dup
+       4: invokespecial #128                // Method net/minecraft/nbt/CompoundTag."<init>":()V
+       7: astore_2
+       8: aload_2
+       9: ldc_w         #357                // String CurrentEntry
+      12: aload_0
+      13: getfield      #84                 // Field currentEntry:I
+      16: invokevirtual #359                // Method net/minecraft/nbt/CompoundTag.putInt:(Ljava/lang/String;I)V
+      19: aload_2
+      20: ldc_w         #363                // String AutoSchedule
+      23: aload_0
+      24: getfield      #227                // Field isAutoSchedule:Z
+      27: invokevirtual #365                // Method net/minecraft/nbt/CompoundTag.putBoolean:(Ljava/lang/String;Z)V
+      30: aload_2
+      31: ldc_w         #369                // String Paused
+      34: aload_0
+      35: getfield      #132                // Field paused:Z
+      38: invokevirtual #365                // Method net/minecraft/nbt/CompoundTag.putBoolean:(Ljava/lang/String;Z)V
+      41: aload_2
+      42: ldc_w         #371                // String Completed
+      45: aload_0
+      46: getfield      #187                // Field completed:Z
+      49: invokevirtual #365                // Method net/minecraft/nbt/CompoundTag.putBoolean:(Ljava/lang/String;Z)V
+      52: aload_0
+      53: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+      56: ifnull        75
+      59: aload_2
+      60: ldc_w         #373                // String Schedule
+      63: aload_0
+      64: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+      67: aload_1
+      68: invokevirtual #375                // Method com/simibubi/create/content/trains/schedule/Schedule.write:(Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/nbt/CompoundTag;
+      71: invokevirtual #379                // Method net/minecraft/nbt/CompoundTag.put:(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;
+      74: pop
+      75: aload_2
+      76: ldc_w         #383                // String State
+      79: aload_0
+      80: getfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      83: invokestatic  #385                // Method net/createmod/catnip/nbt/NBTHelper.writeEnum:(Lnet/minecraft/nbt/CompoundTag;Ljava/lang/String;Ljava/lang/Enum;)V
+      86: aload_2
+      87: ldc_w         #391                // String ConditionProgress
+      90: aload_0
+      91: getfield      #32                 // Field conditionProgress:Ljava/util/List;
+      94: invokevirtual #393                // Method net/minecraft/nbt/CompoundTag.putIntArray:(Ljava/lang/String;Ljava/util/List;)V
+      97: aload_2
+      98: ldc_w         #397                // String ConditionContext
+     101: aload_0
+     102: getfield      #41                 // Field conditionContext:Ljava/util/List;
+     105: invokedynamic #399,  0            // InvokeDynamic #2:apply:()Ljava/util/function/Function;
+     110: invokestatic  #403                // Method net/createmod/catnip/nbt/NBTHelper.writeCompoundList:(Ljava/lang/Iterable;Ljava/util/function/Function;)Lnet/minecraft/nbt/ListTag;
+     113: invokevirtual #379                // Method net/minecraft/nbt/CompoundTag.put:(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;
+     116: pop
+     117: aload_2
+     118: ldc_w         #407                // String TransitTimes
+     121: aload_0
+     122: getfield      #81                 // Field predictionTicks:Ljava/util/List;
+     125: invokevirtual #393                // Method net/minecraft/nbt/CompoundTag.putIntArray:(Ljava/lang/String;Ljava/util/List;)V
+     128: aload_2
+     129: areturn
+
+  public void read(net.minecraft.core.HolderLookup$Provider, net.minecraft.nbt.CompoundTag);
+    Code:
+       0: aload_0
+       1: invokevirtual #13                 // Method reset:()V
+       4: aload_0
+       5: aload_2
+       6: ldc_w         #369                // String Paused
+       9: invokevirtual #409                // Method net/minecraft/nbt/CompoundTag.getBoolean:(Ljava/lang/String;)Z
+      12: putfield      #132                // Field paused:Z
+      15: aload_0
+      16: aload_2
+      17: ldc_w         #371                // String Completed
+      20: invokevirtual #409                // Method net/minecraft/nbt/CompoundTag.getBoolean:(Ljava/lang/String;)Z
+      23: putfield      #187                // Field completed:Z
+      26: aload_0
+      27: aload_2
+      28: ldc_w         #363                // String AutoSchedule
+      31: invokevirtual #409                // Method net/minecraft/nbt/CompoundTag.getBoolean:(Ljava/lang/String;)Z
+      34: putfield      #227                // Field isAutoSchedule:Z
+      37: aload_0
+      38: iconst_0
+      39: aload_2
+      40: ldc_w         #357                // String CurrentEntry
+      43: invokevirtual #203                // Method net/minecraft/nbt/CompoundTag.getInt:(Ljava/lang/String;)I
+      46: invokestatic  #413                // Method java/lang/Math.max:(II)I
+      49: putfield      #84                 // Field currentEntry:I
+      52: aload_2
+      53: ldc_w         #373                // String Schedule
+      56: invokevirtual #416                // Method net/minecraft/nbt/CompoundTag.contains:(Ljava/lang/String;)Z
+      59: ifeq          77
+      62: aload_0
+      63: aload_1
+      64: aload_2
+      65: ldc_w         #373                // String Schedule
+      68: invokevirtual #419                // Method net/minecraft/nbt/CompoundTag.getCompound:(Ljava/lang/String;)Lnet/minecraft/nbt/CompoundTag;
+      71: invokestatic  #423                // Method com/simibubi/create/content/trains/schedule/Schedule.fromTag:(Lnet/minecraft/core/HolderLookup$Provider;Lnet/minecraft/nbt/CompoundTag;)Lcom/simibubi/create/content/trains/schedule/Schedule;
+      74: putfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+      77: aload_0
+      78: aload_2
+      79: ldc_w         #383                // String State
+      82: ldc           #25                 // class com/simibubi/create/content/trains/schedule/ScheduleRuntime$State
+      84: invokestatic  #427                // Method net/createmod/catnip/nbt/NBTHelper.readEnum:(Lnet/minecraft/nbt/CompoundTag;Ljava/lang/String;Ljava/lang/Class;)Ljava/lang/Enum;
+      87: checkcast     #25                 // class com/simibubi/create/content/trains/schedule/ScheduleRuntime$State
+      90: putfield      #20                 // Field state:Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime$State;
+      93: aload_2
+      94: ldc_w         #391                // String ConditionProgress
+      97: invokevirtual #431                // Method net/minecraft/nbt/CompoundTag.getIntArray:(Ljava/lang/String;)[I
+     100: astore_3
+     101: aload_3
+     102: arraylength
+     103: istore        4
+     105: iconst_0
+     106: istore        5
+     108: iload         5
+     110: iload         4
+     112: if_icmpge     142
+     115: aload_3
+     116: iload         5
+     118: iaload
+     119: istore        6
+     121: aload_0
+     122: getfield      #32                 // Field conditionProgress:Ljava/util/List;
+     125: iload         6
+     127: invokestatic  #97                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     130: invokeinterface #122,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+     135: pop
+     136: iinc          5, 1
+     139: goto          108
+     142: aload_2
+     143: ldc_w         #397                // String ConditionContext
+     146: bipush        10
+     148: invokevirtual #437                // Method net/minecraft/nbt/CompoundTag.getList:(Ljava/lang/String;I)Lnet/minecraft/nbt/ListTag;
+     151: aload_0
+     152: getfield      #41                 // Field conditionContext:Ljava/util/List;
+     155: dup
+     156: invokestatic  #441                // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+     159: pop
+     160: invokedynamic #447,  0            // InvokeDynamic #3:accept:(Ljava/util/List;)Ljava/util/function/Consumer;
+     165: invokestatic  #450                // Method net/createmod/catnip/nbt/NBTHelper.iterateCompoundList:(Lnet/minecraft/nbt/ListTag;Ljava/util/function/Consumer;)V
+     168: aload_2
+     169: ldc_w         #407                // String TransitTimes
+     172: invokevirtual #431                // Method net/minecraft/nbt/CompoundTag.getIntArray:(Ljava/lang/String;)[I
+     175: astore_3
+     176: aload_0
+     177: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+     180: ifnull        253
+     183: aload_0
+     184: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+     187: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+     190: aload_0
+     191: invokedynamic #454,  0            // InvokeDynamic #4:accept:(Lcom/simibubi/create/content/trains/schedule/ScheduleRuntime;)Ljava/util/function/Consumer;
+     196: invokeinterface #240,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+     201: aload_3
+     202: arraylength
+     203: aload_0
+     204: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+     207: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+     210: invokeinterface #114,  1          // InterfaceMethod java/util/List.size:()I
+     215: if_icmpne     253
+     218: iconst_0
+     219: istore        4
+     221: iload         4
+     223: aload_3
+     224: arraylength
+     225: if_icmpge     253
+     228: aload_0
+     229: getfield      #81                 // Field predictionTicks:Ljava/util/List;
+     232: iload         4
+     234: aload_3
+     235: iload         4
+     237: iaload
+     238: invokestatic  #97                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+     241: invokeinterface #101,  3          // InterfaceMethod java/util/List.set:(ILjava/lang/Object;)Ljava/lang/Object;
+     246: pop
+     247: iinc          4, 1
+     250: goto          221
+     253: return
+
+  public net.minecraft.world.item.ItemStack returnSchedule(net.minecraft.core.HolderLookup$Provider);
+    Code:
+       0: aload_0
+       1: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+       4: ifnonnull     11
+       7: getstatic     #455                // Field net/minecraft/world/item/ItemStack.EMPTY:Lnet/minecraft/world/item/ItemStack;
+      10: areturn
+      11: getstatic     #461                // Field com/simibubi/create/AllItems.SCHEDULE:Lcom/tterrag/registrate/util/entry/ItemEntry;
+      14: invokevirtual #467                // Method com/tterrag/registrate/util/entry/ItemEntry.asStack:()Lnet/minecraft/world/item/ItemStack;
+      17: astore_2
+      18: aload_0
+      19: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+      22: aload_0
+      23: getfield      #84                 // Field currentEntry:I
+      26: putfield      #218                // Field com/simibubi/create/content/trains/schedule/Schedule.savedProgress:I
+      29: aload_2
+      30: getstatic     #473                // Field com/simibubi/create/AllDataComponents.TRAIN_SCHEDULE:Lnet/minecraft/core/component/DataComponentType;
+      33: aload_0
+      34: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+      37: aload_1
+      38: invokevirtual #375                // Method com/simibubi/create/content/trains/schedule/Schedule.write:(Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/nbt/CompoundTag;
+      41: invokevirtual #479                // Method net/minecraft/world/item/ItemStack.set:(Lnet/minecraft/core/component/DataComponentType;Ljava/lang/Object;)Ljava/lang/Object;
+      44: pop
+      45: aload_0
+      46: getfield      #227                // Field isAutoSchedule:Z
+      49: ifeq          58
+      52: getstatic     #455                // Field net/minecraft/world/item/ItemStack.EMPTY:Lnet/minecraft/world/item/ItemStack;
+      55: goto          59
+      58: aload_2
+      59: astore_2
+      60: aload_0
+      61: invokevirtual #482                // Method discardSchedule:()V
+      64: aload_2
+      65: areturn
+
+  public void setSchedulePresentClientside(boolean);
+    Code:
+       0: aload_0
+       1: iload_1
+       2: ifeq          15
+       5: new           #110                // class com/simibubi/create/content/trains/schedule/Schedule
+       8: dup
+       9: invokespecial #485                // Method com/simibubi/create/content/trains/schedule/Schedule."<init>":()V
+      12: goto          16
+      15: aconst_null
+      16: putfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+      19: return
+
+  public net.minecraft.network.chat.MutableComponent getWaitingStatus(net.minecraft.world.level.Level);
+    Code:
+       0: aload_0
+       1: getfield      #105                // Field schedule:Lcom/simibubi/create/content/trains/schedule/Schedule;
+       4: getfield      #109                // Field com/simibubi/create/content/trains/schedule/Schedule.entries:Ljava/util/List;
+       7: aload_0
+       8: getfield      #84                 // Field currentEntry:I
+      11: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      16: checkcast     #117                // class com/simibubi/create/content/trains/schedule/ScheduleEntry
+      19: getfield      #119                // Field com/simibubi/create/content/trains/schedule/ScheduleEntry.conditions:Ljava/util/List;
+      22: astore_2
+      23: aload_2
+      24: invokeinterface #486,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+      29: ifne          56
+      32: aload_0
+      33: getfield      #32                 // Field conditionProgress:Ljava/util/List;
+      36: invokeinterface #486,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+      41: ifne          56
+      44: aload_0
+      45: getfield      #41                 // Field conditionContext:Ljava/util/List;
+      48: invokeinterface #486,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+      53: ifeq          60
+      56: invokestatic  #489                // InterfaceMethod net/minecraft/network/chat/Component.empty:()Lnet/minecraft/network/chat/MutableComponent;
+      59: areturn
+      60: aload_2
+      61: iconst_0
+      62: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      67: checkcast     #37                 // class java/util/List
+      70: astore_3
+      71: aload_0
+      72: getfield      #32                 // Field conditionProgress:Ljava/util/List;
+      75: iconst_0
+      76: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+      81: checkcast     #91                 // class java/lang/Integer
+      84: invokevirtual #93                 // Method java/lang/Integer.intValue:()I
+      87: istore        4
+      89: iload         4
+      91: aload_3
+      92: invokeinterface #114,  1          // InterfaceMethod java/util/List.size:()I
+      97: if_icmplt     104
+     100: invokestatic  #489                // InterfaceMethod net/minecraft/network/chat/Component.empty:()Lnet/minecraft/network/chat/MutableComponent;
+     103: areturn
+     104: aload_0
+     105: getfield      #41                 // Field conditionContext:Ljava/util/List;
+     108: iconst_0
+     109: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     114: checkcast     #126                // class net/minecraft/nbt/CompoundTag
+     117: astore        5
+     119: aload_3
+     120: iload         4
+     122: invokeinterface #87,  2           // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+     127: checkcast     #199                // class com/simibubi/create/content/trains/schedule/condition/ScheduleWaitCondition
+     130: astore        6
+     132: aload         6
+     134: aload_1
+     135: aload_0
+     136: getfield      #7                  // Field train:Lcom/simibubi/create/content/trains/entity/Train;
+     139: aload         5
+     141: invokevirtual #492                // Method com/simibubi/create/content/trains/schedule/condition/ScheduleWaitCondition.getWaitingStatus:(Lnet/minecraft/world/level/Level;Lcom/simibubi/create/content/trains/entity/Train;Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/network/chat/MutableComponent;
+     144: areturn
+}
