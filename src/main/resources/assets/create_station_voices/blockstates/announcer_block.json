@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "create_station_voices:block/announcer_block" }
+  }
+}
