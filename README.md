@@ -2,7 +2,7 @@
 *A Create addon that brings automated, customizable Text-to-Speech announcements to your railway network.*
 
 > [!WARNING]  
-> **Work in Progress:** This mod is currently in beta. You may encounter bugs—if you find any, please [open an issue](https://github.com/JaMaLa1111/YOUR_REPO/issues) on GitHub!
+> **Work in Progress:** This mod is currently in beta. You may encounter bugs, if you find any, please [open an issue](https://github.com/JaMaLa1111/YOUR_REPO/issues) on GitHub!
 
 ## Features
 
