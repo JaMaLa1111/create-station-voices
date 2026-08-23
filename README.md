@@ -21,7 +21,7 @@
    Configure audio directly per announcer block/profile:
     - Pitch & Speed
     - Volume
-    - Audible Range (1–64 blocks)
+    - Audible Range (1-64 blocks)
 
 5. **Audio Falloff**  
    Announcements feature natural sound falloff (volume begins to decrease after one-third of the max range).
