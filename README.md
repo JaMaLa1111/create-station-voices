@@ -9,7 +9,7 @@
 1. **Dynamic TTS (Piper TTS)**  
    Voices can be downloaded on-demand to minimize the mod's file size. 
 TTS lines are generated once when set (via the Preview button) and then cached. 
-   Open the voice manager GUI in-game using:  
+   Open the voice manager GUI in-game (requires OP 2 or higher) using:  
    `/create_station_voices piper_models`
 
 2. **Redstone Announcer Block**  
