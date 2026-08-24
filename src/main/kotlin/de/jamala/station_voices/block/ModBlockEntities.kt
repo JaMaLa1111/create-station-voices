@@ -43,6 +43,22 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
     var ttsReverb: Boolean = false
     var ttsMaxRange: Int = 32
 
+    var isPlaying: Boolean = false
+    var wasPoweredByRedstone: Boolean = false
+    var audioEndTimeMillis: Long = 0L
+
+    fun tick(level: net.minecraft.world.level.Level, pos: BlockPos, state: BlockState) {
+        if (level.isClientSide) return
+
+        if (isPlaying && System.currentTimeMillis() >= audioEndTimeMillis) {
+            isPlaying = false
+            val hasSignal = level.hasNeighborSignal(pos)
+            if (!hasSignal && state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
+            }
+        }
+    }
+
     override fun saveAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.saveAdditional(tag, registries)
         tag.putString("TtsText", ttsText)

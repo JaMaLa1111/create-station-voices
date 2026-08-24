@@ -13,9 +13,9 @@ object ModCreativeTabs {
 
     val MAIN_TAB by REGISTRY.register("main") { ->
         CreativeModeTab.builder()
-            .title(Component.literal("Create: Station Voices"))
+            .title(Component.translatable("itemGroup.create_station_voices.main"))
             .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
-            .icon { ModItems.CONFIGURABLE_ANNOUNCER_BLOCK_ITEM.defaultInstance }
+            .icon { ModItems.TAB_ICON.defaultInstance }
             .displayItems { _, output ->
                 output.accept(ModItems.ANNOUNCER_BLOCK_ITEM)
                 output.accept(ModItems.CONFIGURABLE_ANNOUNCER_BLOCK_ITEM)

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "create_station_voices:block/ar_unpowered"
+    },
+    "powered=true": {
+      "model": "create_station_voices:block/ar_powered"
+    }
+  }
+}

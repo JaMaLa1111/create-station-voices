@@ -17,4 +17,8 @@ object ModItems {
     val CONFIGURABLE_ANNOUNCER_BLOCK_ITEM by REGISTRY.register("configurable_announcer_block") { ->
         ConfigurableAnnouncerBlockItem(ModBlocks.CONFIGURABLE_ANNOUNCER_BLOCK, Item.Properties())
     }
+
+    val TAB_ICON by REGISTRY.register("tab_icon") { ->
+        Item(Item.Properties())
+    }
 }

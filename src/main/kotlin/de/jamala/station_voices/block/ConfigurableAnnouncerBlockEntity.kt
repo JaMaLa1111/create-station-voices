@@ -42,11 +42,29 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
     var targetStation: BlockPos? = null
     private var lastPresentTrain: UUID? = null
 
+    var isPlaying: Boolean = false
+    var audioEndTimeMillis: Long = 0L
+
     private val gson = Gson()
 
     fun tick() {
         val level = level ?: return
         if (level.isClientSide) return
+
+        if (isPlaying) {
+            if (System.currentTimeMillis() >= audioEndTimeMillis) {
+                isPlaying = false
+                val state = level.getBlockState(blockPos)
+                if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                    level.setBlock(blockPos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
+                }
+            }
+        } else {
+            val state = level.getBlockState(blockPos)
+            if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                level.setBlock(blockPos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
+            }
+        }
 
         val targetBe = targetStation?.let { level.getBlockEntity(it) }
 
@@ -99,10 +117,19 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
         val level = level ?: return
         val profile = profiles[trainName]
         if (profile != null && profile.text.isNotBlank()) {
+            isPlaying = true
+            val st = level.getBlockState(blockPos)
+            if (st.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && !st.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                level.setBlock(blockPos, st.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, true), 3)
+            }
+
             if (ModConfig.SERVER.ttsMode.get() == ModConfig.TtsMode.LOCAL_PIPER) {
                 CoroutineScope(Dispatchers.IO).launch {
                     val audioData = PiperManager.generateAudio(profile.text, profile.voice, profile.language)
                     if (audioData != null) {
+                        val durationMs = calculateWavDurationMs(audioData, profile.speed, profile.reverb)
+                        audioEndTimeMillis = System.currentTimeMillis() + durationMs
+
                         val streamId = UUID.randomUUID()
                         val chunkSize = 30000
                         val totalChunks = Math.ceil(audioData.size.toDouble() / chunkSize.toDouble()).toInt()
@@ -134,9 +161,18 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                                 chunkPayload
                             )
                         }
+                    } else {
+                        isPlaying = false
+                        val curSt = level.getBlockState(blockPos)
+                        if (curSt.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && curSt.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                            level.setBlock(blockPos, curSt.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
+                        }
                     }
                 }
             } else {
+                val estimatedDurationMs = (profile.text.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L)
+                audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
+
                 val payload = PlayAnnouncerAudioPayload(
                     blockPos,
                     profile.text,
@@ -157,6 +193,22 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                     payload
                 )
             }
+        }
+    }
+
+    private fun calculateWavDurationMs(audioData: ByteArray, speed: Float, reverb: Boolean): Long {
+        try {
+            val bais = java.io.ByteArrayInputStream(audioData)
+            val audioIn = javax.sound.sampled.AudioSystem.getAudioInputStream(bais)
+            val format = audioIn.format
+            val frameLength = audioData.size.toLong() / format.frameSize
+            val durationSeconds = frameLength.toDouble() / format.frameRate.toDouble()
+            val speedFactor = if (speed > 0.01f) speed.toDouble() else 1.0
+            val adjustedMs = ((durationSeconds / speedFactor) * 1000.0).toLong()
+            val reverbTailMs = if (reverb) 900L else 0L
+            return adjustedMs + reverbTailMs
+        } catch (e: Exception) {
+            return 2000L
         }
     }
 

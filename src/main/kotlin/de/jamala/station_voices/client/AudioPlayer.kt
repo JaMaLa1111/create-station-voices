@@ -145,6 +145,16 @@ object AudioPlayer {
                 line.close()
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                if (pos != null) {
+                    try {
+                        net.neoforged.neoforge.network.PacketDistributor.sendToServer(
+                            de.jamala.station_voices.network.AnnouncerAudioFinishedPayload(pos)
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
             }
         }
     }

@@ -167,9 +167,52 @@ data class RequestPreviewAudioPayload(
     }
 }
 
+data class AnnouncerAudioFinishedPayload(val pos: BlockPos) : CustomPacketPayload {
+    companion object {
+        val ID = CustomPacketPayload.Type<AnnouncerAudioFinishedPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "announcer_audio_finished"))
+        val STREAM_CODEC = StreamCodec.ofMember(AnnouncerAudioFinishedPayload::write, ::read)
+
+        fun read(buf: RegistryFriendlyByteBuf): AnnouncerAudioFinishedPayload {
+            return AnnouncerAudioFinishedPayload(buf.readBlockPos())
+        }
+    }
+
+    override fun type(): CustomPacketPayload.Type<out CustomPacketPayload> = ID
+
+    fun write(buf: RegistryFriendlyByteBuf) {
+        buf.writeBlockPos(pos)
+    }
+}
+
 object ModNetworking {
     fun register(event: RegisterPayloadHandlersEvent) {
         val registrar = event.registrar(CreateStationVoices.ID)
+
+        registrar.playToServer(
+            AnnouncerAudioFinishedPayload.ID,
+            AnnouncerAudioFinishedPayload.STREAM_CODEC
+        ) { payload, context ->
+            context.enqueueWork {
+                val player = context.player()
+                val level = player.level()
+                val pos = payload.pos
+                val be = level.getBlockEntity(pos)
+                if (be is AnnouncerBlockEntity && be.isPlaying) {
+                    be.isPlaying = false
+                    val state = level.getBlockState(pos)
+                    val hasSignal = level.hasNeighborSignal(pos)
+                    if (!hasSignal && state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                        level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
+                    }
+                } else if (be is de.jamala.station_voices.block.ConfigurableAnnouncerBlockEntity && be.isPlaying) {
+                    be.isPlaying = false
+                    val state = level.getBlockState(pos)
+                    if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                        level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
+                    }
+                }
+            }
+        }
 
         registrar.playToServer(
             SetAnnouncerDataPayload.ID,

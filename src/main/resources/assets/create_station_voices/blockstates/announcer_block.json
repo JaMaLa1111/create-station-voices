@@ -1,5 +1,10 @@
 {
   "variants": {
-    "": { "model": "create_station_voices:block/announcer_block" }
+    "powered=false": {
+      "model": "create_station_voices:block/ra_noconfig_unpowered"
+    },
+    "powered=true": {
+      "model": "create_station_voices:block/ra_noconfig_powered"
+    }
   }
 }

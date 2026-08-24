@@ -13,7 +13,22 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
 import thedarkcolour.kotlinforforge.neoforge.forge.runForDist
 
+import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.level.block.state.StateDefinition
+import net.minecraft.world.level.block.state.properties.BlockStateProperties
+
 class ConfigurableAnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
+    init {
+        registerDefaultState(stateDefinition.any().setValue(BlockStateProperties.POWERED, false))
+    }
+
+    override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
+        builder.add(BlockStateProperties.POWERED)
+    }
+
+    override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {
+        return defaultBlockState().setValue(BlockStateProperties.POWERED, false)
+    }
     
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity? {
         return ConfigurableAnnouncerBlockEntity(pos, state)

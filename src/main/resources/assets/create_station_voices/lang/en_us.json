@@ -1,0 +1,9 @@
+{
+  "block.create_station_voices.announcer_block": "Redstone Announcer",
+  "block.create_station_voices.configurable_announcer_block": "Configurable Train Announcer",
+  "item.create_station_voices.announcer_block": "Redstone Announcer",
+  "item.create_station_voices.configurable_announcer_block": "Configurable Train Announcer",
+  "item.create_station_voices.tab_icon": "Icon",
+  "itemGroup.create_station_voices": "Create: Station Voices",
+  "itemGroup.create_station_voices.main": "Create: Station Voices"
+}

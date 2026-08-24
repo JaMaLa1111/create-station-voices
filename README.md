@@ -30,7 +30,8 @@ TTS lines are generated once when set (via the Preview button) and then cached.
 6. **Auto-Populate Profiles**  
    Automatically detects and populates profiles for all trains scheduled to pass the station.
 
-**Currently all Block textures are missing**
+~~Currently all Block textures are missing~~<br>
+Textures and mod logo added in v0.5.0-beta, all textures can become subject to change.
 
 ---
 

@@ -11,6 +11,8 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.EntityBlock
 import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityTicker
+import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
@@ -35,11 +37,26 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
     }
 
     override fun getStateForPlacement(context: BlockPlaceContext): BlockState? {
-        return defaultBlockState().setValue(BlockStateProperties.POWERED, context.level.hasNeighborSignal(context.clickedPos))
+        val hasSignal = context.level.hasNeighborSignal(context.clickedPos)
+        return defaultBlockState().setValue(BlockStateProperties.POWERED, hasSignal)
     }
 
     override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity? {
         return AnnouncerBlockEntity(pos, state)
+    }
+
+    override fun <T : BlockEntity?> getTicker(
+        level: Level,
+        state: BlockState,
+        blockEntityType: BlockEntityType<T>
+    ): BlockEntityTicker<T>? {
+        return if (!level.isClientSide) {
+            BlockEntityTicker { level, pos, state, be ->
+                if (be is AnnouncerBlockEntity) {
+                    be.tick(level, pos, state)
+                }
+            }
+        } else null
     }
 
     override fun useWithoutItem(
@@ -81,76 +98,113 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
         isMoving: Boolean
     ) {
         if (!level.isClientSide) {
-            val isPowered = state.getValue(BlockStateProperties.POWERED)
+            val be = level.getBlockEntity(pos) as? AnnouncerBlockEntity ?: return
             val hasSignal = level.hasNeighborSignal(pos)
+            val isPoweredState = state.getValue(BlockStateProperties.POWERED)
 
-            if (hasSignal && !isPowered) {
-                val be = level.getBlockEntity(pos) as? AnnouncerBlockEntity
-                if (be != null) {
-                    if (ModConfig.SERVER.ttsMode.get() == ModConfig.TtsMode.LOCAL_PIPER) {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val audioData = PiperManager.generateAudio(be.ttsText, be.ttsVoice, be.ttsLanguage)
-                            if (audioData != null) {
-                                val streamId = UUID.randomUUID()
-                                val chunkSize = 30000
-                                val totalChunks = Math.ceil(audioData.size.toDouble() / chunkSize.toDouble()).toInt()
-                                
-                                for (i in 0 until totalChunks) {
-                                    val start = i * chunkSize
-                                    val end = Math.min(start + chunkSize, audioData.size)
-                                    val chunk = audioData.copyOfRange(start, end)
-                                    
-                                    val chunkPayload = PlayAnnouncerAudioDataChunkPayload(
-                                        pos,
-                                        be.ttsSpeed,
-                                        be.ttsVolume,
-                                        be.ttsReverb,
-                                        be.ttsMaxRange,
-                                        streamId,
-                                        i,
-                                        totalChunks,
-                                        chunk
-                                    )
-                                    
-                                    net.neoforged.neoforge.network.PacketDistributor.sendToPlayersNear(
-                                        level as net.minecraft.server.level.ServerLevel,
-                                        null,
-                                        pos.x + 0.5,
-                                        pos.y + 0.5,
-                                        pos.z + 0.5,
-                                        be.ttsMaxRange.toDouble(),
-                                        chunkPayload
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        val payload = de.jamala.station_voices.network.PlayAnnouncerAudioPayload(
+            if (hasSignal && !be.wasPoweredByRedstone) {
+                be.wasPoweredByRedstone = true
+                if (!isPoweredState) {
+                    level.setBlock(pos, state.setValue(BlockStateProperties.POWERED, true), 3)
+                }
+                triggerAudio(level, pos, be)
+            } else if (!hasSignal && be.wasPoweredByRedstone) {
+                be.wasPoweredByRedstone = false
+                if (!be.isPlaying && isPoweredState) {
+                    level.setBlock(pos, state.setValue(BlockStateProperties.POWERED, false), 3)
+                }
+            }
+        }
+    }
+
+    private fun triggerAudio(level: Level, pos: BlockPos, be: AnnouncerBlockEntity) {
+        be.isPlaying = true
+        if (ModConfig.SERVER.ttsMode.get() == ModConfig.TtsMode.LOCAL_PIPER) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val audioData = PiperManager.generateAudio(be.ttsText, be.ttsVoice, be.ttsLanguage)
+                if (audioData != null) {
+                    val durationMs = calculateWavDurationMs(audioData, be.ttsSpeed, be.ttsReverb)
+                    be.audioEndTimeMillis = System.currentTimeMillis() + durationMs
+
+                    val streamId = UUID.randomUUID()
+                    val chunkSize = 30000
+                    val totalChunks = Math.ceil(audioData.size.toDouble() / chunkSize.toDouble()).toInt()
+                    
+                    for (i in 0 until totalChunks) {
+                        val start = i * chunkSize
+                        val end = Math.min(start + chunkSize, audioData.size)
+                        val chunk = audioData.copyOfRange(start, end)
+                        
+                        val chunkPayload = PlayAnnouncerAudioDataChunkPayload(
                             pos,
-                            be.ttsText, 
-                            be.ttsVoice, 
-                            be.ttsLanguage,
                             be.ttsSpeed,
                             be.ttsVolume,
                             be.ttsReverb,
-                            be.ttsMaxRange
+                            be.ttsMaxRange,
+                            streamId,
+                            i,
+                            totalChunks,
+                            chunk
                         )
+                        
                         net.neoforged.neoforge.network.PacketDistributor.sendToPlayersNear(
-                            level as net.minecraft.server.level.ServerLevel, 
-                            null, 
-                            pos.x.toDouble() + 0.5, 
-                            pos.y.toDouble() + 0.5, 
-                            pos.z.toDouble() + 0.5, 
-                            be.ttsMaxRange.toDouble(), 
-                            payload
+                            level as net.minecraft.server.level.ServerLevel,
+                            null,
+                            pos.x + 0.5,
+                            pos.y + 0.5,
+                            pos.z + 0.5,
+                            be.ttsMaxRange.toDouble(),
+                            chunkPayload
                         )
                     }
+                } else {
+                    be.isPlaying = false
+                    val hasSignal = level.hasNeighborSignal(pos)
+                    val state = level.getBlockState(pos)
+                    if (!hasSignal && state.hasProperty(BlockStateProperties.POWERED) && state.getValue(BlockStateProperties.POWERED)) {
+                        level.setBlock(pos, state.setValue(BlockStateProperties.POWERED, false), 3)
+                    }
                 }
-                level.setBlock(pos, state.setValue(BlockStateProperties.POWERED, true), 3)
-            } else if (!hasSignal && isPowered) {
-                // Unpower
-                level.setBlock(pos, state.setValue(BlockStateProperties.POWERED, false), 3)
             }
+        } else {
+            val estimatedDurationMs = (be.ttsText.length * 120L / be.ttsSpeed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (be.ttsReverb) 900L else 0L)
+            be.audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
+
+            val payload = de.jamala.station_voices.network.PlayAnnouncerAudioPayload(
+                pos,
+                be.ttsText, 
+                be.ttsVoice, 
+                be.ttsLanguage,
+                be.ttsSpeed,
+                be.ttsVolume,
+                be.ttsReverb,
+                be.ttsMaxRange
+            )
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersNear(
+                level as net.minecraft.server.level.ServerLevel, 
+                null, 
+                pos.x.toDouble() + 0.5, 
+                pos.y.toDouble() + 0.5, 
+                pos.z.toDouble() + 0.5, 
+                be.ttsMaxRange.toDouble(), 
+                payload
+            )
+        }
+    }
+
+    private fun calculateWavDurationMs(audioData: ByteArray, speed: Float, reverb: Boolean): Long {
+        try {
+            val bais = java.io.ByteArrayInputStream(audioData)
+            val audioIn = javax.sound.sampled.AudioSystem.getAudioInputStream(bais)
+            val format = audioIn.format
+            val frameLength = audioData.size.toLong() / format.frameSize
+            val durationSeconds = frameLength.toDouble() / format.frameRate.toDouble()
+            val speedFactor = if (speed > 0.01f) speed.toDouble() else 1.0
+            val adjustedMs = ((durationSeconds / speedFactor) * 1000.0).toLong()
+            val reverbTailMs = if (reverb) 900L else 0L
+            return adjustedMs + reverbTailMs
+        } catch (e: Exception) {
+            return 2000L
         }
     }
 }
