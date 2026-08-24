@@ -164,6 +164,20 @@ data class OpenModelDownloadScreenPayload(val dummy: Boolean = false) : CustomPa
     fun write(buf: RegistryFriendlyByteBuf) = buf.writeBoolean(dummy)
 }
 
+data class DownloadModelProgressPayload(val language: String, val voice: String, val progress: Float) : CustomPacketPayload {
+    companion object {
+        val ID = CustomPacketPayload.Type<DownloadModelProgressPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "download_model_progress"))
+        val STREAM_CODEC = StreamCodec.ofMember(DownloadModelProgressPayload::write, ::read)
+        fun read(buf: RegistryFriendlyByteBuf) = DownloadModelProgressPayload(buf.readUtf(), buf.readUtf(), buf.readFloat())
+    }
+    override fun type() = ID
+    fun write(buf: RegistryFriendlyByteBuf) {
+        buf.writeUtf(language)
+        buf.writeUtf(voice)
+        buf.writeFloat(progress)
+    }
+}
+
 object ModNetworkingConfigurable {
     fun register(event: RegisterPayloadHandlersEvent) {
         val registrar = event.registrar(CreateStationVoices.ID)
@@ -218,14 +232,29 @@ object ModNetworkingConfigurable {
             DownloadModelPayload.STREAM_CODEC
         ) { payload, context ->
             context.enqueueWork {
+                val player = context.player() as? ServerPlayer
                 CoroutineScope(Dispatchers.IO).launch {
-                    PiperManager.downloadModel(payload.language, payload.voice, payload.onnxUrl, payload.jsonUrl)
-                    // Once downloaded, broadcast the updated list to all players or just the requester.
-                    // For simplicity, we just send it to the player who requested the download.
-                    val player = context.player() as? ServerPlayer
+                    PiperManager.downloadModel(payload.language, payload.voice, payload.onnxUrl, payload.jsonUrl) { progress ->
+                        if (player != null) {
+                            PacketDistributor.sendToPlayer(player, DownloadModelProgressPayload(payload.language, payload.voice, progress))
+                        }
+                    }
                     if (player != null) {
                         val models = PiperManager.getInstalledModels()
                         PacketDistributor.sendToPlayer(player, InstalledModelsPayload(models))
+                    }
+                }
+            }
+        }
+
+        registrar.playToClient(
+            DownloadModelProgressPayload.ID,
+            DownloadModelProgressPayload.STREAM_CODEC
+        ) { payload, context ->
+            context.enqueueWork {
+                net.neoforged.fml.loading.FMLEnvironment.dist.let {
+                    if (it.isClient) {
+                        de.jamala.station_voices.client.ClientHooks.handleModelProgress(payload.language, payload.voice, payload.progress)
                     }
                 }
             }

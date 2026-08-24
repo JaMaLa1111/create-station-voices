@@ -72,7 +72,7 @@ object PiperManager {
         }
     }
 
-    suspend fun downloadModel(language: String, voice: String, onnxUrl: String, jsonUrl: String) {
+    suspend fun downloadModel(language: String, voice: String, onnxUrl: String, jsonUrl: String, progressCallback: ((Float) -> Unit)? = null) {
         withContext(Dispatchers.IO) {
             try {
                 val modelsDir = getModelsDirectory()
@@ -83,8 +83,8 @@ object PiperManager {
                 val onnxFile = File(voiceDir, onnxUrl.substringAfterLast("/"))
                 val jsonFile = File(voiceDir, jsonUrl.substringAfterLast("/"))
 
-                downloadFile(onnxUrl, onnxFile)
-                downloadFile(jsonUrl, jsonFile)
+                downloadFile(onnxUrl, onnxFile, progressCallback)
+                downloadFile(jsonUrl, jsonFile, null)
                 CreateStationVoices.LOGGER.info("Downloaded Piper model $language-$voice")
             } catch (e: Exception) {
                 CreateStationVoices.LOGGER.error("Failed to download model $language-$voice", e)
@@ -92,13 +92,28 @@ object PiperManager {
         }
     }
 
-    private fun downloadFile(url: String, dest: File) {
+    private fun downloadFile(url: String, dest: File, progressCallback: ((Float) -> Unit)?) {
         val connection = URI(url).toURL().openConnection() as HttpURLConnection
         connection.requestMethod = "GET"
         if (connection.responseCode == 200) {
+            val totalBytes = connection.contentLengthLong
+            var downloadedBytes = 0L
             connection.inputStream.use { input ->
                 FileOutputStream(dest).use { output ->
-                    input.copyTo(output)
+                    val buffer = ByteArray(8192)
+                    var read: Int
+                    var lastProgress = 0f
+                    while (input.read(buffer).also { read = it } >= 0) {
+                        output.write(buffer, 0, read)
+                        downloadedBytes += read
+                        if (totalBytes > 0 && progressCallback != null) {
+                            val progress = downloadedBytes.toFloat() / totalBytes
+                            if (progress - lastProgress > 0.02f || progress >= 1.0f) {
+                                progressCallback.invoke(progress)
+                                lastProgress = progress
+                            }
+                        }
+                    }
                 }
             }
         }

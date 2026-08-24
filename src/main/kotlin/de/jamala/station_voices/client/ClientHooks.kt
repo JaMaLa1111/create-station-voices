@@ -59,4 +59,11 @@ object ClientHooks {
             screen.updateInstalledModels(models)
         }
     }
+
+    fun handleModelProgress(language: String, voice: String, progress: Float) {
+        val screen = Minecraft.getInstance().screen
+        if (screen is ModelDownloadScreen) {
+            screen.updateDownloadProgress(language, voice, progress)
+        }
+    }
 }
