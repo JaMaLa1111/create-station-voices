@@ -3,6 +3,7 @@
 
 > [!WARNING]  
 > **Work in Progress:** This mod is currently in beta. You may encounter bugs, if you find any, please [open an issue](https://github.com/JaMaLa1111/create-station-voices/issues) on GitHub!
+> If you want to be notified when the mod gets updated or take part in polls for new features join the [dedicated Discord server](https://discord.gg/22zCpHDxnw)
 
 ## Features
 
