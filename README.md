@@ -6,7 +6,7 @@
 
 ## Features
 
-1. **Dynamic TTS (Piper TTS)**  
+1. **Dynamic TTS ([Piper TTS](https://github.com/rhasspy/piper))**  
    Voices can be downloaded on-demand to minimize the mod's file size. 
 TTS lines are generated once when set (via the Preview button) and then cached. 
    Open the voice manager GUI in-game (requires OP 2 or higher) using:  
@@ -39,6 +39,7 @@ Textures and mod logo added in v0.5.0-beta, all textures can become subject to c
 - Voice models are downloaded from [Hugging Face](https://huggingface.co/Ja-Ma-La1111/piper-voice-mirror).
 - By default, TTS is generated locally using the bundled Piper TTS binary and downloaded models.
 - The configuration file includes an option to use an external API (currently limited to a private API).
+- The mod comes with bundled versions for Windows and Linux/MacOS
 
 ---
 
