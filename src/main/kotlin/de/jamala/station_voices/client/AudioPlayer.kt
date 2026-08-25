@@ -17,6 +17,7 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
+import de.jamala.station_voices.JingleManager
 
 import javax.sound.sampled.SourceDataLine
 import kotlinx.coroutines.sync.Mutex
@@ -36,7 +37,7 @@ object AudioPlayer {
     private val chunkBuffer = mutableMapOf<java.util.UUID, MutableList<ByteArray?>>()
     
     fun handleAudioChunk(
-        pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int,
+        pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String, realism: Float,
         streamId: java.util.UUID, chunkIndex: Int, totalChunks: Int, chunkData: ByteArray
     ) {
         val list = chunkBuffer.getOrPut(streamId) { MutableList(totalChunks) { null } }
@@ -44,11 +45,11 @@ object AudioPlayer {
         if (list.all { it != null }) {
             chunkBuffer.remove(streamId)
             val fullData = list.flatMap { it!!.toList() }.toByteArray()
-            playData(pos, speed, volume, reverb, maxRange, fullData)
+            playData(pos, speed, volume, reverb, maxRange, fullData, jingle, realism)
         }
     }
 
-    private fun playData(pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, wavData: ByteArray) {
+    private fun playData(pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, wavData: ByteArray, jingle: String = "OFF", realism: Float = 0.0f) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val bais = java.io.ByteArrayInputStream(wavData)
@@ -56,8 +57,32 @@ object AudioPlayer {
                 val format = audioIn.format
                 var bytes = audioIn.readAllBytes()
                 
+                if (realism > 0.001f) {
+                    bytes = RealismFilter.apply(bytes, format, realism)
+                }
+
                 if (reverb) {
                     bytes = applyReverb(bytes, format)
+                }
+
+                val audioSegments = mutableListOf<ByteArray>()
+                if (jingle.equals("DB", ignoreCase = true)) {
+                    var gongBytes = JingleManager.getGongBytesForFormat(format)
+                    if (realism > 0.001f && gongBytes.isNotEmpty()) {
+                        gongBytes = RealismFilter.apply(gongBytes, format, realism)
+                    }
+                    if (reverb && gongBytes.isNotEmpty()) {
+                        gongBytes = applyReverb(gongBytes, format)
+                    }
+                    if (gongBytes.isNotEmpty()) {
+                        audioSegments.add(gongBytes)
+                    }
+                    audioSegments.add(bytes)
+                    if (gongBytes.isNotEmpty()) {
+                        audioSegments.add(gongBytes)
+                    }
+                } else {
+                    audioSegments.add(bytes)
                 }
 
                 val newFormat = AudioFormat(
@@ -81,63 +106,65 @@ object AudioPlayer {
                 var chunkSize = (newFormat.frameRate * newFormat.frameSize * 0.05).toInt()
                 // Ensure chunk size is a multiple of frameSize
                 chunkSize -= chunkSize % newFormat.frameSize
-                var offset = 0
-                
-                while (offset < bytes.size) {
-                    if (pos != null) {
-                        val player = Minecraft.getInstance().player
-                        val camera = Minecraft.getInstance().gameRenderer.mainCamera
-                        if (player != null && camera.isInitialized) {
-                            val dx = pos.x + 0.5 - camera.position.x
-                            val dy = pos.y + 0.5 - camera.position.y
-                            val dz = pos.z + 0.5 - camera.position.z
-                            val distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
 
-                            val maxRangeD = maxRange.toDouble()
-                            val startFalloff = maxRangeD / 3.0
-                            var volMult = 1.0
-                            if (distance > maxRangeD) {
-                                volMult = 0.0
-                            } else if (distance > startFalloff) {
-                                volMult = 1.0 - ((distance - startFalloff) / (maxRangeD - startFalloff))
-                            }
+                for (segment in audioSegments) {
+                    var offset = 0
+                    while (offset < segment.size) {
+                        if (pos != null) {
+                            val player = Minecraft.getInstance().player
+                            val camera = Minecraft.getInstance().gameRenderer.mainCamera
+                            if (player != null && camera.isInitialized) {
+                                val dx = pos.x + 0.5 - camera.position.x
+                                val dy = pos.y + 0.5 - camera.position.y
+                                val dz = pos.z + 0.5 - camera.position.z
+                                val distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
 
-                            if (gainControl != null) {
-                                val v = (volume * volMult).coerceIn(0.0001, 1.0)
-                                gainControl.value = (20.0 * Math.log10(v)).toFloat()
-                            }
-
-                            if (panControl != null) {
-                                val radYaw = Math.toRadians(camera.yRot.toDouble())
-                                val rightX = -Math.cos(radYaw)
-                                val rightZ = -Math.sin(radYaw)
-                                var pan = 0.0
-                                val horizDist = Math.sqrt(dx * dx + dz * dz)
-                                if (horizDist > 0.1) {
-                                    pan = (dx * rightX + dz * rightZ) / horizDist
+                                val maxRangeD = maxRange.toDouble()
+                                val startFalloff = maxRangeD / 3.0
+                                var volMult = 1.0
+                                if (distance > maxRangeD) {
+                                    volMult = 0.0
+                                } else if (distance > startFalloff) {
+                                    volMult = 1.0 - ((distance - startFalloff) / (maxRangeD - startFalloff))
                                 }
-                                panControl.value = pan.toFloat().coerceIn(-1.0f, 1.0f)
+
+                                if (gainControl != null) {
+                                    val v = (volume * volMult).coerceIn(0.0001, 1.0)
+                                    gainControl.value = (20.0 * Math.log10(v)).toFloat()
+                                }
+
+                                if (panControl != null) {
+                                    val radYaw = Math.toRadians(camera.yRot.toDouble())
+                                    val rightX = -Math.cos(radYaw)
+                                    val rightZ = -Math.sin(radYaw)
+                                    var pan = 0.0
+                                    val horizDist = Math.sqrt(dx * dx + dz * dz)
+                                    if (horizDist > 0.1) {
+                                        pan = (dx * rightX + dz * rightZ) / horizDist
+                                    }
+                                    panControl.value = pan.toFloat().coerceIn(-1.0f, 1.0f)
+                                }
+                            }
+                        } else {
+                            if (gainControl != null) {
+                                val v = volume.coerceIn(0.0001f, 1.0f)
+                                gainControl.value = (20.0 * Math.log10(v.toDouble())).toFloat()
+                            }
+                            if (panControl != null) {
+                                panControl.value = 0f
                             }
                         }
-                    } else {
-                        if (gainControl != null) {
-                            val v = volume.coerceIn(0.0001f, 1.0f)
-                            gainControl.value = (20.0 * Math.log10(v.toDouble())).toFloat()
+                        
+                        var length = Math.min(chunkSize, segment.size - offset)
+                        // Ensure length written is a multiple of frameSize
+                        length -= length % newFormat.frameSize
+                        if (length > 0) {
+                            line.write(segment, offset, length)
+                            offset += length
+                        } else {
+                            // Reached the end and not enough bytes for a full frame
+                            break
                         }
-                        if (panControl != null) {
-                            panControl.value = 0f
-                        }
-                    }
-                    
-                    var length = Math.min(chunkSize, bytes.size - offset)
-                    // Ensure length written is a multiple of frameSize
-                    length -= length % newFormat.frameSize
-                    if (length > 0) {
-                        line.write(bytes, offset, length)
-                        offset += length
-                    } else {
-                        // Reached the end and not enough bytes for a full frame
-                        break
                     }
                 }
                 
@@ -159,12 +186,12 @@ object AudioPlayer {
         }
     }
 
-    fun play(pos: BlockPos?, text: String, voice: String, language: String, speed: Float, volume: Float, reverb: Boolean, maxRange: Int) {
+    fun play(pos: BlockPos?, text: String, voice: String, language: String, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String = "OFF", realism: Float = 0.0f) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val file = getAudioFile(text, voice, language)
                 if (file.exists()) {
-                    playData(pos, speed, volume, reverb, maxRange, file.readBytes())
+                    playData(pos, speed, volume, reverb, maxRange, file.readBytes(), jingle, realism)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

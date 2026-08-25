@@ -24,6 +24,8 @@ TTS lines are generated once when set (via the Preview button) and then cached.
     - Pitch & Speed
     - Volume
     - Audible Range (1-64 blocks)
+    - A realism Slider (noticeably reduces the quality of the announcement to be more in-line with real-world station announcements)
+    - Jingles can be turned on in the effects menu, the selected jingle will play before and after the announcement. Currently this only includes the DB jingle ("DB Gong")
 
 5. **Audio Falloff**  
    Announcements feature natural sound falloff (volume begins to decrease after one-third of the max range).

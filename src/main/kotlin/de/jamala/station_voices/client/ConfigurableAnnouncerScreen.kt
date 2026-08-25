@@ -41,7 +41,9 @@ class ConfigurableAnnouncerScreen(
     private lateinit var speedSlider: AbstractSliderButton
     private lateinit var volumeSlider: AbstractSliderButton
     private lateinit var rangeSlider: AbstractSliderButton
+    private lateinit var realismSlider: AbstractSliderButton
     private lateinit var reverbBtn: Button
+    private lateinit var jingleBtn: Button
     private lateinit var tabBtn: Button
 
     // Common
@@ -92,7 +94,7 @@ class ConfigurableAnnouncerScreen(
         autoPopulateBtn.active = isLinkedToStation
 
         // Right Panel
-        textBox = EditBox(font, rightX, centerY - 60, 200, 20, Component.literal("Text"))
+        textBox = EditBox(font, rightX, centerY - 52, 200, 20, Component.literal("Text"))
         textBox.setMaxLength(256)
         textBox.setResponder { text ->
             selectedTrain?.let { profiles[it]?.text = text }
@@ -108,14 +110,16 @@ class ConfigurableAnnouncerScreen(
                     updateRightPanel()
                 })
             }
-        }.bounds(rightX, centerY - 35, 200, 20).build())
+        }.bounds(rightX, centerY - 29, 200, 20).build())
 
         // Effects Tab
-        speedSlider = addRenderableWidget(createSpeedSlider(rightX, centerY - 60, 200, 20))
+        speedSlider = addRenderableWidget(createSpeedSlider(rightX, centerY - 75, 200, 20))
         
-        volumeSlider = addRenderableWidget(createVolumeSlider(rightX, centerY - 35, 200, 20))
+        volumeSlider = addRenderableWidget(createVolumeSlider(rightX, centerY - 52, 200, 20))
         
-        rangeSlider = addRenderableWidget(createRangeSlider(rightX, centerY - 10, 200, 20))
+        rangeSlider = addRenderableWidget(createRangeSlider(rightX, centerY - 29, 200, 20))
+
+        realismSlider = addRenderableWidget(createRealismSlider(rightX, centerY - 6, 200, 20))
 
         reverbBtn = addRenderableWidget(Button.builder(Component.literal("Reverb: OFF")) { btn ->
             val profile = selectedTrain?.let { profiles[it] }
@@ -123,17 +127,25 @@ class ConfigurableAnnouncerScreen(
                 profile.reverb = !profile.reverb
                 btn.message = Component.literal("Reverb: ${if (profile.reverb) "ON" else "OFF"}")
             }
-        }.bounds(rightX, centerY + 15, 200, 20).build())
+        }.bounds(rightX, centerY + 17, 95, 20).build())
+
+        jingleBtn = addRenderableWidget(Button.builder(Component.literal("Jingle: OFF")) { btn ->
+            val profile = selectedTrain?.let { profiles[it] }
+            if (profile != null) {
+                profile.jingle = if (profile.jingle.equals("DB", ignoreCase = true)) "OFF" else "DB"
+                btn.message = Component.literal("Jingle: ${profile.jingle}")
+            }
+        }.bounds(rightX + 105, centerY + 17, 95, 20).build())
 
         // Common
         genBtn = addRenderableWidget(Button.builder(Component.literal("Generate & Preview")) { _ ->
             val profile = selectedTrain?.let { profiles[it] }
             if (profile != null && profile.text.isNotBlank()) {
                 PacketDistributor.sendToServer(de.jamala.station_voices.network.RequestPreviewAudioPayload(
-                    profile.text, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange
+                    profile.text, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.realism
                 ))
             }
-        }.bounds(rightX, centerY + 40, 200, 20).build())
+        }.bounds(rightX, centerY + 41, 200, 20).build())
 
         tabBtn = addRenderableWidget(Button.builder(Component.literal("Tab: Main")) { _ ->
             isEffectsTab = !isEffectsTab
@@ -183,10 +195,10 @@ class ConfigurableAnnouncerScreen(
             val profile = profiles[key]
             if (profile == null) {
                 // Deleted
-                PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, key, "", "amy", "en_US", 1.0f, 1.0f, false, 64))
+                PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, key, "", "amy", "en_US", 1.0f, 1.0f, false, 64, "OFF", 0.0f))
             } else {
                 // Updated/Created
-                PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, key, profile.text, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange))
+                PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, key, profile.text, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.realism))
             }
         }
         onClose()
@@ -218,8 +230,10 @@ class ConfigurableAnnouncerScreen(
             setSliderValue(speedSlider, ((profile.speed - 0.1) / 2.9).toDouble())
             setSliderValue(volumeSlider, profile.volume.toDouble())
             setSliderValue(rangeSlider, ((profile.maxRange - 1.0) / 63.0).toDouble())
+            setSliderValue(realismSlider, profile.realism.toDouble())
             
             reverbBtn.message = Component.literal("Reverb: ${if (profile.reverb) "ON" else "OFF"}")
+            jingleBtn.message = Component.literal("Jingle: ${if (profile.jingle.equals("DB", ignoreCase = true)) "DB" else "OFF"}")
         } else {
             textBox.value = ""
             voiceBtn.message = Component.literal("Voice: None")
@@ -247,7 +261,9 @@ class ConfigurableAnnouncerScreen(
         speedSlider.visible = hasSelection && isEffectsTab
         volumeSlider.visible = hasSelection && isEffectsTab
         rangeSlider.visible = hasSelection && isEffectsTab
+        realismSlider.visible = hasSelection && isEffectsTab
         reverbBtn.visible = hasSelection && isEffectsTab
+        jingleBtn.visible = hasSelection && isEffectsTab
         genBtn.visible = hasSelection
     }
 
@@ -257,7 +273,7 @@ class ConfigurableAnnouncerScreen(
         
         if (selectedTrain != null) {
             val rightX = width / 2 + 10
-            guiGraphics.drawString(font, "Editing: $selectedTrain", rightX, height / 2 - 80, 0xAAAAAA)
+            guiGraphics.drawString(font, "Editing: $selectedTrain", rightX, height / 2 - 95, 0xAAAAAA)
         }
     }
 
@@ -306,6 +322,20 @@ class ConfigurableAnnouncerScreen(
             }
             override fun applyValue() {
                 selectedTrain?.let { profiles[it]?.maxRange = 1 + (value * 63).toInt() }
+            }
+        }
+    }
+
+    private fun createRealismSlider(x: Int, y: Int, w: Int, h: Int): AbstractSliderButton {
+        return object : AbstractSliderButton(x, y, w, h, Component.empty(), 0.0), CustomSlider {
+            init { updateMessage() }
+            override fun setValue(v: Double) { value = v }
+            public override fun updateMessage() {
+                val pct = (value * 100).toInt()
+                message = Component.literal(if (pct == 0) "Realism: OFF" else "Realism: $pct%")
+            }
+            override fun applyValue() {
+                selectedTrain?.let { profiles[it]?.realism = value.toFloat() }
             }
         }
     }

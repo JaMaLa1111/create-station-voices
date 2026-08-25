@@ -22,14 +22,16 @@ data class SetAnnouncerDataPayload(
     val speed: Float,
     val volume: Float,
     val reverb: Boolean,
-    val maxRange: Int
+    val maxRange: Int,
+    val jingle: String,
+    val realism: Float
 ) : CustomPacketPayload {
     companion object {
         val ID = CustomPacketPayload.Type<SetAnnouncerDataPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "set_announcer_data"))
         val STREAM_CODEC = StreamCodec.ofMember(SetAnnouncerDataPayload::write, ::read)
 
         fun read(buf: RegistryFriendlyByteBuf): SetAnnouncerDataPayload {
-            return SetAnnouncerDataPayload(buf.readBlockPos(), buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt())
+            return SetAnnouncerDataPayload(buf.readBlockPos(), buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt(), buf.readUtf(), buf.readFloat())
         }
     }
 
@@ -44,6 +46,8 @@ data class SetAnnouncerDataPayload(
         buf.writeFloat(volume)
         buf.writeBoolean(reverb)
         buf.writeInt(maxRange)
+        buf.writeUtf(jingle)
+        buf.writeFloat(realism)
     }
 }
 
@@ -55,7 +59,9 @@ data class PlayAnnouncerAudioPayload(
     val speed: Float,
     val volume: Float,
     val reverb: Boolean,
-    val maxRange: Int
+    val maxRange: Int,
+    val jingle: String,
+    val realism: Float
 ) : CustomPacketPayload {
     companion object {
         val ID = CustomPacketPayload.Type<PlayAnnouncerAudioPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "play_announcer_audio"))
@@ -64,7 +70,7 @@ data class PlayAnnouncerAudioPayload(
         fun read(buf: RegistryFriendlyByteBuf): PlayAnnouncerAudioPayload {
             val hasPos = buf.readBoolean()
             val pos = if (hasPos) buf.readBlockPos() else null
-            return PlayAnnouncerAudioPayload(pos, buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt())
+            return PlayAnnouncerAudioPayload(pos, buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt(), buf.readUtf(), buf.readFloat())
         }
     }
 
@@ -82,6 +88,8 @@ data class PlayAnnouncerAudioPayload(
         buf.writeFloat(volume)
         buf.writeBoolean(reverb)
         buf.writeInt(maxRange)
+        buf.writeUtf(jingle)
+        buf.writeFloat(realism)
     }
 }
 
@@ -91,6 +99,8 @@ data class PlayAnnouncerAudioDataChunkPayload(
     val volume: Float,
     val reverb: Boolean,
     val maxRange: Int,
+    val jingle: String,
+    val realism: Float,
     val streamId: UUID,
     val chunkIndex: Int,
     val totalChunks: Int,
@@ -107,13 +117,15 @@ data class PlayAnnouncerAudioDataChunkPayload(
             val volume = buf.readFloat()
             val reverb = buf.readBoolean()
             val maxRange = buf.readInt()
+            val jingle = buf.readUtf()
+            val realism = buf.readFloat()
             val streamId = buf.readUUID()
             val chunkIndex = buf.readInt()
             val totalChunks = buf.readInt()
             val dataLen = buf.readInt()
             val chunkData = ByteArray(dataLen)
             buf.readBytes(chunkData)
-            return PlayAnnouncerAudioDataChunkPayload(pos, speed, volume, reverb, maxRange, streamId, chunkIndex, totalChunks, chunkData)
+            return PlayAnnouncerAudioDataChunkPayload(pos, speed, volume, reverb, maxRange, jingle, realism, streamId, chunkIndex, totalChunks, chunkData)
         }
     }
 
@@ -128,6 +140,8 @@ data class PlayAnnouncerAudioDataChunkPayload(
         buf.writeFloat(volume)
         buf.writeBoolean(reverb)
         buf.writeInt(maxRange)
+        buf.writeUtf(jingle)
+        buf.writeFloat(realism)
         buf.writeUUID(streamId)
         buf.writeInt(chunkIndex)
         buf.writeInt(totalChunks)
@@ -143,14 +157,16 @@ data class RequestPreviewAudioPayload(
     val speed: Float,
     val volume: Float,
     val reverb: Boolean,
-    val maxRange: Int
+    val maxRange: Int,
+    val jingle: String,
+    val realism: Float
 ) : CustomPacketPayload {
     companion object {
         val ID = CustomPacketPayload.Type<RequestPreviewAudioPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "request_preview_audio"))
         val STREAM_CODEC = StreamCodec.ofMember(RequestPreviewAudioPayload::write, ::read)
 
         fun read(buf: RegistryFriendlyByteBuf): RequestPreviewAudioPayload {
-            return RequestPreviewAudioPayload(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt())
+            return RequestPreviewAudioPayload(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt(), buf.readUtf(), buf.readFloat())
         }
     }
 
@@ -164,6 +180,8 @@ data class RequestPreviewAudioPayload(
         buf.writeFloat(volume)
         buf.writeBoolean(reverb)
         buf.writeInt(maxRange)
+        buf.writeUtf(jingle)
+        buf.writeFloat(realism)
     }
 }
 
@@ -233,6 +251,8 @@ object ModNetworking {
                         blockEntity.ttsVolume = payload.volume
                         blockEntity.ttsReverb = payload.reverb
                         blockEntity.ttsMaxRange = payload.maxRange
+                        blockEntity.ttsJingle = payload.jingle
+                        blockEntity.ttsRealism = payload.realism
                         blockEntity.setChanged()
                         level.sendBlockUpdated(pos, blockEntity.blockState, blockEntity.blockState, 3)
                     }
@@ -265,6 +285,8 @@ object ModNetworking {
                                 payload.volume,
                                 payload.reverb,
                                 payload.maxRange,
+                                payload.jingle,
+                                payload.realism,
                                 streamId,
                                 i,
                                 totalChunks,
@@ -283,7 +305,9 @@ object ModNetworking {
                     payload.speed,
                     payload.volume,
                     payload.reverb,
-                    payload.maxRange
+                    payload.maxRange,
+                    payload.jingle,
+                    payload.realism
                 )
                 net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, outPayload)
             }
@@ -302,6 +326,8 @@ object ModNetworking {
                             payload.volume,
                             payload.reverb,
                             payload.maxRange,
+                            payload.jingle,
+                            payload.realism,
                             payload.streamId,
                             payload.chunkIndex,
                             payload.totalChunks,
@@ -325,7 +351,9 @@ object ModNetworking {
                     payload.speed,
                     payload.volume,
                     payload.reverb,
-                    payload.maxRange
+                    payload.maxRange,
+                    payload.jingle,
+                    payload.realism
                 )
             }
         }

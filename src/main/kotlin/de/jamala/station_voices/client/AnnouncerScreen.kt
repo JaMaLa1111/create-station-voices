@@ -18,7 +18,9 @@ class AnnouncerScreen(
     var currentSpeed: Float,
     var currentVolume: Float,
     var currentReverb: Boolean,
-    var currentMaxRange: Int
+    var currentMaxRange: Int,
+    var currentJingle: String = "OFF",
+    var currentRealism: Float = 0.0f
 ) : Screen(Component.literal("Announcer Setup")) {
 
     private lateinit var textBox: EditBox
@@ -33,7 +35,9 @@ class AnnouncerScreen(
     private lateinit var speedSlider: AbstractSliderButton
     private lateinit var volumeSlider: AbstractSliderButton
     private lateinit var rangeSlider: AbstractSliderButton
+    private lateinit var realismSlider: AbstractSliderButton
     private lateinit var reverbBtn: Button
+    private lateinit var jingleBtn: Button
 
     // Common
     private lateinit var tabBtn: Button
@@ -44,17 +48,17 @@ class AnnouncerScreen(
         val centerY = height / 2
 
         // Main Tab
-        textBox = EditBox(font, centerX - 100, centerY - 60, 200, 20, Component.literal("Text"))
+        textBox = EditBox(font, centerX - 100, centerY - 52, 200, 20, Component.literal("Text"))
         textBox.value = currentText
         textBox.setMaxLength(256)
         addRenderableWidget(textBox)
 
         voiceBtn = addRenderableWidget(Button.builder(Component.literal("Voice: $currentVoice ($currentLanguage)")) { _ ->
             minecraft?.setScreen(VoiceSelectionScreen(this, currentLanguage, currentVoice) { lang, voice -> updateVoice(lang, voice) })
-        }.bounds(centerX - 100, centerY - 35, 200, 20).build())
+        }.bounds(centerX - 100, centerY - 29, 200, 20).build())
 
         // Effects Tab
-        speedSlider = addRenderableWidget(object : AbstractSliderButton(centerX - 100, centerY - 60, 200, 20, Component.empty(), (currentSpeed - 0.1) / (3.0 - 0.1)) {
+        speedSlider = addRenderableWidget(object : AbstractSliderButton(centerX - 100, centerY - 75, 200, 20, Component.empty(), (currentSpeed - 0.1) / (3.0 - 0.1)) {
             init { updateMessage() }
             override fun updateMessage() {
                 val act = 0.1 + value * 2.9
@@ -65,7 +69,7 @@ class AnnouncerScreen(
             }
         })
         
-        volumeSlider = addRenderableWidget(object : AbstractSliderButton(centerX - 100, centerY - 35, 200, 20, Component.empty(), currentVolume.toDouble()) {
+        volumeSlider = addRenderableWidget(object : AbstractSliderButton(centerX - 100, centerY - 52, 200, 20, Component.empty(), currentVolume.toDouble()) {
             init { updateMessage() }
             override fun updateMessage() {
                 message = Component.literal(String.format(java.util.Locale.US, "Volume: %d%%", (value * 100).toInt()))
@@ -75,7 +79,7 @@ class AnnouncerScreen(
             }
         })
         
-        rangeSlider = addRenderableWidget(object : AbstractSliderButton(centerX - 100, centerY - 10, 200, 20, Component.empty(), (currentMaxRange - 1.0) / 63.0) {
+        rangeSlider = addRenderableWidget(object : AbstractSliderButton(centerX - 100, centerY - 29, 200, 20, Component.empty(), (currentMaxRange - 1.0) / 63.0) {
             init { updateMessage() }
             override fun updateMessage() {
                 val act = 1 + (value * 63).toInt()
@@ -86,10 +90,26 @@ class AnnouncerScreen(
             }
         })
 
+        realismSlider = addRenderableWidget(object : AbstractSliderButton(centerX - 100, centerY - 6, 200, 20, Component.empty(), currentRealism.toDouble()) {
+            init { updateMessage() }
+            override fun updateMessage() {
+                val pct = (value * 100).toInt()
+                message = Component.literal(if (pct == 0) "Realism: OFF" else "Realism: $pct%")
+            }
+            override fun applyValue() {
+                currentRealism = value.toFloat()
+            }
+        })
+
         reverbBtn = addRenderableWidget(Button.builder(Component.literal("Reverb: ${if (currentReverb) "ON" else "OFF"}")) { btn ->
             currentReverb = !currentReverb
             btn.message = Component.literal("Reverb: ${if (currentReverb) "ON" else "OFF"}")
-        }.bounds(centerX - 100, centerY + 15, 200, 20).build())
+        }.bounds(centerX - 100, centerY + 17, 95, 20).build())
+
+        jingleBtn = addRenderableWidget(Button.builder(Component.literal("Jingle: ${if (currentJingle.equals("DB", ignoreCase = true)) "DB" else "OFF"}")) { btn ->
+            currentJingle = if (currentJingle.equals("DB", ignoreCase = true)) "OFF" else "DB"
+            btn.message = Component.literal("Jingle: $currentJingle")
+        }.bounds(centerX + 5, centerY + 17, 95, 20).build())
 
         // Common
         genBtn = addRenderableWidget(Button.builder(Component.literal("Generate & Preview")) { _ ->
@@ -97,10 +117,10 @@ class AnnouncerScreen(
             val text = textBox.value
             if (text.isNotBlank()) {
                 PacketDistributor.sendToServer(de.jamala.station_voices.network.RequestPreviewAudioPayload(
-                    text, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange
+                    text, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange, currentJingle, currentRealism
                 ))
             }
-        }.bounds(centerX - 100, centerY + 40, 200, 20).build())
+        }.bounds(centerX - 100, centerY + 41, 200, 20).build())
 
         tabBtn = addRenderableWidget(Button.builder(Component.literal("Tab: Main")) { _ ->
             isEffectsTab = !isEffectsTab
@@ -109,7 +129,7 @@ class AnnouncerScreen(
 
         doneBtn = addRenderableWidget(Button.builder(Component.literal("Done")) { _ ->
             currentText = textBox.value
-            PacketDistributor.sendToServer(SetAnnouncerDataPayload(pos, currentText, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange))
+            PacketDistributor.sendToServer(SetAnnouncerDataPayload(pos, currentText, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange, currentJingle, currentRealism))
             onClose()
         }.bounds(centerX + 5, centerY + 65, 95, 20).build())
 
@@ -131,7 +151,9 @@ class AnnouncerScreen(
         speedSlider.visible = isEffectsTab
         volumeSlider.visible = isEffectsTab
         rangeSlider.visible = isEffectsTab
+        realismSlider.visible = isEffectsTab
         reverbBtn.visible = isEffectsTab
+        jingleBtn.visible = isEffectsTab
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {

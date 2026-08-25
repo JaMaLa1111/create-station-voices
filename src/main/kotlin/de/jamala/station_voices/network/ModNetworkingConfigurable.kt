@@ -29,7 +29,9 @@ data class SetConfigurableAnnouncerDataPayload(
     val speed: Float,
     val volume: Float,
     val reverb: Boolean,
-    val maxRange: Int
+    val maxRange: Int,
+    val jingle: String,
+    val realism: Float
 ) : CustomPacketPayload {
     companion object {
         val ID = CustomPacketPayload.Type<SetConfigurableAnnouncerDataPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "set_conf_announcer_data"))
@@ -45,7 +47,9 @@ data class SetConfigurableAnnouncerDataPayload(
                 buf.readFloat(),
                 buf.readFloat(),
                 buf.readBoolean(),
-                buf.readInt()
+                buf.readInt(),
+                buf.readUtf(),
+                buf.readFloat()
             )
         }
     }
@@ -62,6 +66,8 @@ data class SetConfigurableAnnouncerDataPayload(
         buf.writeFloat(volume)
         buf.writeBoolean(reverb)
         buf.writeInt(maxRange)
+        buf.writeUtf(jingle)
+        buf.writeFloat(realism)
     }
 }
 
@@ -204,7 +210,9 @@ object ModNetworkingConfigurable {
                                 payload.speed,
                                 payload.volume,
                                 payload.reverb,
-                                payload.maxRange
+                                payload.maxRange,
+                                payload.jingle,
+                                payload.realism
                             )
                         }
                         blockEntity.setChanged()

@@ -42,6 +42,8 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
     var ttsVolume: Float = 1.0f
     var ttsReverb: Boolean = false
     var ttsMaxRange: Int = 32
+    var ttsJingle: String = "OFF"
+    var ttsRealism: Float = 0.0f
 
     var isPlaying: Boolean = false
     var wasPoweredByRedstone: Boolean = false
@@ -68,6 +70,8 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
         tag.putFloat("TtsVolume", ttsVolume)
         tag.putBoolean("TtsReverb", ttsReverb)
         tag.putInt("TtsMaxRange", ttsMaxRange)
+        tag.putString("TtsJingle", ttsJingle)
+        tag.putFloat("TtsRealism", ttsRealism)
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
@@ -80,6 +84,8 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
             if (tag.contains("TtsVolume")) ttsVolume = tag.getFloat("TtsVolume")
             if (tag.contains("TtsReverb")) ttsReverb = tag.getBoolean("TtsReverb")
             if (tag.contains("TtsMaxRange")) ttsMaxRange = tag.getInt("TtsMaxRange")
+            if (tag.contains("TtsJingle")) ttsJingle = tag.getString("TtsJingle")
+            if (tag.contains("TtsRealism")) ttsRealism = tag.getFloat("TtsRealism")
         }
     }
 

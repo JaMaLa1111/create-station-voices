@@ -30,9 +30,11 @@ object ClientHooks {
         currentSpeed: Float,
         currentVolume: Float,
         currentReverb: Boolean,
-        currentMaxRange: Int
+        currentMaxRange: Int,
+        currentJingle: String,
+        currentRealism: Float = 0.0f
     ) {
-        Minecraft.getInstance().setScreen(AnnouncerScreen(pos, currentText, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange))
+        Minecraft.getInstance().setScreen(AnnouncerScreen(pos, currentText, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange, currentJingle, currentRealism))
     }
     
     fun openConfigurableAnnouncerScreen(pos: BlockPos, be: de.jamala.station_voices.block.ConfigurableAnnouncerBlockEntity) {

@@ -34,7 +34,9 @@ data class TrainProfile(
     var speed: Float = 1.0f,
     var volume: Float = 1.0f,
     var reverb: Boolean = false,
-    var maxRange: Int = 32
+    var maxRange: Int = 32,
+    var jingle: String = "OFF",
+    var realism: Float = 0.0f
 )
 
 class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlockEntities.CONFIGURABLE_ANNOUNCER_BLOCK_ENTITY, pos, state), IHaveGoggleInformation {
@@ -127,7 +129,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                 CoroutineScope(Dispatchers.IO).launch {
                     val audioData = PiperManager.generateAudio(profile.text, profile.voice, profile.language)
                     if (audioData != null) {
-                        val durationMs = calculateWavDurationMs(audioData, profile.speed, profile.reverb)
+                        val durationMs = calculateWavDurationMs(audioData, profile.speed, profile.reverb, profile.jingle)
                         audioEndTimeMillis = System.currentTimeMillis() + durationMs
 
                         val streamId = UUID.randomUUID()
@@ -145,6 +147,8 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                                 profile.volume,
                                 profile.reverb,
                                 profile.maxRange,
+                                profile.jingle,
+                                profile.realism,
                                 streamId,
                                 i,
                                 totalChunks,
@@ -170,7 +174,8 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                     }
                 }
             } else {
-                val estimatedDurationMs = (profile.text.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L)
+                val jingleDurationMs = if (profile.jingle.equals("DB", ignoreCase = true)) 2 * de.jamala.station_voices.JingleManager.getGongDuration(profile.speed) else 0L
+                val estimatedDurationMs = (profile.text.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs
                 audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
                 val payload = PlayAnnouncerAudioPayload(
@@ -181,7 +186,9 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                     profile.speed,
                     profile.volume,
                     profile.reverb,
-                    profile.maxRange
+                    profile.maxRange,
+                    profile.jingle,
+                    profile.realism
                 )
                 PacketDistributor.sendToPlayersNear(
                     level as ServerLevel,
@@ -196,7 +203,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
         }
     }
 
-    private fun calculateWavDurationMs(audioData: ByteArray, speed: Float, reverb: Boolean): Long {
+    private fun calculateWavDurationMs(audioData: ByteArray, speed: Float, reverb: Boolean, jingle: String): Long {
         try {
             val bais = java.io.ByteArrayInputStream(audioData)
             val audioIn = javax.sound.sampled.AudioSystem.getAudioInputStream(bais)
@@ -206,7 +213,8 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
             val speedFactor = if (speed > 0.01f) speed.toDouble() else 1.0
             val adjustedMs = ((durationSeconds / speedFactor) * 1000.0).toLong()
             val reverbTailMs = if (reverb) 900L else 0L
-            return adjustedMs + reverbTailMs
+            val jingleMs = if (jingle.equals("DB", ignoreCase = true)) 2 * de.jamala.station_voices.JingleManager.getGongDuration(speed) else 0L
+            return adjustedMs + reverbTailMs + jingleMs
         } catch (e: Exception) {
             return 2000L
         }
