@@ -43,7 +43,7 @@ Textures and mod logo added in v0.5.0-beta, all textures can become subject to c
 - By default, TTS is generated locally using native in-process ONNX runtime Piper TTS and downloaded models.
 - The configuration file includes an option to use an external API (currently limited to a private API).
 - Supports Windows, Linux, and macOS out of the box via native libraries.
-- **Notice:** Due to mod-hosting site moderation policies regarding bundled executable binaries, all mod versions prior to this update (`v0.6.0-beta` and earlier) are exclusively available on [GitHub](https://github.com/JaMaLa1111/create-station-voices/releases). Starting with `v0.7.0-beta`, the mod uses in-process native ONNX Runtime bindings.
+- **Notice:** Due to mod-hosting site moderation policies regarding bundled executable binaries, all mod versions prior to `v0.7.0-beta` (`v0.6.0-beta` and earlier) are exclusively available on [GitHub](https://github.com/JaMaLa1111/create-station-voices/releases). Starting with `v0.7.0-beta`, the mod uses in-process native ONNX Runtime bindings.
 
 ---
 
