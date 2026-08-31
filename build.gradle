@@ -99,6 +99,7 @@ configurations {
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven {
         name = 'Kotlin for Forge'
         url = 'https://thedarkcolour.github.io/KotlinForForge/'
@@ -117,10 +118,14 @@ dependencies {
     runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
     
+    implementation("io.github.jvoice-project:piper-jni:1.4.1")
+    jarJar("io.github.jvoice-project:piper-jni:[1.4.1, 2.0.0)")
+    additionalRuntimeClasspath("io.github.jvoice-project:piper-jni:1.4.1")
+    
     implementation("dev.mccue:jlayer:2024.04.19")
     jarJar("dev.mccue:jlayer:[2024.04.19, 2100.0.0)")
     additionalRuntimeClasspath("dev.mccue:jlayer:2024.04.19")
-    
+
     implementation("dev.mccue:jlayer-decoder:2024.04.19")
     jarJar("dev.mccue:jlayer-decoder:[2024.04.19, 2100.0.0)")
     additionalRuntimeClasspath("dev.mccue:jlayer-decoder:2024.04.19")
@@ -132,6 +137,13 @@ dependencies {
     implementation("dev.mccue:jlayer-converter:2024.04.19")
     jarJar("dev.mccue:jlayer-converter:[2024.04.19, 2100.0.0)")
     additionalRuntimeClasspath("dev.mccue:jlayer-converter:2024.04.19")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+test {
+    useJUnitPlatform()
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

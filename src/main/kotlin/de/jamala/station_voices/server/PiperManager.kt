@@ -1,24 +1,28 @@
 package de.jamala.station_voices.server
 
 import de.jamala.station_voices.CreateStationVoices
-import net.minecraft.server.MinecraftServer
+import io.github.jvoiceproject.piperjni.PiperJNI
+import io.github.jvoiceproject.piperjni.PiperVoice
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import net.neoforged.fml.loading.FMLPaths
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URI
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import net.neoforged.fml.ModList
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
-import kotlin.io.path.isRegularFile
-import kotlin.io.path.name
-import kotlin.io.path.readBytes
-
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.util.concurrent.ConcurrentHashMap
 
 object PiperManager {
+    private var piperInstance: PiperJNI? = null
+    private val piperMutex = Mutex()
+    private val loadedVoices = ConcurrentHashMap<String, PiperVoice>()
+
     private fun md5(input: String): String {
         val md = MessageDigest.getInstance("MD5")
         val bytes = md.digest(input.toByteArray())
@@ -31,20 +35,14 @@ object PiperManager {
         if (!dir.exists()) dir.mkdirs()
         return dir
     }
-    
+
     fun getModelsDirectory(): File {
         val dir = File(getPiperDirectory(), "models")
         if (!dir.exists()) dir.mkdirs()
         return dir
     }
 
-    private fun getBinaryDirectory(): File {
-        val dir = File(getPiperDirectory(), "bin")
-        if (!dir.exists()) dir.mkdirs()
-        return dir
-    }
-
-    private fun getCacheDirectory(): File {
+    fun getCacheDirectory(): File {
         val dir = File(getPiperDirectory(), "cache")
         if (!dir.exists()) dir.mkdirs()
         return dir
@@ -59,7 +57,6 @@ object PiperManager {
                     if (langDir.isDirectory) {
                         for (voiceDir in langDir.listFiles() ?: emptyArray()) {
                             if (voiceDir.isDirectory) {
-                                // check if .onnx exists
                                 if (voiceDir.listFiles()?.any { it.name.endsWith(".onnx") } == true) {
                                     list.add("${langDir.name}:${voiceDir.name}")
                                 }
@@ -85,6 +82,19 @@ object PiperManager {
 
                 downloadFile(onnxUrl, onnxFile, progressCallback)
                 downloadFile(jsonUrl, jsonFile, null)
+
+                // Invalidate cached voice if re-downloaded
+                piperMutex.withLock {
+                    val key = "$language:$voice"
+                    loadedVoices.remove(key)?.let {
+                        try {
+                            it.close()
+                        } catch (e: Exception) {
+                            CreateStationVoices.LOGGER.error("Error closing old voice model $key", e)
+                        }
+                    }
+                }
+
                 CreateStationVoices.LOGGER.info("Downloaded Piper model $language-$voice")
             } catch (e: Exception) {
                 CreateStationVoices.LOGGER.error("Failed to download model $language-$voice", e)
@@ -121,44 +131,18 @@ object PiperManager {
 
     suspend fun setupPiper() {
         withContext(Dispatchers.IO) {
-            val binDir = getBinaryDirectory()
-            val piperDir = File(binDir, "piper")
-            
-            if (!piperDir.exists() || (piperDir.list()?.size ?: 0) < 5) {
-                piperDir.mkdirs()
-                CreateStationVoices.LOGGER.info("Extracting bundled Piper TTS binaries...")
-                
-                try {
-                    val modFile = ModList.get().getModFileById(CreateStationVoices.ID).file
-                    val resourcePath = modFile.findResource("piper", "piper")
-                    
-                    if (Files.exists(resourcePath)) {
-                        Files.walk(resourcePath).forEach { path ->
-                            if (path.isRegularFile()) {
-                                val relPath = resourcePath.relativize(path).toString().replace("\\", "/")
-                                val targetFile = File(piperDir, relPath)
-                                targetFile.parentFile.mkdirs()
-                                Files.copy(path, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-                                
-                                // Make executables runnable
-                                if (targetFile.name == "piper" || targetFile.name == "piper.exe") {
-                                    targetFile.setExecutable(true)
-                                }
-                            }
-                        }
-                        CreateStationVoices.LOGGER.info("Successfully extracted Piper TTS.")
-                    } else {
-                        CreateStationVoices.LOGGER.error("Bundled Piper TTS not found in jar!")
+            piperMutex.withLock {
+                if (piperInstance == null) {
+                    try {
+                        CreateStationVoices.LOGGER.info("Initializing native Piper ONNX runtime...")
+                        val piper = PiperJNI()
+                        piper.initialize(true)
+                        piperInstance = piper
+                        CreateStationVoices.LOGGER.info("Successfully initialized native Piper ONNX runtime v${piper.piperVersion}.")
+                    } catch (e: Exception) {
+                        CreateStationVoices.LOGGER.error("Failed to initialize native Piper ONNX runtime", e)
                     }
-                } catch (e: Exception) {
-                    CreateStationVoices.LOGGER.error("Failed to extract Piper TTS", e)
                 }
-            }
-            
-            val piperExec = if (System.getProperty("os.name").lowercase().contains("win")) "piper.exe" else "piper"
-            val piperFile = File(piperDir, piperExec)
-            if (!piperFile.exists()) {
-                CreateStationVoices.LOGGER.warn("Piper executable not found at ${piperFile.absolutePath}. Local TTS will fail unless Piper is installed.")
             }
         }
     }
@@ -166,9 +150,11 @@ object PiperManager {
     suspend fun generateAudio(text: String, voice: String, language: String): ByteArray? {
         return withContext(Dispatchers.IO) {
             try {
+                if (text.isBlank()) return@withContext null
+
                 val hash = md5("$text-$voice-$language")
                 val cacheFile = File(getCacheDirectory(), "$hash.wav")
-                
+
                 if (cacheFile.exists() && cacheFile.length() > 0) {
                     return@withContext cacheFile.readBytes()
                 }
@@ -177,64 +163,79 @@ object PiperManager {
                 val modelsDir = getModelsDirectory()
                 val langDir = File(modelsDir, language)
                 val voiceDir = File(langDir, voice)
-                
+
                 var onnxFile: File? = null
                 var jsonFile: File? = null
-                
+
                 if (voiceDir.exists()) {
                     voiceDir.walkTopDown().forEach { f ->
                         if (f.name.endsWith(".onnx")) onnxFile = f
                         if (f.name.endsWith(".onnx.json")) jsonFile = f
                     }
                 }
-                
+
                 if (onnxFile == null || jsonFile == null) {
                     CreateStationVoices.LOGGER.error("Piper model for $language-$voice not found in ${modelsDir.absolutePath}")
                     return@withContext null
                 }
-                
-                val binDir = getBinaryDirectory()
-                val piperExec = if (System.getProperty("os.name").lowercase().contains("win")) "piper.exe" else "piper"
-                val piperFile = File(binDir, "piper/$piperExec")
-                
-                if (!piperFile.exists()) {
-                    CreateStationVoices.LOGGER.error("Piper executable not found at ${piperFile.absolutePath}")
-                    return@withContext null
-                }
 
-                val outputFile = File.createTempFile("piper_out", ".wav", getPiperDirectory())
-                
-                val processBuilder = ProcessBuilder(
-                    piperFile.absolutePath,
-                    "--model", onnxFile!!.absolutePath,
-                    "--output_file", outputFile.absolutePath
-                )
-                processBuilder.directory(File(binDir, "piper"))
-                processBuilder.redirectErrorStream(true)
-                
-                val process = processBuilder.start()
-                process.outputStream.bufferedWriter().use { writer ->
-                    writer.write(text)
-                    writer.flush()
+                piperMutex.withLock {
+                    var piper = piperInstance
+                    if (piper == null) {
+                        piper = PiperJNI()
+                        piper.initialize(true)
+                        piperInstance = piper
+                    }
+
+                    val key = "$language:$voice"
+                    var piperVoice = loadedVoices[key]
+                    if (piperVoice == null) {
+                        piperVoice = piper.loadVoice(onnxFile!!.toPath(), jsonFile!!.toPath())
+                        loadedVoices[key] = piperVoice
+                    }
+
+                    val samples = piper.textToAudio(piperVoice, text)
+                    if (samples.isEmpty()) {
+                        CreateStationVoices.LOGGER.warn("Piper generated empty audio for '$text'")
+                        return@withContext null
+                    }
+
+                    val wavBytes = pcmToWav(samples, piperVoice.sampleRate)
+                    cacheFile.writeBytes(wavBytes)
+                    return@withContext wavBytes
                 }
-                
-                val exitCode = process.waitFor()
-                if (exitCode != 0) {
-                    val output = process.inputStream.bufferedReader().readText()
-                    CreateStationVoices.LOGGER.error("Piper process failed with code $exitCode: $output")
-                    outputFile.delete()
-                    return@withContext null
-                }
-                
-                val bytes = outputFile.readBytes()
-                outputFile.copyTo(cacheFile, overwrite = true)
-                outputFile.delete()
-                
-                return@withContext bytes
             } catch (e: Exception) {
                 CreateStationVoices.LOGGER.error("Error generating Piper audio", e)
                 return@withContext null
             }
         }
+    }
+
+    private fun pcmToWav(samples: ShortArray, sampleRate: Int): ByteArray {
+        val numChannels = 1
+        val bitsPerSample = 16
+        val byteRate = sampleRate * numChannels * bitsPerSample / 8
+        val blockAlign = numChannels * bitsPerSample / 8
+        val dataSize = samples.size * 2
+        val chunkSize = 36 + dataSize
+
+        val buffer = ByteBuffer.allocate(44 + dataSize).order(ByteOrder.LITTLE_ENDIAN)
+        buffer.put("RIFF".toByteArray(StandardCharsets.US_ASCII))
+        buffer.putInt(chunkSize)
+        buffer.put("WAVE".toByteArray(StandardCharsets.US_ASCII))
+        buffer.put("fmt ".toByteArray(StandardCharsets.US_ASCII))
+        buffer.putInt(16) // 16 for PCM
+        buffer.putShort(1.toShort()) // PCM
+        buffer.putShort(numChannels.toShort())
+        buffer.putInt(sampleRate)
+        buffer.putInt(byteRate)
+        buffer.putShort(blockAlign.toShort())
+        buffer.putShort(bitsPerSample.toShort())
+        buffer.put("data".toByteArray(StandardCharsets.US_ASCII))
+        buffer.putInt(dataSize)
+        for (sample in samples) {
+            buffer.putShort(sample)
+        }
+        return buffer.array()
     }
 }
