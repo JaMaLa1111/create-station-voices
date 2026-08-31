@@ -18,6 +18,7 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
 import de.jamala.station_voices.JingleManager
+import de.jamala.station_voices.JingleTiming
 
 import javax.sound.sampled.SourceDataLine
 import kotlinx.coroutines.sync.Mutex
@@ -37,7 +38,7 @@ object AudioPlayer {
     private val chunkBuffer = mutableMapOf<java.util.UUID, MutableList<ByteArray?>>()
     
     fun handleAudioChunk(
-        pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String, realism: Float,
+        pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String, jingleTiming: String, realism: Float,
         streamId: java.util.UUID, chunkIndex: Int, totalChunks: Int, chunkData: ByteArray
     ) {
         val list = chunkBuffer.getOrPut(streamId) { MutableList(totalChunks) { null } }
@@ -45,11 +46,11 @@ object AudioPlayer {
         if (list.all { it != null }) {
             chunkBuffer.remove(streamId)
             val fullData = list.flatMap { it!!.toList() }.toByteArray()
-            playData(pos, speed, volume, reverb, maxRange, fullData, jingle, realism)
+            playData(pos, speed, volume, reverb, maxRange, fullData, jingle, jingleTiming, realism)
         }
     }
 
-    private fun playData(pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, wavData: ByteArray, jingle: String = "OFF", realism: Float = 0.0f) {
+    private fun playData(pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, wavData: ByteArray, jingle: String = "OFF", jingleTiming: String = "BOTH", realism: Float = 0.0f) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val bais = java.io.ByteArrayInputStream(wavData)
@@ -74,11 +75,12 @@ object AudioPlayer {
                     if (reverb && gongBytes.isNotEmpty()) {
                         gongBytes = applyReverb(gongBytes, format)
                     }
-                    if (gongBytes.isNotEmpty()) {
+                    val timing = JingleTiming.fromString(jingleTiming)
+                    if ((timing == JingleTiming.BOTH || timing == JingleTiming.BEFORE) && gongBytes.isNotEmpty()) {
                         audioSegments.add(gongBytes)
                     }
                     audioSegments.add(bytes)
-                    if (gongBytes.isNotEmpty()) {
+                    if ((timing == JingleTiming.BOTH || timing == JingleTiming.AFTER) && gongBytes.isNotEmpty()) {
                         audioSegments.add(gongBytes)
                     }
                 } else {
@@ -186,12 +188,12 @@ object AudioPlayer {
         }
     }
 
-    fun play(pos: BlockPos?, text: String, voice: String, language: String, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String = "OFF", realism: Float = 0.0f) {
+    fun play(pos: BlockPos?, text: String, voice: String, language: String, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String = "OFF", jingleTiming: String = "BOTH", realism: Float = 0.0f) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val file = getAudioFile(text, voice, language)
                 if (file.exists()) {
-                    playData(pos, speed, volume, reverb, maxRange, file.readBytes(), jingle, realism)
+                    playData(pos, speed, volume, reverb, maxRange, file.readBytes(), jingle, jingleTiming, realism)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

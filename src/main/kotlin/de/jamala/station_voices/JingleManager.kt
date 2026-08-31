@@ -78,6 +78,14 @@ object JingleManager {
         return (cachedGongDurationMs / speedFactor).toLong()
     }
 
+    fun getGongDuration(speed: Float, timing: JingleTiming): Long {
+        val multiplier = when (timing) {
+            JingleTiming.BOTH -> 2
+            JingleTiming.BEFORE, JingleTiming.AFTER -> 1
+        }
+        return getGongDuration(speed) * multiplier
+    }
+
     fun getGongBytesForFormat(targetFormat: AudioFormat): ByteArray {
         val gong = loadGongPcm() ?: return ByteArray(0)
         val (gongFormat, gongBytes) = gong

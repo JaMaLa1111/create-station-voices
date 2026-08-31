@@ -25,7 +25,7 @@ TTS lines are generated once when set (via the Preview button) and then cached.
     - Volume
     - Audible Range (1-64 blocks)
     - A realism Slider (noticeably reduces the quality of the announcement to be more in-line with real-world station announcements)
-    - Jingles can be turned on in the effects menu, the selected jingle will play before and after the announcement. Currently this only includes the DB jingle ("DB Gong")
+    - Jingles can be turned on in the effects menu, the selected jingle will play either before, after or before and after the announcement depending on the selected option. Currently this only includes the DB jingle ("DB Gong")
 
 5. **Audio Falloff**  
    Announcements feature natural sound falloff (volume begins to decrease after one-third of the max range).
@@ -44,6 +44,15 @@ Textures and mod logo added in v0.5.0-beta, all textures can become subject to c
 - The configuration file includes an option to use an external API (currently limited to a private API).
 - Supports Windows, Linux, and macOS out of the box via native libraries.
 - **Notice:** Due to mod-hosting site moderation policies regarding bundled executable binaries, all mod versions prior to `v0.7.0-beta` (`v0.6.0-beta` and earlier) are exclusively available on [GitHub](https://github.com/JaMaLa1111/create-station-voices/releases). Starting with `v0.7.0-beta`, the mod uses in-process native ONNX Runtime bindings.
+
+---
+
+### Planned features
+- More jingles
+- Ponder scenes
+- A cheap speaker block that can be linked to already placed announcers and will act as a secondary speaker for the announcer
+- A Train-Mounted announcer that will function like a Configurable Announcer but play Audio inside the train when it arrives at a station
+- Display link compatibility (display the  current announcement as text)
 
 ---
 

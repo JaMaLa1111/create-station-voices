@@ -1,5 +1,6 @@
 package de.jamala.station_voices.client
 
+import de.jamala.station_voices.JingleTiming
 import de.jamala.station_voices.block.TrainProfile
 import de.jamala.station_voices.network.AutoFetchTrainsRequestPayload
 import de.jamala.station_voices.network.SetConfigurableAnnouncerDataPayload
@@ -44,6 +45,7 @@ class ConfigurableAnnouncerScreen(
     private lateinit var realismSlider: AbstractSliderButton
     private lateinit var reverbBtn: Button
     private lateinit var jingleBtn: Button
+    private lateinit var jingleTimingBtn: Button
     private lateinit var tabBtn: Button
 
     // Common
@@ -113,13 +115,13 @@ class ConfigurableAnnouncerScreen(
         }.bounds(rightX, centerY - 29, 200, 20).build())
 
         // Effects Tab
-        speedSlider = addRenderableWidget(createSpeedSlider(rightX, centerY - 75, 200, 20))
+        speedSlider = addRenderableWidget(createSpeedSlider(rightX, centerY - 80, 200, 20))
         
-        volumeSlider = addRenderableWidget(createVolumeSlider(rightX, centerY - 52, 200, 20))
+        volumeSlider = addRenderableWidget(createVolumeSlider(rightX, centerY - 57, 200, 20))
         
-        rangeSlider = addRenderableWidget(createRangeSlider(rightX, centerY - 29, 200, 20))
+        rangeSlider = addRenderableWidget(createRangeSlider(rightX, centerY - 34, 200, 20))
 
-        realismSlider = addRenderableWidget(createRealismSlider(rightX, centerY - 6, 200, 20))
+        realismSlider = addRenderableWidget(createRealismSlider(rightX, centerY - 11, 200, 20))
 
         reverbBtn = addRenderableWidget(Button.builder(Component.literal("Reverb: OFF")) { btn ->
             val profile = selectedTrain?.let { profiles[it] }
@@ -127,35 +129,45 @@ class ConfigurableAnnouncerScreen(
                 profile.reverb = !profile.reverb
                 btn.message = Component.literal("Reverb: ${if (profile.reverb) "ON" else "OFF"}")
             }
-        }.bounds(rightX, centerY + 17, 95, 20).build())
+        }.bounds(rightX, centerY + 12, 95, 20).build())
 
         jingleBtn = addRenderableWidget(Button.builder(Component.literal("Jingle: OFF")) { btn ->
             val profile = selectedTrain?.let { profiles[it] }
             if (profile != null) {
                 profile.jingle = if (profile.jingle.equals("DB", ignoreCase = true)) "OFF" else "DB"
                 btn.message = Component.literal("Jingle: ${profile.jingle}")
+                jingleTimingBtn.active = profile.jingle.equals("DB", ignoreCase = true)
             }
-        }.bounds(rightX + 105, centerY + 17, 95, 20).build())
+        }.bounds(rightX + 105, centerY + 12, 95, 20).build())
+
+        jingleTimingBtn = addRenderableWidget(Button.builder(Component.literal("Jingle Timing: Both")) { btn ->
+            val profile = selectedTrain?.let { profiles[it] }
+            if (profile != null) {
+                val next = JingleTiming.fromString(profile.jingleTiming).next()
+                profile.jingleTiming = next.id
+                btn.message = Component.literal("Jingle Timing: ${next.displayName}")
+            }
+        }.bounds(rightX, centerY + 35, 200, 20).build())
 
         // Common
         genBtn = addRenderableWidget(Button.builder(Component.literal("Generate & Preview")) { _ ->
             val profile = selectedTrain?.let { profiles[it] }
             if (profile != null && profile.text.isNotBlank()) {
                 PacketDistributor.sendToServer(de.jamala.station_voices.network.RequestPreviewAudioPayload(
-                    profile.text, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.realism
+                    profile.text, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.jingleTiming, profile.realism
                 ))
             }
-        }.bounds(rightX, centerY + 41, 200, 20).build())
+        }.bounds(rightX, centerY + 58, 200, 20).build())
 
         tabBtn = addRenderableWidget(Button.builder(Component.literal("Tab: Main")) { _ ->
             isEffectsTab = !isEffectsTab
             updateRightPanelVisibility()
-        }.bounds(rightX, centerY + 65, 95, 20).build())
+        }.bounds(rightX, centerY + 81, 95, 20).build())
 
         // Done Button (Saves all)
         doneBtn = addRenderableWidget(Button.builder(Component.literal("Done")) { _ ->
             saveAndClose()
-        }.bounds(rightX + 105, centerY + 65, 95, 20).build())
+        }.bounds(rightX + 105, centerY + 81, 95, 20).build())
 
         if (profiles.isNotEmpty()) {
             trainList.selectItem(profiles.keys.first())
@@ -195,10 +207,10 @@ class ConfigurableAnnouncerScreen(
             val profile = profiles[key]
             if (profile == null) {
                 // Deleted
-                PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, key, "", "amy", "en_US", 1.0f, 1.0f, false, 64, "OFF", 0.0f))
+                PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, key, "", "amy", "en_US", 1.0f, 1.0f, false, 64, "OFF", "BOTH", 0.0f))
             } else {
                 // Updated/Created
-                PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, key, profile.text, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.realism))
+                PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, key, profile.text, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.jingleTiming, profile.realism))
             }
         }
         onClose()
@@ -234,6 +246,9 @@ class ConfigurableAnnouncerScreen(
             
             reverbBtn.message = Component.literal("Reverb: ${if (profile.reverb) "ON" else "OFF"}")
             jingleBtn.message = Component.literal("Jingle: ${if (profile.jingle.equals("DB", ignoreCase = true)) "DB" else "OFF"}")
+            val timing = JingleTiming.fromString(profile.jingleTiming)
+            jingleTimingBtn.message = Component.literal("Jingle Timing: ${timing.displayName}")
+            jingleTimingBtn.active = profile.jingle.equals("DB", ignoreCase = true)
         } else {
             textBox.value = ""
             voiceBtn.message = Component.literal("Voice: None")
@@ -252,6 +267,7 @@ class ConfigurableAnnouncerScreen(
 
     private fun updateRightPanelVisibility() {
         val hasSelection = selectedTrain != null
+        val profile = selectedTrain?.let { profiles[it] }
         
         tabBtn.message = Component.literal(if (isEffectsTab) "Tab: Effects" else "Tab: Main")
         
@@ -264,6 +280,10 @@ class ConfigurableAnnouncerScreen(
         realismSlider.visible = hasSelection && isEffectsTab
         reverbBtn.visible = hasSelection && isEffectsTab
         jingleBtn.visible = hasSelection && isEffectsTab
+        jingleTimingBtn.visible = hasSelection && isEffectsTab
+        if (hasSelection && profile != null) {
+            jingleTimingBtn.active = profile.jingle.equals("DB", ignoreCase = true)
+        }
         genBtn.visible = hasSelection
     }
 

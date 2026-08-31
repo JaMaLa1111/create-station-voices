@@ -22,6 +22,7 @@ import net.neoforged.neoforge.network.PacketDistributor
 import de.jamala.station_voices.ModConfig
 import de.jamala.station_voices.server.PiperManager
 import de.jamala.station_voices.network.PlayAnnouncerAudioDataChunkPayload
+import de.jamala.station_voices.JingleTiming
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,6 +37,7 @@ data class TrainProfile(
     var reverb: Boolean = false,
     var maxRange: Int = 32,
     var jingle: String = "OFF",
+    var jingleTiming: String = "BOTH",
     var realism: Float = 0.0f
 )
 
@@ -129,7 +131,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                 CoroutineScope(Dispatchers.IO).launch {
                     val audioData = PiperManager.generateAudio(profile.text, profile.voice, profile.language)
                     if (audioData != null) {
-                        val durationMs = calculateWavDurationMs(audioData, profile.speed, profile.reverb, profile.jingle)
+                        val durationMs = calculateWavDurationMs(audioData, profile.speed, profile.reverb, profile.jingle, profile.jingleTiming)
                         audioEndTimeMillis = System.currentTimeMillis() + durationMs
 
                         val streamId = UUID.randomUUID()
@@ -148,6 +150,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                                 profile.reverb,
                                 profile.maxRange,
                                 profile.jingle,
+                                profile.jingleTiming,
                                 profile.realism,
                                 streamId,
                                 i,
@@ -174,7 +177,8 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                     }
                 }
             } else {
-                val jingleDurationMs = if (profile.jingle.equals("DB", ignoreCase = true)) 2 * de.jamala.station_voices.JingleManager.getGongDuration(profile.speed) else 0L
+                val timing = JingleTiming.fromString(profile.jingleTiming)
+                val jingleDurationMs = if (profile.jingle.equals("DB", ignoreCase = true)) de.jamala.station_voices.JingleManager.getGongDuration(profile.speed, timing) else 0L
                 val estimatedDurationMs = (profile.text.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs
                 audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
@@ -188,6 +192,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                     profile.reverb,
                     profile.maxRange,
                     profile.jingle,
+                    profile.jingleTiming,
                     profile.realism
                 )
                 PacketDistributor.sendToPlayersNear(
@@ -203,7 +208,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
         }
     }
 
-    private fun calculateWavDurationMs(audioData: ByteArray, speed: Float, reverb: Boolean, jingle: String): Long {
+    private fun calculateWavDurationMs(audioData: ByteArray, speed: Float, reverb: Boolean, jingle: String, jingleTiming: String = "BOTH"): Long {
         try {
             val bais = java.io.ByteArrayInputStream(audioData)
             val audioIn = javax.sound.sampled.AudioSystem.getAudioInputStream(bais)
@@ -213,7 +218,8 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
             val speedFactor = if (speed > 0.01f) speed.toDouble() else 1.0
             val adjustedMs = ((durationSeconds / speedFactor) * 1000.0).toLong()
             val reverbTailMs = if (reverb) 900L else 0L
-            val jingleMs = if (jingle.equals("DB", ignoreCase = true)) 2 * de.jamala.station_voices.JingleManager.getGongDuration(speed) else 0L
+            val timing = JingleTiming.fromString(jingleTiming)
+            val jingleMs = if (jingle.equals("DB", ignoreCase = true)) de.jamala.station_voices.JingleManager.getGongDuration(speed, timing) else 0L
             return adjustedMs + reverbTailMs + jingleMs
         } catch (e: Exception) {
             return 2000L
@@ -241,6 +247,11 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
             try {
                 val map: MutableMap<String, TrainProfile>? = gson.fromJson(json, type)
                 if (map != null) {
+                    for ((_, p) in map) {
+                        if (p.jingleTiming.isNullOrBlank()) {
+                            p.jingleTiming = "BOTH"
+                        }
+                    }
                     profiles = map
                 }
             } catch (e: Exception) {

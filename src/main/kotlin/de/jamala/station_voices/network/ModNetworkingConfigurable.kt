@@ -31,6 +31,7 @@ data class SetConfigurableAnnouncerDataPayload(
     val reverb: Boolean,
     val maxRange: Int,
     val jingle: String,
+    val jingleTiming: String,
     val realism: Float
 ) : CustomPacketPayload {
     companion object {
@@ -48,6 +49,7 @@ data class SetConfigurableAnnouncerDataPayload(
                 buf.readFloat(),
                 buf.readBoolean(),
                 buf.readInt(),
+                buf.readUtf(),
                 buf.readUtf(),
                 buf.readFloat()
             )
@@ -67,6 +69,7 @@ data class SetConfigurableAnnouncerDataPayload(
         buf.writeBoolean(reverb)
         buf.writeInt(maxRange)
         buf.writeUtf(jingle)
+        buf.writeUtf(jingleTiming)
         buf.writeFloat(realism)
     }
 }
@@ -212,6 +215,7 @@ object ModNetworkingConfigurable {
                                 payload.reverb,
                                 payload.maxRange,
                                 payload.jingle,
+                                payload.jingleTiming,
                                 payload.realism
                             )
                         }

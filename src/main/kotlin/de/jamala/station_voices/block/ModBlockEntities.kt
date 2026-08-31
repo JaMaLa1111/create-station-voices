@@ -43,6 +43,7 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
     var ttsReverb: Boolean = false
     var ttsMaxRange: Int = 32
     var ttsJingle: String = "OFF"
+    var ttsJingleTiming: String = "BOTH"
     var ttsRealism: Float = 0.0f
 
     var isPlaying: Boolean = false
@@ -71,6 +72,7 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
         tag.putBoolean("TtsReverb", ttsReverb)
         tag.putInt("TtsMaxRange", ttsMaxRange)
         tag.putString("TtsJingle", ttsJingle)
+        tag.putString("TtsJingleTiming", ttsJingleTiming)
         tag.putFloat("TtsRealism", ttsRealism)
     }
 
@@ -85,6 +87,7 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
             if (tag.contains("TtsReverb")) ttsReverb = tag.getBoolean("TtsReverb")
             if (tag.contains("TtsMaxRange")) ttsMaxRange = tag.getInt("TtsMaxRange")
             if (tag.contains("TtsJingle")) ttsJingle = tag.getString("TtsJingle")
+            if (tag.contains("TtsJingleTiming")) ttsJingleTiming = tag.getString("TtsJingleTiming") else ttsJingleTiming = "BOTH"
             if (tag.contains("TtsRealism")) ttsRealism = tag.getFloat("TtsRealism")
         }
     }

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "N": {
+      "item": "minecraft:note_block"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "RRR",
+    "RNR",
+    "RRR"
+  ],
+  "result": {
+    "count": 1,
+    "id": "create_station_voices:announcer_block"
+  }
+}

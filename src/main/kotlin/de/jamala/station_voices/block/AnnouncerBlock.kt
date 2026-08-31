@@ -22,6 +22,7 @@ import thedarkcolour.kotlinforforge.neoforge.forge.runForDist
 import de.jamala.station_voices.ModConfig
 import de.jamala.station_voices.server.PiperManager
 import de.jamala.station_voices.network.PlayAnnouncerAudioDataChunkPayload
+import de.jamala.station_voices.JingleTiming
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,6 +82,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                             be.ttsReverb,
                             be.ttsMaxRange,
                             be.ttsJingle,
+                            be.ttsJingleTiming,
                             be.ttsRealism
                         )
                     },
@@ -125,7 +127,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
             CoroutineScope(Dispatchers.IO).launch {
                 val audioData = PiperManager.generateAudio(be.ttsText, be.ttsVoice, be.ttsLanguage)
                 if (audioData != null) {
-                    val durationMs = calculateWavDurationMs(audioData, be.ttsSpeed, be.ttsReverb, be.ttsJingle)
+                    val durationMs = calculateWavDurationMs(audioData, be.ttsSpeed, be.ttsReverb, be.ttsJingle, be.ttsJingleTiming)
                     be.audioEndTimeMillis = System.currentTimeMillis() + durationMs
 
                     val streamId = UUID.randomUUID()
@@ -144,6 +146,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                             be.ttsReverb,
                             be.ttsMaxRange,
                             be.ttsJingle,
+                            be.ttsJingleTiming,
                             be.ttsRealism,
                             streamId,
                             i,
@@ -171,7 +174,8 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                 }
             }
         } else {
-            val jingleDurationMs = if (be.ttsJingle.equals("DB", ignoreCase = true)) 2 * de.jamala.station_voices.JingleManager.getGongDuration(be.ttsSpeed) else 0L
+            val timing = JingleTiming.fromString(be.ttsJingleTiming)
+            val jingleDurationMs = if (be.ttsJingle.equals("DB", ignoreCase = true)) de.jamala.station_voices.JingleManager.getGongDuration(be.ttsSpeed, timing) else 0L
             val estimatedDurationMs = (be.ttsText.length * 120L / be.ttsSpeed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (be.ttsReverb) 900L else 0L) + jingleDurationMs
             be.audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
@@ -185,6 +189,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                 be.ttsReverb,
                 be.ttsMaxRange,
                 be.ttsJingle,
+                be.ttsJingleTiming,
                 be.ttsRealism
             )
             net.neoforged.neoforge.network.PacketDistributor.sendToPlayersNear(
@@ -199,7 +204,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
         }
     }
 
-    private fun calculateWavDurationMs(audioData: ByteArray, speed: Float, reverb: Boolean, jingle: String): Long {
+    private fun calculateWavDurationMs(audioData: ByteArray, speed: Float, reverb: Boolean, jingle: String, jingleTiming: String = "BOTH"): Long {
         try {
             val bais = java.io.ByteArrayInputStream(audioData)
             val audioIn = javax.sound.sampled.AudioSystem.getAudioInputStream(bais)
@@ -209,7 +214,8 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
             val speedFactor = if (speed > 0.01f) speed.toDouble() else 1.0
             val adjustedMs = ((durationSeconds / speedFactor) * 1000.0).toLong()
             val reverbTailMs = if (reverb) 900L else 0L
-            val jingleMs = if (jingle.equals("DB", ignoreCase = true)) 2 * de.jamala.station_voices.JingleManager.getGongDuration(speed) else 0L
+            val timing = JingleTiming.fromString(jingleTiming)
+            val jingleMs = if (jingle.equals("DB", ignoreCase = true)) de.jamala.station_voices.JingleManager.getGongDuration(speed, timing) else 0L
             return adjustedMs + reverbTailMs + jingleMs
         } catch (e: Exception) {
             return 2000L
