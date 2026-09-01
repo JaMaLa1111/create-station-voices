@@ -33,6 +33,11 @@ TTS lines are generated once when set (via the Preview button) and then cached.
 6. **Auto-Populate Profiles**  
    Automatically detects and populates profiles for all trains scheduled to pass the station.
 
+7. **Speaker Block**  
+   A cheap speaker block that can be linked to already placed announcers and will act as a secondary speaker for the announcer
+
+Additionally beginning with v0.9.0-beta all blocks feature ponder scenes.
+
 ~~Currently all Block textures are missing~~<br>
 Textures and mod logo added in v0.5.0-beta, all textures can become subject to change.
 
@@ -49,8 +54,6 @@ Textures and mod logo added in v0.5.0-beta, all textures can become subject to c
 
 ### Planned features
 - More jingles
-- Ponder scenes
-- A cheap speaker block that can be linked to already placed announcers and will act as a secondary speaker for the announcer
 - A Train-Mounted announcer that will function like a Configurable Announcer but play Audio inside the train when it arrives at a station
 - Display link compatibility (display the  current announcement as text)
 
