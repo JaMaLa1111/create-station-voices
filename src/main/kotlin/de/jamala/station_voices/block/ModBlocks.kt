@@ -19,4 +19,8 @@ object ModBlocks {
     val CONFIGURABLE_ANNOUNCER_BLOCK by REGISTRY.register("configurable_announcer_block") { ->
         ConfigurableAnnouncerBlock(BlockBehaviour.Properties.of().lightLevel { 15 }.strength(3.0f))
     }
+
+    val SPEAKER_BLOCK by REGISTRY.register("speaker_block") { ->
+        SpeakerBlock(BlockBehaviour.Properties.of().lightLevel { 15 }.strength(3.0f))
+    }
 }

@@ -164,6 +164,53 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                             chunkPayload
                         )
                     }
+
+                    val speakers = SpeakerManager.getSpeakersFor(level, pos)
+                    for (speakerPos in speakers) {
+                        val speakerStreamId = UUID.randomUUID()
+                        for (i in 0 until totalChunks) {
+                            val start = i * chunkSize
+                            val end = Math.min(start + chunkSize, audioData.size)
+                            val chunk = audioData.copyOfRange(start, end)
+
+                            val chunkPayload = PlayAnnouncerAudioDataChunkPayload(
+                                speakerPos,
+                                be.ttsSpeed,
+                                be.ttsVolume,
+                                be.ttsReverb,
+                                be.ttsMaxRange,
+                                be.ttsJingle,
+                                be.ttsJingleTiming,
+                                be.ttsRealism,
+                                speakerStreamId,
+                                i,
+                                totalChunks,
+                                chunk
+                            )
+
+                            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersNear(
+                                level as net.minecraft.server.level.ServerLevel,
+                                null,
+                                speakerPos.x + 0.5,
+                                speakerPos.y + 0.5,
+                                speakerPos.z + 0.5,
+                                be.ttsMaxRange.toDouble(),
+                                chunkPayload
+                            )
+                        }
+
+                        (level as? net.minecraft.server.level.ServerLevel)?.server?.execute {
+                            val speakerBe = level.getBlockEntity(speakerPos) as? SpeakerBlockEntity
+                            if (speakerBe != null && speakerBe.linkedAnnouncer == pos) {
+                                speakerBe.isPlaying = true
+                                speakerBe.audioEndTimeMillis = System.currentTimeMillis() + durationMs
+                                val st = level.getBlockState(speakerPos)
+                                if (st.hasProperty(BlockStateProperties.POWERED) && !st.getValue(BlockStateProperties.POWERED)) {
+                                    level.setBlock(speakerPos, st.setValue(BlockStateProperties.POWERED, true), 3)
+                                }
+                            }
+                        }
+                    }
                 } else {
                     be.isPlaying = false
                     val hasSignal = level.hasNeighborSignal(pos)
@@ -183,13 +230,13 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                 pos,
                 be.ttsText, 
                 be.ttsVoice, 
-                be.ttsLanguage,
-                be.ttsSpeed,
-                be.ttsVolume,
-                be.ttsReverb,
-                be.ttsMaxRange,
-                be.ttsJingle,
-                be.ttsJingleTiming,
+                be.ttsLanguage, 
+                be.ttsSpeed, 
+                be.ttsVolume, 
+                be.ttsReverb, 
+                be.ttsMaxRange, 
+                be.ttsJingle, 
+                be.ttsJingleTiming, 
                 be.ttsRealism
             )
             net.neoforged.neoforge.network.PacketDistributor.sendToPlayersNear(
@@ -201,6 +248,42 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                 be.ttsMaxRange.toDouble(), 
                 payload
             )
+
+            val speakers = SpeakerManager.getSpeakersFor(level, pos)
+            for (speakerPos in speakers) {
+                val speakerPayload = de.jamala.station_voices.network.PlayAnnouncerAudioPayload(
+                    speakerPos,
+                    be.ttsText, 
+                    be.ttsVoice, 
+                    be.ttsLanguage, 
+                    be.ttsSpeed, 
+                    be.ttsVolume, 
+                    be.ttsReverb, 
+                    be.ttsMaxRange, 
+                    be.ttsJingle, 
+                    be.ttsJingleTiming, 
+                    be.ttsRealism
+                )
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayersNear(
+                    level as net.minecraft.server.level.ServerLevel, 
+                    null, 
+                    speakerPos.x.toDouble() + 0.5, 
+                    speakerPos.y.toDouble() + 0.5, 
+                    speakerPos.z.toDouble() + 0.5, 
+                    be.ttsMaxRange.toDouble(), 
+                    speakerPayload
+                )
+
+                val speakerBe = level.getBlockEntity(speakerPos) as? SpeakerBlockEntity
+                if (speakerBe != null) {
+                    speakerBe.isPlaying = true
+                    speakerBe.audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
+                    val st = level.getBlockState(speakerPos)
+                    if (st.hasProperty(BlockStateProperties.POWERED) && !st.getValue(BlockStateProperties.POWERED)) {
+                        level.setBlock(speakerPos, st.setValue(BlockStateProperties.POWERED, true), 3)
+                    }
+                }
+            }
         }
     }
 

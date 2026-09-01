@@ -168,6 +168,53 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                                 chunkPayload
                             )
                         }
+
+                        val speakers = SpeakerManager.getSpeakersFor(level, blockPos)
+                        for (speakerPos in speakers) {
+                            val speakerStreamId = UUID.randomUUID()
+                            for (i in 0 until totalChunks) {
+                                val start = i * chunkSize
+                                val end = Math.min(start + chunkSize, audioData.size)
+                                val chunk = audioData.copyOfRange(start, end)
+
+                                val chunkPayload = PlayAnnouncerAudioDataChunkPayload(
+                                    speakerPos,
+                                    profile.speed,
+                                    profile.volume,
+                                    profile.reverb,
+                                    profile.maxRange,
+                                    profile.jingle,
+                                    profile.jingleTiming,
+                                    profile.realism,
+                                    speakerStreamId,
+                                    i,
+                                    totalChunks,
+                                    chunk
+                                )
+
+                                PacketDistributor.sendToPlayersNear(
+                                    level as ServerLevel,
+                                    null,
+                                    speakerPos.x + 0.5,
+                                    speakerPos.y + 0.5,
+                                    speakerPos.z + 0.5,
+                                    profile.maxRange.toDouble(),
+                                    chunkPayload
+                                )
+                            }
+
+                            (level as? ServerLevel)?.server?.execute {
+                                val speakerBe = level.getBlockEntity(speakerPos) as? SpeakerBlockEntity
+                                if (speakerBe != null && speakerBe.linkedAnnouncer == blockPos) {
+                                    speakerBe.isPlaying = true
+                                    speakerBe.audioEndTimeMillis = System.currentTimeMillis() + durationMs
+                                    val st = level.getBlockState(speakerPos)
+                                    if (st.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && !st.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                                        level.setBlock(speakerPos, st.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, true), 3)
+                                    }
+                                }
+                            }
+                        }
                     } else {
                         isPlaying = false
                         val curSt = level.getBlockState(blockPos)
@@ -204,6 +251,42 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                     profile.maxRange.toDouble(),
                     payload
                 )
+
+                val speakers = SpeakerManager.getSpeakersFor(level, blockPos)
+                for (speakerPos in speakers) {
+                    val speakerPayload = PlayAnnouncerAudioPayload(
+                        speakerPos,
+                        profile.text,
+                        profile.voice,
+                        profile.language,
+                        profile.speed,
+                        profile.volume,
+                        profile.reverb,
+                        profile.maxRange,
+                        profile.jingle,
+                        profile.jingleTiming,
+                        profile.realism
+                    )
+                    PacketDistributor.sendToPlayersNear(
+                        level as ServerLevel,
+                        null,
+                        speakerPos.x + 0.5,
+                        speakerPos.y + 0.5,
+                        speakerPos.z + 0.5,
+                        profile.maxRange.toDouble(),
+                        speakerPayload
+                    )
+
+                    val speakerBe = level.getBlockEntity(speakerPos) as? SpeakerBlockEntity
+                    if (speakerBe != null && speakerBe.linkedAnnouncer == blockPos) {
+                        speakerBe.isPlaying = true
+                        speakerBe.audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
+                        val st = level.getBlockState(speakerPos)
+                        if (st.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && !st.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                            level.setBlock(speakerPos, st.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, true), 3)
+                        }
+                    }
+                }
             }
         }
     }

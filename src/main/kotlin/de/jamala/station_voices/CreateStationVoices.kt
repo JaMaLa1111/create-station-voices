@@ -97,6 +97,7 @@ object CreateStationVoices {
      */
     private fun onClientSetup(event: FMLClientSetupEvent) {
         LOGGER.log(Level.INFO, "Initializing client...")
+        net.createmod.ponder.foundation.PonderIndex.addPlugin(de.jamala.station_voices.ponder.ModPonderPlugin())
     }
 
     /**

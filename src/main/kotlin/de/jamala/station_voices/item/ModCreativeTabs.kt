@@ -19,6 +19,7 @@ object ModCreativeTabs {
             .displayItems { _, output ->
                 output.accept(ModItems.ANNOUNCER_BLOCK_ITEM)
                 output.accept(ModItems.CONFIGURABLE_ANNOUNCER_BLOCK_ITEM)
+                output.accept(ModItems.SPEAKER_BLOCK_ITEM)
             }
             .build()
     }

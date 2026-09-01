@@ -32,6 +32,13 @@ object ModBlockEntities {
             ModBlocks.CONFIGURABLE_ANNOUNCER_BLOCK
         ).build(null)
     }
+
+    val SPEAKER_BLOCK_ENTITY by REGISTRY.register("speaker_block") { ->
+        BlockEntityType.Builder.of(
+            ::SpeakerBlockEntity,
+            ModBlocks.SPEAKER_BLOCK
+        ).build(null)
+    }
 }
 
 class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlockEntities.ANNOUNCER_BLOCK_ENTITY, pos, state), IHaveGoggleInformation {

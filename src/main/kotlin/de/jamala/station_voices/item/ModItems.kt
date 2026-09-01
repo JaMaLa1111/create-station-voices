@@ -18,6 +18,10 @@ object ModItems {
         ConfigurableAnnouncerBlockItem(ModBlocks.CONFIGURABLE_ANNOUNCER_BLOCK, Item.Properties())
     }
 
+    val SPEAKER_BLOCK_ITEM by REGISTRY.register("speaker_block") { ->
+        SpeakerBlockItem(ModBlocks.SPEAKER_BLOCK, Item.Properties())
+    }
+
     val TAB_ICON by REGISTRY.register("tab_icon") { ->
         Item(Item.Properties())
     }

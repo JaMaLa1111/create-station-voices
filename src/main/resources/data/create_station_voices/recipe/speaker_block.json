@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": {
+      "item": "create:andesite_alloy"
+    },
+    "N": {
+      "item": "minecraft:note_block"
+    }
+  },
+  "pattern": [
+    " A ",
+    "ANA",
+    " A "
+  ],
+  "result": {
+    "count": 4,
+    "id": "create_station_voices:speaker_block"
+  }
+}

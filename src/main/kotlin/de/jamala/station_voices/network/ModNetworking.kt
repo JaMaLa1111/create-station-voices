@@ -237,6 +237,12 @@ object ModNetworking {
                     if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                         level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
                     }
+                } else if (be is de.jamala.station_voices.block.SpeakerBlockEntity && be.isPlaying) {
+                    be.isPlaying = false
+                    val state = level.getBlockState(pos)
+                    if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
+                        level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
+                    }
                 }
             }
         }
