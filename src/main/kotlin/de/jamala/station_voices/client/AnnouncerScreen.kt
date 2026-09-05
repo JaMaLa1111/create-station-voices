@@ -1,5 +1,6 @@
 package de.jamala.station_voices.client
 
+import de.jamala.station_voices.Jingle
 import de.jamala.station_voices.JingleTiming
 import de.jamala.station_voices.network.SetAnnouncerDataPayload
 import net.minecraft.client.gui.GuiGraphics
@@ -109,10 +110,12 @@ class AnnouncerScreen(
             btn.message = Component.literal("Reverb: ${if (currentReverb) "ON" else "OFF"}")
         }.bounds(centerX - 100, centerY + 12, 95, 20).build())
 
-        jingleBtn = addRenderableWidget(Button.builder(Component.literal("Jingle: ${if (currentJingle.equals("DB", ignoreCase = true)) "DB" else "OFF"}")) { btn ->
-            currentJingle = if (currentJingle.equals("DB", ignoreCase = true)) "OFF" else "DB"
-            btn.message = Component.literal("Jingle: $currentJingle")
-            jingleTimingBtn.active = currentJingle.equals("DB", ignoreCase = true)
+        val initJingle = Jingle.fromString(currentJingle)
+        jingleBtn = addRenderableWidget(Button.builder(Component.literal("Jingle: ${initJingle.displayName}")) { btn ->
+            val next = Jingle.fromString(currentJingle).next()
+            currentJingle = next.id
+            btn.message = Component.literal("Jingle: ${next.displayName}")
+            jingleTimingBtn.active = next != Jingle.OFF
         }.bounds(centerX + 5, centerY + 12, 95, 20).build())
 
         jingleTimingBtn = addRenderableWidget(Button.builder(Component.literal("Jingle Timing: ${JingleTiming.fromString(currentJingleTiming).displayName}")) { btn ->
@@ -165,7 +168,7 @@ class AnnouncerScreen(
         reverbBtn.visible = isEffectsTab
         jingleBtn.visible = isEffectsTab
         jingleTimingBtn.visible = isEffectsTab
-        jingleTimingBtn.active = currentJingle.equals("DB", ignoreCase = true)
+        jingleTimingBtn.active = Jingle.fromString(currentJingle) != Jingle.OFF
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {

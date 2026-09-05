@@ -39,9 +39,16 @@ object ModBlockEntities {
             ModBlocks.SPEAKER_BLOCK
         ).build(null)
     }
+
+    val TRAIN_ANNOUNCER_BLOCK_ENTITY by REGISTRY.register("train_announcer_block") { ->
+        BlockEntityType.Builder.of(
+            ::TrainAnnouncerBlockEntity,
+            ModBlocks.TRAIN_ANNOUNCER_BLOCK
+        ).build(null)
+    }
 }
 
-class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlockEntities.ANNOUNCER_BLOCK_ENTITY, pos, state), IHaveGoggleInformation {
+class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlockEntities.ANNOUNCER_BLOCK_ENTITY, pos, state), IHaveGoggleInformation, IAnnouncerSource {
     var ttsText: String = "Hello"
     var ttsVoice: String = "amy"
     var ttsLanguage: String = "en_US"
@@ -56,12 +63,20 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
     var isPlaying: Boolean = false
     var wasPoweredByRedstone: Boolean = false
     var audioEndTimeMillis: Long = 0L
+    var lastAnnouncementText: String = ""
+
+    override val isPlayingAnnouncement: Boolean
+        get() = isPlaying
+
+    override val currentAnnouncementText: String
+        get() = if (lastAnnouncementText.isNotBlank()) lastAnnouncementText else ttsText
 
     fun tick(level: net.minecraft.world.level.Level, pos: BlockPos, state: BlockState) {
         if (level.isClientSide) return
 
         if (isPlaying && System.currentTimeMillis() >= audioEndTimeMillis) {
             isPlaying = false
+            com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
             val hasSignal = level.hasNeighborSignal(pos)
             if (!hasSignal && state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                 level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
@@ -81,6 +96,7 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
         tag.putString("TtsJingle", ttsJingle)
         tag.putString("TtsJingleTiming", ttsJingleTiming)
         tag.putFloat("TtsRealism", ttsRealism)
+        tag.putString("LastAnnouncementText", lastAnnouncementText)
     }
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
@@ -96,6 +112,9 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
             if (tag.contains("TtsJingle")) ttsJingle = tag.getString("TtsJingle")
             if (tag.contains("TtsJingleTiming")) ttsJingleTiming = tag.getString("TtsJingleTiming") else ttsJingleTiming = "BOTH"
             if (tag.contains("TtsRealism")) ttsRealism = tag.getFloat("TtsRealism")
+        }
+        if (tag.contains("LastAnnouncementText")) {
+            lastAnnouncementText = tag.getString("LastAnnouncementText")
         }
     }
 

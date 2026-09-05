@@ -17,6 +17,7 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
+import de.jamala.station_voices.Jingle
 import de.jamala.station_voices.JingleManager
 import de.jamala.station_voices.JingleTiming
 
@@ -39,18 +40,23 @@ object AudioPlayer {
     
     fun handleAudioChunk(
         pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String, jingleTiming: String, realism: Float,
-        streamId: java.util.UUID, chunkIndex: Int, totalChunks: Int, chunkData: ByteArray
+        streamId: java.util.UUID, chunkIndex: Int, totalChunks: Int, chunkData: ByteArray,
+        entityId: Int? = null
     ) {
         val list = chunkBuffer.getOrPut(streamId) { MutableList(totalChunks) { null } }
         list[chunkIndex] = chunkData
         if (list.all { it != null }) {
             chunkBuffer.remove(streamId)
             val fullData = list.flatMap { it!!.toList() }.toByteArray()
-            playData(pos, speed, volume, reverb, maxRange, fullData, jingle, jingleTiming, realism)
+            playData(pos, speed, volume, reverb, maxRange, fullData, jingle, jingleTiming, realism, entityId)
         }
     }
 
-    private fun playData(pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, wavData: ByteArray, jingle: String = "OFF", jingleTiming: String = "BOTH", realism: Float = 0.0f) {
+    private fun playData(
+        pos: BlockPos?, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, wavData: ByteArray,
+        jingle: String = "OFF", jingleTiming: String = "BOTH", realism: Float = 0.0f,
+        entityId: Int? = null
+    ) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val bais = java.io.ByteArrayInputStream(wavData)
@@ -67,21 +73,22 @@ object AudioPlayer {
                 }
 
                 val audioSegments = mutableListOf<ByteArray>()
-                if (jingle.equals("DB", ignoreCase = true)) {
-                    var gongBytes = JingleManager.getGongBytesForFormat(format)
-                    if (realism > 0.001f && gongBytes.isNotEmpty()) {
-                        gongBytes = RealismFilter.apply(gongBytes, format, realism)
+                val jingleType = Jingle.fromString(jingle)
+                if (jingleType != Jingle.OFF) {
+                    var jingleBytes = JingleManager.getJingleBytesForFormat(jingleType, format)
+                    if (realism > 0.001f && jingleBytes.isNotEmpty()) {
+                        jingleBytes = RealismFilter.apply(jingleBytes, format, realism)
                     }
-                    if (reverb && gongBytes.isNotEmpty()) {
-                        gongBytes = applyReverb(gongBytes, format)
+                    if (reverb && jingleBytes.isNotEmpty()) {
+                        jingleBytes = applyReverb(jingleBytes, format)
                     }
                     val timing = JingleTiming.fromString(jingleTiming)
-                    if ((timing == JingleTiming.BOTH || timing == JingleTiming.BEFORE) && gongBytes.isNotEmpty()) {
-                        audioSegments.add(gongBytes)
+                    if ((timing == JingleTiming.BOTH || timing == JingleTiming.BEFORE) && jingleBytes.isNotEmpty()) {
+                        audioSegments.add(jingleBytes)
                     }
                     audioSegments.add(bytes)
-                    if ((timing == JingleTiming.BOTH || timing == JingleTiming.AFTER) && gongBytes.isNotEmpty()) {
-                        audioSegments.add(gongBytes)
+                    if ((timing == JingleTiming.BOTH || timing == JingleTiming.AFTER) && jingleBytes.isNotEmpty()) {
+                        audioSegments.add(jingleBytes)
                     }
                 } else {
                     audioSegments.add(bytes)
@@ -112,40 +119,89 @@ object AudioPlayer {
                 for (segment in audioSegments) {
                     var offset = 0
                     while (offset < segment.size) {
-                        if (pos != null) {
-                            val player = Minecraft.getInstance().player
-                            val camera = Minecraft.getInstance().gameRenderer.mainCamera
-                            if (player != null && camera.isInitialized) {
-                                val dx = pos.x + 0.5 - camera.position.x
-                                val dy = pos.y + 0.5 - camera.position.y
-                                val dz = pos.z + 0.5 - camera.position.z
-                                val distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
+                        val player = Minecraft.getInstance().player
+                        val camera = Minecraft.getInstance().gameRenderer.mainCamera
+                        val level = Minecraft.getInstance().level
 
-                                val maxRangeD = maxRange.toDouble()
-                                val startFalloff = maxRangeD / 3.0
-                                var volMult = 1.0
-                                if (distance > maxRangeD) {
-                                    volMult = 0.0
-                                } else if (distance > startFalloff) {
-                                    volMult = 1.0 - ((distance - startFalloff) / (maxRangeD - startFalloff))
-                                }
+                        var isInsideTrain = false
+                        var soundSourcePos: net.minecraft.world.phys.Vec3? = pos?.let { net.minecraft.world.phys.Vec3.atCenterOf(it) }
 
-                                if (gainControl != null) {
-                                    val v = (volume * volMult).coerceIn(0.0001, 1.0)
-                                    gainControl.value = (20.0 * Math.log10(v)).toFloat()
-                                }
-
-                                if (panControl != null) {
-                                    val radYaw = Math.toRadians(camera.yRot.toDouble())
-                                    val rightX = -Math.cos(radYaw)
-                                    val rightZ = -Math.sin(radYaw)
-                                    var pan = 0.0
-                                    val horizDist = Math.sqrt(dx * dx + dz * dz)
-                                    if (horizDist > 0.1) {
-                                        pan = (dx * rightX + dz * rightZ) / horizDist
+                        if (entityId != null && level != null) {
+                            val entity = level.getEntity(entityId)
+                            if (entity != null) {
+                                soundSourcePos = entity.position()
+                                if (player != null && entity is com.simibubi.create.content.trains.entity.CarriageContraptionEntity) {
+                                    val train = entity.carriage?.train
+                                    val carriages = train?.carriages ?: listOfNotNull(entity.carriage)
+                                    for (c in carriages) {
+                                        val ce = c.anyAvailableEntity() ?: continue
+                                        if (player.vehicle == ce || player.rootVehicle == ce || ce.passengers.contains(player)) {
+                                            isInsideTrain = true
+                                            break
+                                        }
+                                        if (ce.collidingEntities.containsKey(player)) {
+                                            isInsideTrain = true
+                                            break
+                                        }
+                                        if (ce.boundingBox.inflate(0.5, 1.0, 0.5).contains(player.position())) {
+                                            isInsideTrain = true
+                                            break
+                                        }
+                                        val contraption = ce.contraption
+                                        if (contraption?.bounds != null) {
+                                            val localPos = ce.toLocalVector(player.position(), 0f)
+                                            if (contraption.bounds.inflate(0.5, 1.0, 0.5).contains(localPos)) {
+                                                isInsideTrain = true
+                                                break
+                                            }
+                                        }
                                     }
-                                    panControl.value = pan.toFloat().coerceIn(-1.0f, 1.0f)
+                                } else if (player != null) {
+                                    if (player.vehicle == entity || player.rootVehicle == entity || entity.boundingBox.inflate(2.0).contains(player.position())) {
+                                        isInsideTrain = true
+                                    }
                                 }
+                            }
+                        }
+
+                        if (isInsideTrain) {
+                            if (gainControl != null) {
+                                val v = volume.coerceIn(0.0001f, 1.0f)
+                                gainControl.value = (20.0 * Math.log10(v.toDouble())).toFloat()
+                            }
+                            if (panControl != null) {
+                                panControl.value = 0f
+                            }
+                        } else if (soundSourcePos != null && player != null && camera.isInitialized) {
+                            val dx = soundSourcePos.x - camera.position.x
+                            val dy = soundSourcePos.y - camera.position.y
+                            val dz = soundSourcePos.z - camera.position.z
+                            val distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
+
+                            val maxRangeD = maxRange.toDouble()
+                            val startFalloff = maxRangeD / 3.0
+                            var volMult = 1.0
+                            if (distance > maxRangeD) {
+                                volMult = 0.0
+                            } else if (distance > startFalloff) {
+                                volMult = 1.0 - ((distance - startFalloff) / (maxRangeD - startFalloff))
+                            }
+
+                            if (gainControl != null) {
+                                val v = (volume * volMult).coerceIn(0.0001, 1.0)
+                                gainControl.value = (20.0 * Math.log10(v)).toFloat()
+                            }
+
+                            if (panControl != null) {
+                                val radYaw = Math.toRadians(camera.yRot.toDouble())
+                                val rightX = -Math.cos(radYaw)
+                                val rightZ = -Math.sin(radYaw)
+                                var pan = 0.0
+                                val horizDist = Math.sqrt(dx * dx + dz * dz)
+                                if (horizDist > 0.1) {
+                                    pan = (dx * rightX + dz * rightZ) / horizDist
+                                }
+                                panControl.value = pan.toFloat().coerceIn(-1.0f, 1.0f)
                             }
                         } else {
                             if (gainControl != null) {
@@ -188,12 +244,12 @@ object AudioPlayer {
         }
     }
 
-    fun play(pos: BlockPos?, text: String, voice: String, language: String, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String = "OFF", jingleTiming: String = "BOTH", realism: Float = 0.0f) {
+    fun play(pos: BlockPos?, text: String, voice: String, language: String, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String = "OFF", jingleTiming: String = "BOTH", realism: Float = 0.0f, entityId: Int? = null) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val file = getAudioFile(text, voice, language)
                 if (file.exists()) {
-                    playData(pos, speed, volume, reverb, maxRange, file.readBytes(), jingle, jingleTiming, realism)
+                    playData(pos, speed, volume, reverb, maxRange, file.readBytes(), jingle, jingleTiming, realism, entityId)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

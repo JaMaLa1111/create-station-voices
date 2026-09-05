@@ -28,6 +28,13 @@ object ModPonderScenes {
                 AllCreatePonderTags.REDSTONE
             )
 
+        itemHelper.forComponents(ModBlocks.TRAIN_ANNOUNCER_BLOCK)
+            .addStoryBoard(
+                ResourceLocation.fromNamespaceAndPath("create", "train_station/schedule"),
+                AnnouncerScenes::trainAnnouncer,
+                AllCreatePonderTags.TRAIN_RELATED
+            )
+
         itemHelper.forComponents(ModBlocks.SPEAKER_BLOCK)
             .addStoryBoard(
                 ResourceLocation.fromNamespaceAndPath("create", "redstone_link"),
@@ -35,5 +42,16 @@ object ModPonderScenes {
                 AllCreatePonderTags.REDSTONE,
                 AllCreatePonderTags.TRAIN_RELATED
             )
+
+        itemHelper.forComponents(
+            ModBlocks.ANNOUNCER_BLOCK,
+            ModBlocks.CONFIGURABLE_ANNOUNCER_BLOCK,
+            ModBlocks.SPEAKER_BLOCK
+        ).addStoryBoard(
+            ResourceLocation.fromNamespaceAndPath("create", "display_link"),
+            AnnouncerScenes::displayLink,
+            AllCreatePonderTags.DISPLAY_SOURCES,
+            AllCreatePonderTags.REDSTONE
+        )
     }
 }

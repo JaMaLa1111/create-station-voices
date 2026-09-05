@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
 
-class SpeakerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlockEntities.SPEAKER_BLOCK_ENTITY, pos, state), IHaveGoggleInformation {
+class SpeakerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlockEntities.SPEAKER_BLOCK_ENTITY, pos, state), IHaveGoggleInformation, IAnnouncerSource {
     var linkedAnnouncer: BlockPos? = null
         set(value) {
             val old = field
@@ -27,6 +27,16 @@ class SpeakerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBloc
 
     var isPlaying: Boolean = false
     var audioEndTimeMillis: Long = 0L
+
+    override val isPlayingAnnouncement: Boolean
+        get() = isPlaying
+
+    override val currentAnnouncementText: String
+        get() {
+            val target = linkedAnnouncer ?: return ""
+            val targetBe = level?.getBlockEntity(target) as? IAnnouncerSource ?: return ""
+            return targetBe.currentAnnouncementText
+        }
 
     override fun onLoad() {
         super.onLoad()
@@ -77,6 +87,7 @@ class SpeakerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBloc
                 if (state.hasProperty(BlockStateProperties.POWERED) && state.getValue(BlockStateProperties.POWERED)) {
                     level.setBlock(pos, state.setValue(BlockStateProperties.POWERED, false), 3)
                 }
+                com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
             }
         } else {
             if (state.hasProperty(BlockStateProperties.POWERED) && state.getValue(BlockStateProperties.POWERED)) {

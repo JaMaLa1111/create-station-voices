@@ -38,16 +38,24 @@ data class TrainProfile(
     var maxRange: Int = 32,
     var jingle: String = "OFF",
     var jingleTiming: String = "BOTH",
-    var realism: Float = 0.0f
+    var realism: Float = 0.0f,
+    var contraptionOnly: Boolean = false
 )
 
-class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlockEntities.CONFIGURABLE_ANNOUNCER_BLOCK_ENTITY, pos, state), IHaveGoggleInformation {
+class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlockEntities.CONFIGURABLE_ANNOUNCER_BLOCK_ENTITY, pos, state), IHaveGoggleInformation, IAnnouncerSource {
     var profiles: MutableMap<String, TrainProfile> = mutableMapOf()
     var targetStation: BlockPos? = null
     private var lastPresentTrain: UUID? = null
 
     var isPlaying: Boolean = false
     var audioEndTimeMillis: Long = 0L
+    var lastAnnouncementText: String = ""
+
+    override val isPlayingAnnouncement: Boolean
+        get() = isPlaying
+
+    override val currentAnnouncementText: String
+        get() = lastAnnouncementText
 
     private val gson = Gson()
 
@@ -62,6 +70,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                 if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                     level.setBlock(blockPos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
                 }
+                com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, blockPos)
             }
         } else {
             val state = level.getBlockState(blockPos)
@@ -122,6 +131,9 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
         val profile = profiles[trainName]
         if (profile != null && profile.text.isNotBlank()) {
             isPlaying = true
+            lastAnnouncementText = profile.text
+            setChanged()
+            com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, blockPos)
             val st = level.getBlockState(blockPos)
             if (st.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && !st.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                 level.setBlock(blockPos, st.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, true), 3)
@@ -212,6 +224,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                                     if (st.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && !st.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                                         level.setBlock(speakerPos, st.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, true), 3)
                                     }
+                                    com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, speakerPos)
                                 }
                             }
                         }
@@ -221,11 +234,14 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                         if (curSt.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && curSt.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                             level.setBlock(blockPos, curSt.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
                         }
+                        (level as? ServerLevel)?.server?.execute {
+                            com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, blockPos)
+                        }
                     }
                 }
             } else {
                 val timing = JingleTiming.fromString(profile.jingleTiming)
-                val jingleDurationMs = if (profile.jingle.equals("DB", ignoreCase = true)) de.jamala.station_voices.JingleManager.getGongDuration(profile.speed, timing) else 0L
+                val jingleDurationMs = de.jamala.station_voices.JingleManager.getJingleDuration(profile.jingle, profile.speed, timing)
                 val estimatedDurationMs = (profile.text.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs
                 audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
@@ -285,6 +301,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                         if (st.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && !st.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                             level.setBlock(speakerPos, st.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, true), 3)
                         }
+                        com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, speakerPos)
                     }
                 }
             }
@@ -302,7 +319,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
             val adjustedMs = ((durationSeconds / speedFactor) * 1000.0).toLong()
             val reverbTailMs = if (reverb) 900L else 0L
             val timing = JingleTiming.fromString(jingleTiming)
-            val jingleMs = if (jingle.equals("DB", ignoreCase = true)) de.jamala.station_voices.JingleManager.getGongDuration(speed, timing) else 0L
+            val jingleMs = de.jamala.station_voices.JingleManager.getJingleDuration(jingle, speed, timing)
             return adjustedMs + reverbTailMs + jingleMs
         } catch (e: Exception) {
             return 2000L
@@ -313,6 +330,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
         super.saveAdditional(tag, registries)
         val json = gson.toJson(profiles)
         tag.putString("TrainProfiles", json)
+        tag.putString("LastAnnouncementText", lastAnnouncementText)
         targetStation?.let {
             val stationTag = CompoundTag()
             stationTag.putInt("X", it.x)
@@ -324,6 +342,9 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
 
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
+        if (tag.contains("LastAnnouncementText")) {
+            lastAnnouncementText = tag.getString("LastAnnouncementText")
+        }
         if (tag.contains("TrainProfiles")) {
             val json = tag.getString("TrainProfiles")
             val type = object : TypeToken<MutableMap<String, TrainProfile>>() {}.type

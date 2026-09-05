@@ -22,6 +22,10 @@ object ModItems {
         SpeakerBlockItem(ModBlocks.SPEAKER_BLOCK, Item.Properties())
     }
 
+    val TRAIN_ANNOUNCER_BLOCK_ITEM by REGISTRY.register("train_announcer_block") { ->
+        BlockItem(ModBlocks.TRAIN_ANNOUNCER_BLOCK, Item.Properties())
+    }
+
     val TAB_ICON by REGISTRY.register("tab_icon") { ->
         Item(Item.Properties())
     }

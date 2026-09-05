@@ -123,6 +123,9 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
 
     private fun triggerAudio(level: Level, pos: BlockPos, be: AnnouncerBlockEntity) {
         be.isPlaying = true
+        be.lastAnnouncementText = be.ttsText
+        be.setChanged()
+        com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
         if (ModConfig.SERVER.ttsMode.get() == ModConfig.TtsMode.LOCAL_PIPER) {
             CoroutineScope(Dispatchers.IO).launch {
                 val audioData = PiperManager.generateAudio(be.ttsText, be.ttsVoice, be.ttsLanguage)
@@ -208,6 +211,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                                 if (st.hasProperty(BlockStateProperties.POWERED) && !st.getValue(BlockStateProperties.POWERED)) {
                                     level.setBlock(speakerPos, st.setValue(BlockStateProperties.POWERED, true), 3)
                                 }
+                                com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, speakerPos)
                             }
                         }
                     }
@@ -218,11 +222,14 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                     if (!hasSignal && state.hasProperty(BlockStateProperties.POWERED) && state.getValue(BlockStateProperties.POWERED)) {
                         level.setBlock(pos, state.setValue(BlockStateProperties.POWERED, false), 3)
                     }
+                    (level as? net.minecraft.server.level.ServerLevel)?.server?.execute {
+                        com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
+                    }
                 }
             }
         } else {
             val timing = JingleTiming.fromString(be.ttsJingleTiming)
-            val jingleDurationMs = if (be.ttsJingle.equals("DB", ignoreCase = true)) de.jamala.station_voices.JingleManager.getGongDuration(be.ttsSpeed, timing) else 0L
+            val jingleDurationMs = de.jamala.station_voices.JingleManager.getJingleDuration(be.ttsJingle, be.ttsSpeed, timing)
             val estimatedDurationMs = (be.ttsText.length * 120L / be.ttsSpeed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (be.ttsReverb) 900L else 0L) + jingleDurationMs
             be.audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
@@ -282,6 +289,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
                     if (st.hasProperty(BlockStateProperties.POWERED) && !st.getValue(BlockStateProperties.POWERED)) {
                         level.setBlock(speakerPos, st.setValue(BlockStateProperties.POWERED, true), 3)
                     }
+                    com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, speakerPos)
                 }
             }
         }
@@ -298,7 +306,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
             val adjustedMs = ((durationSeconds / speedFactor) * 1000.0).toLong()
             val reverbTailMs = if (reverb) 900L else 0L
             val timing = JingleTiming.fromString(jingleTiming)
-            val jingleMs = if (jingle.equals("DB", ignoreCase = true)) de.jamala.station_voices.JingleManager.getGongDuration(speed, timing) else 0L
+            val jingleMs = de.jamala.station_voices.JingleManager.getJingleDuration(jingle, speed, timing)
             return adjustedMs + reverbTailMs + jingleMs
         } catch (e: Exception) {
             return 2000L

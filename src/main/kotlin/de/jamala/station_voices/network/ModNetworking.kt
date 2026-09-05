@@ -64,7 +64,8 @@ data class PlayAnnouncerAudioPayload(
     val maxRange: Int,
     val jingle: String,
     val jingleTiming: String,
-    val realism: Float
+    val realism: Float,
+    val entityId: Int? = null
 ) : CustomPacketPayload {
     companion object {
         val ID = CustomPacketPayload.Type<PlayAnnouncerAudioPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "play_announcer_audio"))
@@ -73,7 +74,19 @@ data class PlayAnnouncerAudioPayload(
         fun read(buf: RegistryFriendlyByteBuf): PlayAnnouncerAudioPayload {
             val hasPos = buf.readBoolean()
             val pos = if (hasPos) buf.readBlockPos() else null
-            return PlayAnnouncerAudioPayload(pos, buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt(), buf.readUtf(), buf.readUtf(), buf.readFloat())
+            val text = buf.readUtf()
+            val voice = buf.readUtf()
+            val language = buf.readUtf()
+            val speed = buf.readFloat()
+            val volume = buf.readFloat()
+            val reverb = buf.readBoolean()
+            val maxRange = buf.readInt()
+            val jingle = buf.readUtf()
+            val jingleTiming = buf.readUtf()
+            val realism = buf.readFloat()
+            val hasEntity = buf.readBoolean()
+            val entityId = if (hasEntity) buf.readVarInt() else null
+            return PlayAnnouncerAudioPayload(pos, text, voice, language, speed, volume, reverb, maxRange, jingle, jingleTiming, realism, entityId)
         }
     }
 
@@ -94,6 +107,10 @@ data class PlayAnnouncerAudioPayload(
         buf.writeUtf(jingle)
         buf.writeUtf(jingleTiming)
         buf.writeFloat(realism)
+        buf.writeBoolean(entityId != null)
+        if (entityId != null) {
+            buf.writeVarInt(entityId)
+        }
     }
 }
 
@@ -109,7 +126,8 @@ data class PlayAnnouncerAudioDataChunkPayload(
     val streamId: UUID,
     val chunkIndex: Int,
     val totalChunks: Int,
-    val chunkData: ByteArray
+    val chunkData: ByteArray,
+    val entityId: Int? = null
 ) : CustomPacketPayload {
     companion object {
         val ID = CustomPacketPayload.Type<PlayAnnouncerAudioDataChunkPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "play_announcer_audio_chunk"))
@@ -131,7 +149,9 @@ data class PlayAnnouncerAudioDataChunkPayload(
             val dataLen = buf.readInt()
             val chunkData = ByteArray(dataLen)
             buf.readBytes(chunkData)
-            return PlayAnnouncerAudioDataChunkPayload(pos, speed, volume, reverb, maxRange, jingle, jingleTiming, realism, streamId, chunkIndex, totalChunks, chunkData)
+            val hasEntity = buf.readBoolean()
+            val entityId = if (hasEntity) buf.readVarInt() else null
+            return PlayAnnouncerAudioDataChunkPayload(pos, speed, volume, reverb, maxRange, jingle, jingleTiming, realism, streamId, chunkIndex, totalChunks, chunkData, entityId)
         }
     }
 
@@ -154,6 +174,10 @@ data class PlayAnnouncerAudioDataChunkPayload(
         buf.writeInt(totalChunks)
         buf.writeInt(chunkData.size)
         buf.writeBytes(chunkData)
+        buf.writeBoolean(entityId != null)
+        if (entityId != null) {
+            buf.writeVarInt(entityId)
+        }
     }
 }
 
@@ -231,18 +255,21 @@ object ModNetworking {
                     if (!hasSignal && state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                         level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
                     }
+                    com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
                 } else if (be is de.jamala.station_voices.block.ConfigurableAnnouncerBlockEntity && be.isPlaying) {
                     be.isPlaying = false
                     val state = level.getBlockState(pos)
                     if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                         level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
                     }
+                    com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
                 } else if (be is de.jamala.station_voices.block.SpeakerBlockEntity && be.isPlaying) {
                     be.isPlaying = false
                     val state = level.getBlockState(pos)
                     if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                         level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
                     }
+                    com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
                 }
             }
         }
@@ -260,6 +287,7 @@ object ModNetworking {
                     val blockEntity = level.getBlockEntity(pos)
                     if (blockEntity is AnnouncerBlockEntity) {
                         blockEntity.ttsText = payload.text
+                        blockEntity.lastAnnouncementText = payload.text
                         blockEntity.ttsVoice = payload.voice
                         blockEntity.ttsLanguage = payload.language
                         blockEntity.ttsSpeed = payload.speed
@@ -271,6 +299,7 @@ object ModNetworking {
                         blockEntity.ttsRealism = payload.realism
                         blockEntity.setChanged()
                         level.sendBlockUpdated(pos, blockEntity.blockState, blockEntity.blockState, 3)
+                        com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
                     }
                 }
             }
@@ -350,7 +379,8 @@ object ModNetworking {
                             payload.streamId,
                             payload.chunkIndex,
                             payload.totalChunks,
-                            payload.chunkData
+                            payload.chunkData,
+                            payload.entityId
                         )
                     }
                 }
@@ -373,7 +403,8 @@ object ModNetworking {
                     payload.maxRange,
                     payload.jingle,
                     payload.jingleTiming,
-                    payload.realism
+                    payload.realism,
+                    payload.entityId
                 )
             }
         }

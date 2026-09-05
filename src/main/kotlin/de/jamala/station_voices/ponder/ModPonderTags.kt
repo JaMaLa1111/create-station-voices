@@ -20,6 +20,12 @@ object ModPonderTags {
 
         itemHelper.addToTag(AllCreatePonderTags.TRAIN_RELATED)
             .add(ModBlocks.CONFIGURABLE_ANNOUNCER_BLOCK)
+            .add(ModBlocks.TRAIN_ANNOUNCER_BLOCK)
+            .add(ModBlocks.SPEAKER_BLOCK)
+
+        itemHelper.addToTag(AllCreatePonderTags.DISPLAY_SOURCES)
+            .add(ModBlocks.ANNOUNCER_BLOCK)
+            .add(ModBlocks.CONFIGURABLE_ANNOUNCER_BLOCK)
             .add(ModBlocks.SPEAKER_BLOCK)
     }
 }

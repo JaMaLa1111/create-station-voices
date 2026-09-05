@@ -43,10 +43,22 @@ object ClientHooks {
         Minecraft.getInstance().setScreen(ConfigurableAnnouncerScreen(pos, profilesMap, be.targetStation))
     }
 
+    fun openTrainAnnouncerScreen(entityId: Int?, pos: BlockPos?, localPos: BlockPos?, profiles: MutableMap<String, de.jamala.station_voices.block.TrainProfile>) {
+        val profilesMap = profiles.mapValues { it.value.copy() }.toMutableMap()
+        Minecraft.getInstance().setScreen(TrainAnnouncerScreen(entityId, pos, localPos, profilesMap))
+    }
+
     fun handleAutoFetchResponse(trainNames: List<String>) {
         val screen = Minecraft.getInstance().screen
         if (screen is ConfigurableAnnouncerScreen) {
             screen.handleAutoFetchResponse(trainNames)
+        }
+    }
+
+    fun handleAutoFetchStationsResponse(stationNames: List<String>) {
+        val screen = Minecraft.getInstance().screen
+        if (screen is TrainAnnouncerScreen) {
+            screen.handleAutoFetchResponse(stationNames)
         }
     }
     

@@ -23,4 +23,8 @@ object ModBlocks {
     val SPEAKER_BLOCK by REGISTRY.register("speaker_block") { ->
         SpeakerBlock(BlockBehaviour.Properties.of().lightLevel { 15 }.strength(3.0f))
     }
+
+    val TRAIN_ANNOUNCER_BLOCK by REGISTRY.register("train_announcer_block") { ->
+        TrainAnnouncerBlock(BlockBehaviour.Properties.of().lightLevel { 15 }.strength(3.0f))
+    }
 }
