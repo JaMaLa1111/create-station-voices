@@ -59,7 +59,7 @@
 
 ### Planned features
 
-With `v1.0.0-rc.1` all features I planned are added. If you wish to suggest a feature please create a suggestion in the Discord server.
+With `v1.0.0-rc1` all features I planned are added. If you wish to suggest a feature please create a suggestion in the Discord server.
 
 ---
 
