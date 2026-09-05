@@ -1,4 +1,3 @@
-
 # Create: Station Voices
 
 *A Create addon that brings automated, customizable Text-to-Speech announcements to your railway network.*
@@ -14,23 +13,33 @@
 
 ## Features
 
-* **Dynamic TTS ([Piper TTS](https://github.com/rhasspy/piper))**Voices can be downloaded on-demand to minimize the mod's file size.
+* **Dynamic TTS ([Piper TTS](https://github.com/rhasspy/piper))**  
+  Voices can be downloaded on-demand to minimize the mod's file size.
   TTS lines are generated once when set (via the Preview button) and then cached.
   Open the voice manager GUI in-game (requires OP 2 or higher) using: `/create_station_voices piper_models`
-* **Redstone Announcer Block**Plays a set text-to-speech announcement whenever it receives a redstone signal.
-* **Train Announcer Block**Links to either a **Train Station** or a **Train Observer**. It supports multiple profiles for different trains, triggering the announcement when a train arrives or passes by.
-* **Custom Audio Effects**Configure audio directly per announcer block/profile:
-  - Pitch & Speed
-  - Volume
-  - Audible Range (1-64 blocks)
-  - A realism slider (noticeably reduces the quality of the announcement to be more in-line with real-world station announcements)
-  - Jingles can be turned on in the effects menu, the selected jingle will play either before, after or before and after the announcement depending on the selected option. Supported jingles include DB Gong, SNCF, NS, and UK chime.
-* **Audio Falloff**Announcements feature natural sound falloff (volume begins to decrease after one-third of the max range).
-* **Auto-Populate Profiles**Automatically detects and populates profiles for all trains scheduled to pass the station.
-* **Speaker Block**A cheap speaker block that can be linked to already placed announcers and will act as a secondary speaker for the announcer
-* **Display Link Compatibility**Use a display link to automatically read active announcements from announcer blocks and display them on display boards, nixie tubes, signs and more.
+* **Redstone Announcer Block**  
+  Plays a set text-to-speech announcement whenever it receives a redstone signal.
+* **Train Announcer Block**  
+  Links to either a **Train Station** or a **Train Observer**. It supports multiple profiles for different trains, triggering the announcement when a train arrives or passes by.
+* **Custom Audio Effects**  
+  Configure audio directly per announcer block/profile:
+    - Pitch & Speed
+    - Volume
+    - Audible Range (1-64 blocks)
+    - A realism slider (noticeably reduces the quality of the announcement to be more in-line with real-world station announcements)
+    - Jingles can be turned on in the effects menu, the selected jingle will play either before, after or before and after the announcement depending on the selected option. Supported jingles include DB Gong, SNCF, NS, and UK chime.
+* **Audio Falloff**  
+  Announcements feature natural sound falloff (volume begins to decrease after one-third of the max range).
+* **Auto-Populate Profiles**  
+  Automatically detects and populates profiles for all trains scheduled to pass the station.
+* **Speaker Block**  
+  A cheap speaker block that can be linked to already placed announcers and will act as a secondary speaker for the announcer
+* **Display Link Compatibility**  
+  Use a display link to automatically read active announcements from announcer blocks and display them on display boards, nixie tubes, signs and more.
 * **In-Game Documentation**
   Beginning with v0.9.0-beta, all blocks feature in-game Ponder scenes to help you set them up.
+* **Train-Mounted Announcer**  
+  A announcer block that can be mounted on a train. It functions like the configurable announcer but has profiles for each station the train passes. It can be configured to only broadcast the announcement to either all players in range or only to players riding the train.
 
 *(Note: While textures and a mod logo were added in v0.5.0-beta, all visuals are subject to change as development continues).*
 
