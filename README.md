@@ -32,7 +32,7 @@
 * **In-Game Documentation**
   Beginning with v0.9.0-beta, all blocks feature in-game Ponder scenes to help you set them up.
 * **Train-Mounted Announcer**  
-  A announcer block that can be mounted on a train. It functions liek the configurable announcer but has profiles for each station the train passes. It can be configured to only broadcast the announcement to either all players in range or only to players riding the train.
+  A announcer block that can be mounted on a train. It functions like the configurable announcer but has profiles for each station the train passes. It can be configured to only broadcast the announcement to either all players in range or only to players riding the train.
 
 *(Note: While textures and a mod logo were added in v0.5.0-beta, all visuals are subject to change as development continues).*
 
