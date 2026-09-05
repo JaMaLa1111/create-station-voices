@@ -95,7 +95,8 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                 }
             }
         } else if (targetBe is TrackObserverBlockEntity) {
-            val trainId = targetBe.passingTrainUUID
+            val observer = targetBe.observer ?: targetBe.edgePoint?.createEdgePoint()
+            val trainId = observer?.currentTrain ?: targetBe.passingTrainUUID
             if (trainId != null) {
                 if (lastPresentTrain != trainId) {
                     lastPresentTrain = trainId
@@ -126,12 +127,39 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
         return true
     }
 
+    fun findProfile(trainName: String): TrainProfile? {
+        val trimmed = trainName.trim()
+        profiles[trimmed]?.let { return it }
+        profiles.entries.find { it.key.trim().equals(trimmed, ignoreCase = true) }?.value?.let { return it }
+        for ((key, profile) in profiles) {
+            val k = key.trim()
+            if (k == "*" || k.equals("default", ignoreCase = true) || k.equals("all", ignoreCase = true)) {
+                continue
+            }
+            try {
+                if (trimmed.matches(Regex(k, RegexOption.IGNORE_CASE))) {
+                    return profile
+                }
+            } catch (_: Exception) {}
+        }
+        for ((key, profile) in profiles) {
+            val k = key.trim()
+            if (k == "*" || k.equals("default", ignoreCase = true) || k.equals("all", ignoreCase = true)) {
+                return profile
+            }
+        }
+        return null
+    }
+
     private fun playTrainAudio(trainName: String) {
         val level = level ?: return
-        val profile = profiles[trainName]
+        val profile = findProfile(trainName)
         if (profile != null && profile.text.isNotBlank()) {
+            val announcementText = profile.text
+                .replace("{train}", trainName, ignoreCase = true)
+                .replace("{name}", trainName, ignoreCase = true)
             isPlaying = true
-            lastAnnouncementText = profile.text
+            lastAnnouncementText = announcementText
             setChanged()
             com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, blockPos)
             val st = level.getBlockState(blockPos)
@@ -141,7 +169,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
 
             if (ModConfig.SERVER.ttsMode.get() == ModConfig.TtsMode.LOCAL_PIPER) {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val audioData = PiperManager.generateAudio(profile.text, profile.voice, profile.language)
+                    val audioData = PiperManager.generateAudio(announcementText, profile.voice, profile.language)
                     if (audioData != null) {
                         val durationMs = calculateWavDurationMs(audioData, profile.speed, profile.reverb, profile.jingle, profile.jingleTiming)
                         audioEndTimeMillis = System.currentTimeMillis() + durationMs
@@ -242,12 +270,12 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
             } else {
                 val timing = JingleTiming.fromString(profile.jingleTiming)
                 val jingleDurationMs = de.jamala.station_voices.JingleManager.getJingleDuration(profile.jingle, profile.speed, timing)
-                val estimatedDurationMs = (profile.text.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs
+                val estimatedDurationMs = (announcementText.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs
                 audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
                 val payload = PlayAnnouncerAudioPayload(
                     blockPos,
-                    profile.text,
+                    announcementText,
                     profile.voice,
                     profile.language,
                     profile.speed,
@@ -272,7 +300,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                 for (speakerPos in speakers) {
                     val speakerPayload = PlayAnnouncerAudioPayload(
                         speakerPos,
-                        profile.text,
+                        announcementText,
                         profile.voice,
                         profile.language,
                         profile.speed,

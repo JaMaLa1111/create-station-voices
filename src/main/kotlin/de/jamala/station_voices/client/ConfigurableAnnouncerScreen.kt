@@ -17,6 +17,7 @@ import net.minecraft.network.chat.Component
 import net.neoforged.neoforge.network.PacketDistributor
 import com.simibubi.create.CreateClient
 import com.simibubi.create.content.trains.station.StationBlockEntity
+import com.simibubi.create.content.trains.observer.TrackObserverBlockEntity
 import com.simibubi.create.content.trains.schedule.destination.DestinationInstruction
 
 class ConfigurableAnnouncerScreen(
@@ -93,8 +94,9 @@ class ConfigurableAnnouncerScreen(
             autoPopulateTrains()
         }.bounds(leftX + 77, height - 30, 73, 20).build())
 
-        val isLinkedToStation = targetStation != null && (minecraft?.level?.getBlockEntity(targetStation) is StationBlockEntity)
-        autoPopulateBtn.active = isLinkedToStation
+        val targetBe = targetStation?.let { minecraft?.level?.getBlockEntity(it) }
+        val isLinked = targetStation != null && (targetBe == null || targetBe is StationBlockEntity || targetBe is TrackObserverBlockEntity)
+        autoPopulateBtn.active = isLinked
 
         // Right Panel
         textBox = EditBox(font, rightX, centerY - 52, 200, 20, Component.literal("Text"))

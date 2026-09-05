@@ -13,6 +13,7 @@ import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
 import net.neoforged.neoforge.network.PacketDistributor
 import com.simibubi.create.content.trains.station.StationBlockEntity
+import com.simibubi.create.content.trains.observer.TrackObserverBlockEntity
 import com.simibubi.create.content.trains.schedule.destination.DestinationInstruction
 import net.minecraft.server.level.ServerPlayer
 import kotlinx.coroutines.CoroutineScope
@@ -310,42 +311,58 @@ object ModNetworkingConfigurable {
                 if (player.distanceToSqr(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5) < 64) {
                     val be = level.getBlockEntity(pos) as? ConfigurableAnnouncerBlockEntity ?: return@enqueueWork
                     val targetPos = be.targetStation ?: return@enqueueWork
-                    val targetBe = level.getBlockEntity(targetPos) as? StationBlockEntity ?: return@enqueueWork
+                    val targetBe = level.getBlockEntity(targetPos) ?: return@enqueueWork
                     
-                    val station = targetBe.station ?: return@enqueueWork
-                    val stationName = station.name ?: return@enqueueWork
-
                     val foundTrains = mutableSetOf<String>()
-                    
-                    val presentTrain = station.presentTrain
-                    if (presentTrain != null) {
-                        val tName = presentTrain.name.string
-                        if (tName.isNotBlank()) foundTrains.add(tName)
-                    }
 
-                    val trains = com.simibubi.create.Create.RAILWAYS.trains.values
-                    for (train in trains) {
-                        val schedule = train.runtime?.schedule ?: continue
-                        var stopsHere = false
-                        for (entry in schedule.entries) {
-                            val instruction = entry.instruction
-                            if (instruction is DestinationInstruction) {
-                                val regexStr = instruction.filterForRegex
-                                try {
-                                    if (stationName.matches(Regex(regexStr, RegexOption.IGNORE_CASE))) {
-                                        stopsHere = true
-                                        break
-                                    }
-                                } catch (e: Exception) {
-                                    if (stationName.equals(instruction.filter, ignoreCase = true)) {
-                                        stopsHere = true
-                                        break
+                    if (targetBe is StationBlockEntity) {
+                        val station = targetBe.station ?: return@enqueueWork
+                        val stationName = station.name ?: return@enqueueWork
+
+                        val presentTrain = station.presentTrain
+                        if (presentTrain != null) {
+                            val tName = presentTrain.name.string.trim()
+                            if (tName.isNotBlank()) foundTrains.add(tName)
+                        }
+
+                        val trains = com.simibubi.create.Create.RAILWAYS.trains.values
+                        for (train in trains) {
+                            val schedule = train.runtime?.schedule ?: continue
+                            var stopsHere = false
+                            for (entry in schedule.entries) {
+                                val instruction = entry.instruction
+                                if (instruction is DestinationInstruction) {
+                                    val regexStr = instruction.filterForRegex
+                                    try {
+                                        if (stationName.matches(Regex(regexStr, RegexOption.IGNORE_CASE))) {
+                                            stopsHere = true
+                                            break
+                                        }
+                                    } catch (e: Exception) {
+                                        if (stationName.equals(instruction.filter, ignoreCase = true)) {
+                                            stopsHere = true
+                                            break
+                                        }
                                     }
                                 }
                             }
+                            if (stopsHere) {
+                                val tName = train.name.string.trim()
+                                if (tName.isNotBlank()) foundTrains.add(tName)
+                            }
                         }
-                        if (stopsHere) {
-                            val tName = train.name.string
+                    } else if (targetBe is TrackObserverBlockEntity) {
+                        val observer = targetBe.observer ?: targetBe.edgePoint?.createEdgePoint()
+                        val passingId = observer?.currentTrain ?: targetBe.passingTrainUUID
+                        if (passingId != null) {
+                            val train = com.simibubi.create.Create.RAILWAYS.trains[passingId]
+                            if (train != null) {
+                                val tName = train.name.string.trim()
+                                if (tName.isNotBlank()) foundTrains.add(tName)
+                            }
+                        }
+                        for (train in com.simibubi.create.Create.RAILWAYS.trains.values) {
+                            val tName = train.name.string.trim()
                             if (tName.isNotBlank()) foundTrains.add(tName)
                         }
                     }

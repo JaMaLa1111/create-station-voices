@@ -58,6 +58,115 @@ class TrainAnnouncerTest {
     }
 
     @Test
+    fun testConfigurableAnnouncerFindProfileWildcardAndPlaceholders() {
+        val profiles = mutableMapOf(
+            "Express" to TrainProfile(text = "The {train} is arriving"),
+            "*" to TrainProfile(text = "Attention: Train {train} is passing by without stopping")
+        )
+
+        fun findConfigurableProfile(trainName: String): TrainProfile? {
+            val trimmed = trainName.trim()
+            profiles[trimmed]?.let { return it }
+            profiles.entries.find { it.key.trim().equals(trimmed, ignoreCase = true) }?.value?.let { return it }
+            for ((key, profile) in profiles) {
+                val k = key.trim()
+                if (k == "*" || k.equals("default", ignoreCase = true) || k.equals("all", ignoreCase = true)) {
+                    continue
+                }
+                try {
+                    if (trimmed.matches(Regex(k, RegexOption.IGNORE_CASE))) {
+                        return profile
+                    }
+                } catch (_: Exception) {}
+            }
+            for ((key, profile) in profiles) {
+                val k = key.trim()
+                if (k == "*" || k.equals("default", ignoreCase = true) || k.equals("all", ignoreCase = true)) {
+                    return profile
+                }
+            }
+            return null
+        }
+
+        // Exact match takes priority over wildcard
+        val expressProfile = findConfigurableProfile("Express")
+        assertNotNull(expressProfile)
+        assertEquals("The {train} is arriving", expressProfile?.text)
+        val expressText = expressProfile!!.text.replace("{train}", "Express", ignoreCase = true)
+        assertEquals("The Express is arriving", expressText)
+
+        // Case-insensitive match takes priority over wildcard
+        val expressLowerProfile = findConfigurableProfile("express")
+        assertNotNull(expressLowerProfile)
+        assertEquals("The {train} is arriving", expressLowerProfile?.text)
+
+        // Unknown train falls back to wildcard
+        val cargoProfile = findConfigurableProfile("Heavy Freight 42")
+        assertNotNull(cargoProfile)
+        assertEquals("Attention: Train {train} is passing by without stopping", cargoProfile?.text)
+        val cargoText = cargoProfile!!.text.replace("{train}", "Heavy Freight 42", ignoreCase = true)
+        assertEquals("Attention: Train Heavy Freight 42 is passing by without stopping", cargoText)
+    }
+
+    @Test
+    fun testObserverDetectionLogic() {
+        // Simulates the observer detection mechanism
+        val trainAId = java.util.UUID.randomUUID()
+        val trainBId = java.util.UUID.randomUUID()
+        val trainNames = mutableMapOf(
+            trainAId to "Regional Express",
+            trainBId to "Freight Carrier"
+        )
+
+        var lastPresentTrain: java.util.UUID? = null
+        val playedAnnouncements = mutableListOf<String>()
+
+        fun onObserverTick(currentTrainId: java.util.UUID?) {
+            val trainId = currentTrainId
+            if (trainId != null) {
+                if (lastPresentTrain != trainId) {
+                    lastPresentTrain = trainId
+                    val trainName = trainNames[trainId]
+                    if (trainName != null) {
+                        playedAnnouncements.add(trainName)
+                    }
+                }
+            } else {
+                lastPresentTrain = null
+            }
+        }
+
+        // Tick 1: Train A enters observer
+        onObserverTick(trainAId)
+        assertEquals(1, playedAnnouncements.size)
+        assertEquals("Regional Express", playedAnnouncements.last())
+
+        // Tick 2-5: Train A is still passing over observer
+        onObserverTick(trainAId)
+        onObserverTick(trainAId)
+        onObserverTick(trainAId)
+        assertEquals(1, playedAnnouncements.size, "Should not re-trigger while train is still passing")
+
+        // Tick 6: Train A leaves observer (currentTrain becomes null)
+        onObserverTick(null)
+        assertNull(lastPresentTrain)
+        assertEquals(1, playedAnnouncements.size)
+
+        // Tick 7: Train B arrives
+        onObserverTick(trainBId)
+        assertEquals(2, playedAnnouncements.size)
+        assertEquals("Freight Carrier", playedAnnouncements.last())
+
+        // Tick 8: Train B leaves
+        onObserverTick(null)
+
+        // Tick 9: Train A returns (same train as earlier)
+        onObserverTick(trainAId)
+        assertEquals(3, playedAnnouncements.size)
+        assertEquals("Regional Express", playedAnnouncements.last())
+    }
+
+    @Test
     fun testJsonSerializationPersistence() {
         val gson = Gson()
         val originalProfiles = mutableMapOf(
