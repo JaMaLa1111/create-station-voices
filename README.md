@@ -14,7 +14,9 @@
 
 ## Showcase
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/mjXGIBDxG-A?si=rHulz6MoXT-E3EJg" title="Showcase" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=mjXGIBDxG-A" target="_blank">
+  <img src="https://img.youtube.com/vi/mjXGIBDxG-A/maxresdefault.jpg" alt="Watch the video" width="400" />
+</a>
 
 ## Features
 

@@ -11,6 +11,10 @@
 [![CurseForge](https://img.shields.io/badge/CurseForge-Download-F16436?style=for-the-badge&logo=curseforge)](https://www.curseforge.com/minecraft/mc-mods/create-station-voices)
 [![GitHub](https://img.shields.io/badge/GitHub-Source-181717?style=for-the-badge&logo=github)](https://github.com/JaMaLa1111/create-station-voices)
 
+## Showcase
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/mjXGIBDxG-A" title="Showcase" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
 ## Features
 
 * **Dynamic TTS ([Piper TTS](https://github.com/rhasspy/piper))**  
