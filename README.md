@@ -74,7 +74,7 @@ With `v1.0.0-rc1` all features I planned are added. If you wish to suggest a fea
 ### Getting Started
 
 1. Download the latest version of the mod from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/create-station-voices) or [GitHub](https://github.com/JaMaLa1111/create-station-voices/releases) (If you downloaded the .jar file instead of using a modpack, place it in your `mods` folder)
-2. Launch Minecraft with NeoForge 21.1.219+ and Create 6.0+ installed
+2. Launch Minecraft with NeoForge 21.1.219+, KotlinForForge and Create 6.0+ installed
 3. Open the in-game voice manager GUI using `/create_station_voices piper_models` to download voice models
 4. Place a Redstone Announcer or Train Announcer block and configure it to your liking
 5. For more information, check out the in-game Ponder scenes for each block.
@@ -98,6 +98,7 @@ With `v1.0.0-rc1` all features I planned are added. If you wish to suggest a fea
 
 - **Minecraft:** `1.21.1`
 - **NeoForge:** `21.1.219+`
+- **KotlinForForge (NeoForge version)**
 - **Create:** `6.0+`
 
 ---
@@ -114,5 +115,5 @@ This mod is provided under a **Custom License**. Please see the [`LICENSE.txt`](
 ### Third-Party Credits
 
 * **[Piper TTS](https://github.com/rhasspy/piper):** Bundled under the MIT License (Copyright © 2023 Michael Hansen / Rhasspy).
-* **[KotlinForNeoforge](https://github.com/thedarkcolour/KotlinForForge):** Portions derived from this project, licensed under the MIT License (Copyright © 2020 TheDarkColour).
+* **[KotlinForForge](https://github.com/thedarkcolour/KotlinForForge):** Portions derived from this project, licensed under the MIT License (Copyright © 2020 TheDarkColour).
 * **Voice Models:** Downloaded voice models are not bundled with the mod, are not covered by this mod's license, and belong to their respective creators under various licenses (e.g., Creative Commons). Proper attribution for these models is displayed within the in-game UI.
