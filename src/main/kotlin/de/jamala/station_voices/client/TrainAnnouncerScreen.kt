@@ -65,7 +65,7 @@ class TrainAnnouncerScreen(
         addRenderableWidget(newStationBox)
 
         addStationBtn = addRenderableWidget(Button.builder(Component.literal("Add")) { _ ->
-            val name = newStationBox.value.trim()
+            val name = de.jamala.station_voices.TextSanitizer.sanitizeLabel(newStationBox.value)
             if (name.isNotBlank() && !profiles.containsKey(name)) {
                 profiles[name] = TrainProfile()
                 stationList.updateItems(profiles.keys.toList())
@@ -159,9 +159,15 @@ class TrainAnnouncerScreen(
         genBtn = addRenderableWidget(Button.builder(Component.literal("Generate & Preview")) { _ ->
             val profile = selectedStation?.let { profiles[it] }
             if (profile != null && profile.text.isNotBlank()) {
-                PacketDistributor.sendToServer(de.jamala.station_voices.network.RequestPreviewAudioPayload(
-                    profile.text, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.jingleTiming, profile.realism
-                ))
+                val previewText = de.jamala.station_voices.TextSanitizer.sanitize(
+                    profile.text.replace("{station}", selectedStation ?: "", ignoreCase = true).replace("{name}", selectedStation ?: "", ignoreCase = true),
+                    profile.language
+                )
+                if (previewText.isNotBlank()) {
+                    PacketDistributor.sendToServer(de.jamala.station_voices.network.RequestPreviewAudioPayload(
+                        previewText, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.jingleTiming, profile.realism
+                    ))
+                }
             }
         }.bounds(rightX, centerY + 58, 200, 20).build())
 
@@ -204,7 +210,15 @@ class TrainAnnouncerScreen(
     }
 
     private fun saveAndClose() {
-        val json = gson.toJson(profiles)
+        val map = mutableMapOf<String, TrainProfile>()
+        for ((key, profile) in profiles) {
+            val safeKey = de.jamala.station_voices.TextSanitizer.sanitizeLabel(key)
+            if (safeKey.isNotBlank()) {
+                profile.text = de.jamala.station_voices.TextSanitizer.sanitizeTemplate(profile.text, profile.language)
+                map[safeKey] = profile
+            }
+        }
+        val json = gson.toJson(map)
         PacketDistributor.sendToServer(SaveTrainAnnouncerProfilesPayload(pos, entityId, localPos, json))
         onClose()
     }

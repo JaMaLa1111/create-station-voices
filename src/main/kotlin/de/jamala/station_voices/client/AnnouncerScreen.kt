@@ -127,7 +127,8 @@ class AnnouncerScreen(
         // Common
         genBtn = addRenderableWidget(Button.builder(Component.literal("Generate & Preview")) { _ ->
             de.jamala.station_voices.client.ClientHooks.testAL()
-            val text = textBox.value
+            val text = de.jamala.station_voices.TextSanitizer.sanitize(textBox.value, currentLanguage)
+            textBox.value = text
             if (text.isNotBlank()) {
                 PacketDistributor.sendToServer(de.jamala.station_voices.network.RequestPreviewAudioPayload(
                     text, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange, currentJingle, currentJingleTiming, currentRealism
@@ -141,7 +142,8 @@ class AnnouncerScreen(
         }.bounds(centerX - 100, centerY + 81, 95, 20).build())
 
         doneBtn = addRenderableWidget(Button.builder(Component.literal("Done")) { _ ->
-            currentText = textBox.value
+            currentText = de.jamala.station_voices.TextSanitizer.sanitize(textBox.value, currentLanguage)
+            textBox.value = currentText
             PacketDistributor.sendToServer(SetAnnouncerDataPayload(pos, currentText, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange, currentJingle, currentJingleTiming, currentRealism))
             onClose()
         }.bounds(centerX + 5, centerY + 81, 95, 20).build())

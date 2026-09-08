@@ -155,9 +155,15 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
         val level = level ?: return
         val profile = findProfile(trainName)
         if (profile != null && profile.text.isNotBlank()) {
-            val announcementText = profile.text
-                .replace("{train}", trainName, ignoreCase = true)
-                .replace("{name}", trainName, ignoreCase = true)
+            val cleanTrainName = de.jamala.station_voices.TextSanitizer.sanitizeLabel(trainName)
+            val announcementText = de.jamala.station_voices.TextSanitizer.sanitize(
+                profile.text
+                    .replace("{train}", cleanTrainName, ignoreCase = true)
+                    .replace("{name}", cleanTrainName, ignoreCase = true),
+                profile.language
+            )
+            if (!de.jamala.station_voices.TextSanitizer.isSpeakable(announcementText)) return
+
             isPlaying = true
             lastAnnouncementText = announcementText
             setChanged()

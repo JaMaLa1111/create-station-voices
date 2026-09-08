@@ -286,8 +286,9 @@ object ModNetworking {
                 if (player.distanceToSqr(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5) < 64) {
                     val blockEntity = level.getBlockEntity(pos)
                     if (blockEntity is AnnouncerBlockEntity) {
-                        blockEntity.ttsText = payload.text
-                        blockEntity.lastAnnouncementText = payload.text
+                        val sanitized = de.jamala.station_voices.TextSanitizer.sanitize(payload.text, payload.language)
+                        blockEntity.ttsText = sanitized
+                        blockEntity.lastAnnouncementText = sanitized
                         blockEntity.ttsVoice = payload.voice
                         blockEntity.ttsLanguage = payload.language
                         blockEntity.ttsSpeed = payload.speed
@@ -310,10 +311,11 @@ object ModNetworking {
             RequestPreviewAudioPayload.STREAM_CODEC
         ) { payload, context ->
             val player = context.player() as net.minecraft.server.level.ServerPlayer
+            val sanitizedText = de.jamala.station_voices.TextSanitizer.sanitize(payload.text, payload.language)
             
             if (de.jamala.station_voices.ModConfig.SERVER.ttsMode.get() == de.jamala.station_voices.ModConfig.TtsMode.LOCAL_PIPER) {
                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                    val audioData = de.jamala.station_voices.server.PiperManager.generateAudio(payload.text, payload.voice, payload.language)
+                    val audioData = de.jamala.station_voices.server.PiperManager.generateAudio(sanitizedText, payload.voice, payload.language)
                     if (audioData != null) {
                         val streamId = UUID.randomUUID()
                         val chunkSize = 30000
@@ -345,7 +347,7 @@ object ModNetworking {
             } else {
                 val outPayload = PlayAnnouncerAudioPayload(
                     null, // preview implies no position
-                    payload.text,
+                    sanitizedText,
                     payload.voice,
                     payload.language,
                     payload.speed,

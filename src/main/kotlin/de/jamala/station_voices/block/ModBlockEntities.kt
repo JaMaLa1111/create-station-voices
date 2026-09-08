@@ -102,9 +102,9 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
     override fun loadAdditional(tag: CompoundTag, registries: HolderLookup.Provider) {
         super.loadAdditional(tag, registries)
         if (tag.contains("TtsText")) {
-            ttsText = tag.getString("TtsText")
             ttsVoice = tag.getString("TtsVoice")
             ttsLanguage = tag.getString("TtsLanguage")
+            ttsText = de.jamala.station_voices.TextSanitizer.sanitize(tag.getString("TtsText"), ttsLanguage)
             if (tag.contains("TtsSpeed")) ttsSpeed = tag.getFloat("TtsSpeed")
             if (tag.contains("TtsVolume")) ttsVolume = tag.getFloat("TtsVolume")
             if (tag.contains("TtsReverb")) ttsReverb = tag.getBoolean("TtsReverb")

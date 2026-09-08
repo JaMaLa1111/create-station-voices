@@ -122,13 +122,18 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
     }
 
     private fun triggerAudio(level: Level, pos: BlockPos, be: AnnouncerBlockEntity) {
+        val safeText = de.jamala.station_voices.TextSanitizer.sanitize(be.ttsText, be.ttsLanguage)
+        if (!de.jamala.station_voices.TextSanitizer.isSpeakable(safeText)) {
+            be.isPlaying = false
+            return
+        }
         be.isPlaying = true
-        be.lastAnnouncementText = be.ttsText
+        be.lastAnnouncementText = safeText
         be.setChanged()
         com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
         if (ModConfig.SERVER.ttsMode.get() == ModConfig.TtsMode.LOCAL_PIPER) {
             CoroutineScope(Dispatchers.IO).launch {
-                val audioData = PiperManager.generateAudio(be.ttsText, be.ttsVoice, be.ttsLanguage)
+                val audioData = PiperManager.generateAudio(safeText, be.ttsVoice, be.ttsLanguage)
                 if (audioData != null) {
                     val durationMs = calculateWavDurationMs(audioData, be.ttsSpeed, be.ttsReverb, be.ttsJingle, be.ttsJingleTiming)
                     be.audioEndTimeMillis = System.currentTimeMillis() + durationMs
@@ -230,12 +235,12 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
         } else {
             val timing = JingleTiming.fromString(be.ttsJingleTiming)
             val jingleDurationMs = de.jamala.station_voices.JingleManager.getJingleDuration(be.ttsJingle, be.ttsSpeed, timing)
-            val estimatedDurationMs = (be.ttsText.length * 120L / be.ttsSpeed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (be.ttsReverb) 900L else 0L) + jingleDurationMs
+            val estimatedDurationMs = (safeText.length * 120L / be.ttsSpeed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (be.ttsReverb) 900L else 0L) + jingleDurationMs
             be.audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
             val payload = de.jamala.station_voices.network.PlayAnnouncerAudioPayload(
                 pos,
-                be.ttsText, 
+                safeText, 
                 be.ttsVoice, 
                 be.ttsLanguage, 
                 be.ttsSpeed, 
@@ -260,7 +265,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
             for (speakerPos in speakers) {
                 val speakerPayload = de.jamala.station_voices.network.PlayAnnouncerAudioPayload(
                     speakerPos,
-                    be.ttsText, 
+                    safeText, 
                     be.ttsVoice, 
                     be.ttsLanguage, 
                     be.ttsSpeed, 

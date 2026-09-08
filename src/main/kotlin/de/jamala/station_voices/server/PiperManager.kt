@@ -1,6 +1,9 @@
 package de.jamala.station_voices.server
 
 import de.jamala.station_voices.CreateStationVoices
+import de.jamala.station_voices.TextSanitizer
+import de.jamala.station_voices.VoiceModelInfo
+import com.google.gson.JsonParser
 import io.github.jvoiceproject.piperjni.PiperJNI
 import io.github.jvoiceproject.piperjni.PiperVoice
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +13,7 @@ import kotlinx.coroutines.withContext
 import net.neoforged.fml.loading.FMLPaths
 import java.io.File
 import java.io.FileOutputStream
+import java.io.FileReader
 import java.net.HttpURLConnection
 import java.net.URI
 import java.nio.ByteBuffer
@@ -22,6 +26,7 @@ object PiperManager {
     private var piperInstance: PiperJNI? = null
     private val piperMutex = Mutex()
     private val loadedVoices = ConcurrentHashMap<String, PiperVoice>()
+    private val loadedVoiceModels = ConcurrentHashMap<String, VoiceModelInfo>()
 
     private fun md5(input: String): String {
         val md = MessageDigest.getInstance("MD5")
@@ -86,6 +91,7 @@ object PiperManager {
                 // Invalidate cached voice if re-downloaded
                 piperMutex.withLock {
                     val key = "$language:$voice"
+                    loadedVoiceModels.remove(key)
                     loadedVoices.remove(key)?.let {
                         try {
                             it.close()
@@ -129,6 +135,41 @@ object PiperManager {
         }
     }
 
+    fun getVoiceModelInfo(language: String, voice: String): VoiceModelInfo? {
+        val key = "$language:$voice"
+        loadedVoiceModels[key]?.let { return it }
+
+        val modelsDir = getModelsDirectory()
+        val langDir = File(modelsDir, language)
+        val voiceDir = File(langDir, voice)
+
+        var jsonFile: File? = null
+        if (voiceDir.exists()) {
+            voiceDir.walkTopDown().forEach { f ->
+                if (f.name.endsWith(".onnx.json")) jsonFile = f
+            }
+        }
+
+        if (jsonFile != null && jsonFile.exists()) {
+            try {
+                FileReader(jsonFile).use { reader ->
+                    val root = JsonParser.parseReader(reader).asJsonObject
+                    val phonemeType = root.get("phoneme_type")?.asString ?: "espeak"
+                    val idMapObj = root.getAsJsonObject("phoneme_id_map")
+                    val phonemeIds = idMapObj?.keySet() ?: emptySet()
+                    val espeakVoice = root.getAsJsonObject("espeak")?.get("voice")?.asString
+                    val sampleRate = root.getAsJsonObject("audio")?.get("sample_rate")?.asInt ?: 22050
+                    val info = VoiceModelInfo(phonemeType, phonemeIds, espeakVoice, sampleRate)
+                    loadedVoiceModels[key] = info
+                    return info
+                }
+            } catch (e: Exception) {
+                CreateStationVoices.LOGGER.error("Failed to load model info from ${jsonFile!!.absolutePath}", e)
+            }
+        }
+        return null
+    }
+
     suspend fun setupPiper() {
         withContext(Dispatchers.IO) {
             piperMutex.withLock {
@@ -152,7 +193,15 @@ object PiperManager {
             try {
                 if (text.isBlank()) return@withContext null
 
-                val hash = md5("$text-$voice-$language")
+                // Load voice model metadata if available for guardrails
+                val voiceModel = getVoiceModelInfo(language, voice)
+                val safeText = TextSanitizer.sanitizeForModel(text, voiceModel, language)
+                if (safeText.isNullOrBlank()) {
+                    CreateStationVoices.LOGGER.debug("Text sanitized to blank or unspeakable for model $language-$voice: '$text'")
+                    return@withContext null
+                }
+
+                val hash = md5("$safeText-$voice-$language")
                 val cacheFile = File(getCacheDirectory(), "$hash.wav")
 
                 if (cacheFile.exists() && cacheFile.length() > 0) {
@@ -194,9 +243,9 @@ object PiperManager {
                         loadedVoices[key] = piperVoice
                     }
 
-                    val samples = piper.textToAudio(piperVoice, text)
+                    val samples = piper.textToAudio(piperVoice, safeText)
                     if (samples.isEmpty()) {
-                        CreateStationVoices.LOGGER.warn("Piper generated empty audio for '$text'")
+                        CreateStationVoices.LOGGER.warn("Piper generated empty audio for '$safeText' (raw: '$text')")
                         return@withContext null
                     }
 

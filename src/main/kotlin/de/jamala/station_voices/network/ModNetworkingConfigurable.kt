@@ -204,11 +204,14 @@ object ModNetworkingConfigurable {
                 if (player.distanceToSqr(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5) < 64) {
                     val blockEntity = level.getBlockEntity(pos)
                     if (blockEntity is ConfigurableAnnouncerBlockEntity) {
+                        val sanitizedTrainName = de.jamala.station_voices.TextSanitizer.sanitizeLabel(payload.trainName)
                         if (payload.text.isBlank()) {
+                            blockEntity.profiles.remove(sanitizedTrainName)
                             blockEntity.profiles.remove(payload.trainName)
                         } else {
-                            blockEntity.profiles[payload.trainName] = TrainProfile(
-                                payload.text,
+                            val sanitizedText = de.jamala.station_voices.TextSanitizer.sanitizeTemplate(payload.text, payload.language)
+                            blockEntity.profiles[sanitizedTrainName] = TrainProfile(
+                                sanitizedText,
                                 payload.voice,
                                 payload.language,
                                 payload.speed,

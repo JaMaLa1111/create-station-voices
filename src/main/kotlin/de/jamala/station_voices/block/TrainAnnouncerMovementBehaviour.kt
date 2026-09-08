@@ -101,12 +101,21 @@ class TrainAnnouncerMovementBehaviour : MovementBehaviour {
         val profile = findProfile(data.profiles, stationName) ?: return
         if (profile.text.isBlank()) return
 
+        val cleanStationName = de.jamala.station_voices.TextSanitizer.sanitizeLabel(stationName)
+        val announcementText = de.jamala.station_voices.TextSanitizer.sanitize(
+            profile.text
+                .replace("{station}", cleanStationName, ignoreCase = true)
+                .replace("{name}", cleanStationName, ignoreCase = true),
+            profile.language
+        )
+        if (!de.jamala.station_voices.TextSanitizer.isSpeakable(announcementText)) return
+
         data.isPlaying = true
-        data.lastAnnouncementText = profile.text
+        data.lastAnnouncementText = announcementText
 
         if (ModConfig.SERVER.ttsMode.get() == ModConfig.TtsMode.LOCAL_PIPER) {
             CoroutineScope(Dispatchers.IO).launch {
-                val audioData = PiperManager.generateAudio(profile.text, profile.voice, profile.language)
+                val audioData = PiperManager.generateAudio(announcementText, profile.voice, profile.language)
                 if (audioData != null) {
                     val durationMs = calculateWavDurationMs(audioData, profile.speed, profile.reverb, profile.jingle, profile.jingleTiming)
                     data.audioEndTimeMillis = System.currentTimeMillis() + durationMs
@@ -165,12 +174,12 @@ class TrainAnnouncerMovementBehaviour : MovementBehaviour {
         } else {
             val timing = JingleTiming.fromString(profile.jingleTiming)
             val jingleDurationMs = JingleManager.getJingleDuration(profile.jingle, profile.speed, timing)
-            val estimatedDurationMs = (profile.text.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs
+            val estimatedDurationMs = (announcementText.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs
             data.audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
             val payload = PlayAnnouncerAudioPayload(
                 null,
-                profile.text,
+                announcementText,
                 profile.voice,
                 profile.language,
                 profile.speed,

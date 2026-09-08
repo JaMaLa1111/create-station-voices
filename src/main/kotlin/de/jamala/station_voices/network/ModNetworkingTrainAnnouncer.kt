@@ -194,11 +194,20 @@ object ModNetworkingTrainAnnouncer {
                 val level = player.serverLevel()
 
                 val type = object : TypeToken<MutableMap<String, TrainProfile>>() {}.type
-                val map: MutableMap<String, TrainProfile> = try {
+                val rawMap: MutableMap<String, TrainProfile> = try {
                     gson.fromJson(payload.profilesJson, type) ?: mutableMapOf()
                 } catch (e: Exception) {
                     mutableMapOf()
                 }
+                val map = mutableMapOf<String, TrainProfile>()
+                for ((key, profile) in rawMap) {
+                    val sanitizedKey = de.jamala.station_voices.TextSanitizer.sanitizeLabel(key)
+                    if (sanitizedKey.isNotBlank()) {
+                        profile.text = de.jamala.station_voices.TextSanitizer.sanitizeTemplate(profile.text, profile.language)
+                        map[sanitizedKey] = profile
+                    }
+                }
+                val sanitizedJson = gson.toJson(map)
 
                 if (payload.pos != null) {
                     val pos = payload.pos
@@ -227,12 +236,12 @@ object ModNetworkingTrainAnnouncer {
                                 )
                                 entity.setBlock(localPos, newInfo)
                             }
-                            tag.putString("StationProfiles", payload.profilesJson)
+                            tag.putString("StationProfiles", sanitizedJson)
 
                             for (actor in contraption.actors) {
                                 val ctx = actor.right
                                 if (ctx != null && ctx.localPos == localPos) {
-                                    ctx.blockEntityData?.putString("StationProfiles", payload.profilesJson)
+                                    ctx.blockEntityData?.putString("StationProfiles", sanitizedJson)
                                     val movementData = ctx.temporaryData as? TrainAnnouncerMovementData
                                     if (movementData != null) {
                                         movementData.profiles = map

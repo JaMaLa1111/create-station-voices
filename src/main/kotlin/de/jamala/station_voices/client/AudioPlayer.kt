@@ -245,9 +245,22 @@ object AudioPlayer {
     }
 
     fun play(pos: BlockPos?, text: String, voice: String, language: String, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String = "OFF", jingleTiming: String = "BOTH", realism: Float = 0.0f, entityId: Int? = null) {
+        val safeText = de.jamala.station_voices.TextSanitizer.sanitizeForModel(text, null, language)
+        if (safeText.isNullOrBlank()) {
+            if (pos != null) {
+                try {
+                    net.neoforged.neoforge.network.PacketDistributor.sendToServer(
+                        de.jamala.station_voices.network.AnnouncerAudioFinishedPayload(pos)
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            return
+        }
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val file = getAudioFile(text, voice, language)
+                val file = getAudioFile(safeText, voice, language)
                 if (file.exists()) {
                     playData(pos, speed, volume, reverb, maxRange, file.readBytes(), jingle, jingleTiming, realism, entityId)
                 }
@@ -298,7 +311,8 @@ object AudioPlayer {
     }
 
     suspend fun getAudioFile(text: String, voice: String, language: String): File {
-        val hash = md5("$text-$voice-$language")
+        val safeText = de.jamala.station_voices.TextSanitizer.sanitizeForModel(text, null, language) ?: text.trim()
+        val hash = md5("$safeText-$voice-$language")
         val file = File(CACHE_DIR, "$hash.wav")
 
         if (file.exists() && file.length() > 0) {
@@ -321,7 +335,7 @@ object AudioPlayer {
             connection.doOutput = true
 
             val json = JsonObject()
-            json.addProperty("text", text)
+            json.addProperty("text", safeText)
             json.addProperty("voice", voice)
             json.addProperty("language", language)
             json.addProperty("no-cache", false)
