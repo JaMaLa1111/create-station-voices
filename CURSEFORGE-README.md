@@ -40,7 +40,7 @@
   A cheap speaker block that can be linked to already placed announcers and will act as a secondary speaker for the announcer
 * **Display Link Compatibility**  
   Use a display link to automatically read active announcements from announcer blocks and display them on display boards, nixie tubes, signs and more.
-* **In-Game Documentation**
+* **In-Game Documentation**  
   Beginning with v0.9.0-beta, all blocks feature in-game Ponder scenes to help you set them up.
 * **Train-Mounted Announcer**  
   A announcer block that can be mounted on a train. It functions like the configurable announcer but has profiles for each station the train passes. It can be configured to only broadcast the announcement to either all players in range or only to players riding the train.
