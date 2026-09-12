@@ -55,7 +55,7 @@
 - By default, TTS is generated locally using native in-process ONNX runtime Piper TTS and downloaded models.
 - The configuration file includes an option to use an external API (currently limited to a private API).
 - Supports Windows, Linux, and macOS out of the box via native libraries.
-- Currently the available models are in english and german. If you want to request another language or voice to be added please open a suggestion in the [Discord server](https://discord.gg/22zCpHDxnw).
+- You can find a list of all languages [here](https://huggingface.co/Ja-Ma-La1111/piper-voice-mirror). If you want to request another language or voice to be added please open a suggestion in the [Discord server](https://discord.gg/22zCpHDxnw).
 
 > Due to mod-hosting site moderation policies regarding bundled executable binaries, all mod versions prior to `v0.7.0-beta` (`v0.6.0-beta` and earlier) are exclusively available on [GitHub](https://github.com/JaMaLa1111/create-station-voices/releases). Starting with `v0.7.0-beta`, the mod uses in-process native ONNX Runtime bindings.
 
@@ -79,13 +79,13 @@ With `v1.0.0-rc1` all features I planned are added. If you wish to suggest a fea
 
 ### Questions that nobody asked (FAQ):
 
-**Q: Will there be a Fabric or Forge port?**
+**Q: Will there be a Fabric or Forge port?**  
 **A:** Main development will remain strictly on NeoForge for now. However, I might consider porting to Fabric or Forge in the future once the mod is feature-complete.
 
-**Q: Will you backport this to older Minecraft versions?**
+**Q: Will you backport this to older Minecraft versions?**  
 **A:** Similar to the modloader situation, backports (e.g., to 1.20.1) are not currently planned, but may be considered in the future.
 
-**Q: Can I use this mod in my modpack?**
+**Q: Can I use this mod in my modpack?**  
 **A:** Yes! Feel free to include Create: Station Voices in any CurseForge or Modrinth modpack, aslong as credit is given (CurseForge/Modrinth linking back to the mod in the mod list is enough).
 
 ---
