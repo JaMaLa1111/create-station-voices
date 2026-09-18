@@ -103,7 +103,7 @@ With `v1.0.0-rc1` all features I planned are added. If you wish to suggest a fea
 
 ## Licensing & Permissions
 
-This mod is provided under a **Custom License**. Please see the [`LICENSE.txt`](https://github.com/JaMaLa1111/create-station-voices/blob/main/LICENSE.txt) file in the repository for full legal phrasing. Here is a quick summary of what you can and cannot do:
+This mod is provided under a **Custom License**. Please see the [`LICENSE.txt`](https://github.com/JaMaLa1111/create-station-voices/blob/1.21-neoforge/LICENSE) file in the repository for full legal phrasing. Here is a quick summary of what you can and cannot do:
 
 * **Modpacks:** You are free to include this mod in any free-to-download modpack on standard platforms (like CurseForge/Modrinth). **However, distributing modpacks containing this mod behind early-access paywalls (e.g., Patreon) is strictly prohibited.**
 * **Servers & Pay-to-Win:** You can use this mod freely on public/private servers. However, you may not lock this mod's features or items behind real-money purchases, mandatory donations, or any other pay-to-win structure.
