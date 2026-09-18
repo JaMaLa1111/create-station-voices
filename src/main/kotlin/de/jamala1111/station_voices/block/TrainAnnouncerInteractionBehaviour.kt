@@ -1,9 +1,9 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
 import com.simibubi.create.api.behaviour.interaction.MovingInteractionBehaviour
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity
-import de.jamala.station_voices.network.OpenTrainAnnouncerScreenPayload
+import de.jamala1111.station_voices.network.OpenTrainAnnouncerScreenPayload
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.level.ServerPlayer

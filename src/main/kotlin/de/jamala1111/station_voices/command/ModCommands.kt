@@ -1,8 +1,8 @@
-package de.jamala.station_voices.command
+package de.jamala1111.station_voices.command
 
 import com.mojang.brigadier.CommandDispatcher
-import de.jamala.station_voices.CreateStationVoices
-import de.jamala.station_voices.network.OpenModelDownloadScreenPayload
+import de.jamala1111.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.network.OpenModelDownloadScreenPayload
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.server.level.ServerPlayer

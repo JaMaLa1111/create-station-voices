@@ -1,10 +1,10 @@
-package de.jamala.station_voices.client
+package de.jamala1111.station_voices.client
 
 import com.google.gson.JsonParser
 import com.google.gson.JsonObject
-import de.jamala.station_voices.ModConfig
-import de.jamala.station_voices.network.DownloadModelPayload
-import de.jamala.station_voices.network.RequestInstalledModelsPayload
+import de.jamala1111.station_voices.ModConfig
+import de.jamala1111.station_voices.network.DownloadModelPayload
+import de.jamala1111.station_voices.network.RequestInstalledModelsPayload
 import net.neoforged.neoforge.network.PacketDistributor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

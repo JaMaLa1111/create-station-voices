@@ -1,5 +1,5 @@
-import de.jamala.station_voices.TextSanitizer
-import de.jamala.station_voices.VoiceModelInfo
+import de.jamala1111.station_voices.TextSanitizer
+import de.jamala1111.station_voices.VoiceModelInfo
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

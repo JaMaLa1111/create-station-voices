@@ -1,7 +1,7 @@
-package de.jamala.station_voices.item
+package de.jamala1111.station_voices.item
 
-import de.jamala.station_voices.block.AnnouncerBlockEntity
-import de.jamala.station_voices.block.ConfigurableAnnouncerBlockEntity
+import de.jamala1111.station_voices.block.AnnouncerBlockEntity
+import de.jamala1111.station_voices.block.ConfigurableAnnouncerBlockEntity
 import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component

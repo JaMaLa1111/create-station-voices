@@ -1,6 +1,6 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
-import de.jamala.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.CreateStationVoices
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockBehaviour
 import net.neoforged.neoforge.registries.DeferredRegister

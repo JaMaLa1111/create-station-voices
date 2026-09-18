@@ -1,7 +1,7 @@
-package de.jamala.station_voices.network
+package de.jamala1111.station_voices.network
 
-import de.jamala.station_voices.CreateStationVoices
-import de.jamala.station_voices.block.AnnouncerBlockEntity
+import de.jamala1111.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.block.AnnouncerBlockEntity
 import net.minecraft.core.BlockPos
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
@@ -256,14 +256,14 @@ object ModNetworking {
                         level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
                     }
                     com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
-                } else if (be is de.jamala.station_voices.block.ConfigurableAnnouncerBlockEntity && be.isPlaying) {
+                } else if (be is de.jamala1111.station_voices.block.ConfigurableAnnouncerBlockEntity && be.isPlaying) {
                     be.isPlaying = false
                     val state = level.getBlockState(pos)
                     if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
                         level.setBlock(pos, state.setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED, false), 3)
                     }
                     com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock.notifyGatherers(level, pos)
-                } else if (be is de.jamala.station_voices.block.SpeakerBlockEntity && be.isPlaying) {
+                } else if (be is de.jamala1111.station_voices.block.SpeakerBlockEntity && be.isPlaying) {
                     be.isPlaying = false
                     val state = level.getBlockState(pos)
                     if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED) && state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWERED)) {
@@ -286,7 +286,7 @@ object ModNetworking {
                 if (player.distanceToSqr(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5) < 64) {
                     val blockEntity = level.getBlockEntity(pos)
                     if (blockEntity is AnnouncerBlockEntity) {
-                        val sanitized = de.jamala.station_voices.TextSanitizer.sanitize(payload.text, payload.language)
+                        val sanitized = de.jamala1111.station_voices.TextSanitizer.sanitize(payload.text, payload.language)
                         blockEntity.ttsText = sanitized
                         blockEntity.lastAnnouncementText = sanitized
                         blockEntity.ttsVoice = payload.voice
@@ -311,11 +311,11 @@ object ModNetworking {
             RequestPreviewAudioPayload.STREAM_CODEC
         ) { payload, context ->
             val player = context.player() as net.minecraft.server.level.ServerPlayer
-            val sanitizedText = de.jamala.station_voices.TextSanitizer.sanitize(payload.text, payload.language)
+            val sanitizedText = de.jamala1111.station_voices.TextSanitizer.sanitize(payload.text, payload.language)
             
-            if (de.jamala.station_voices.ModConfig.SERVER.ttsMode.get() == de.jamala.station_voices.ModConfig.TtsMode.LOCAL_PIPER) {
+            if (de.jamala1111.station_voices.ModConfig.SERVER.ttsMode.get() == de.jamala1111.station_voices.ModConfig.TtsMode.LOCAL_PIPER) {
                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                    val audioData = de.jamala.station_voices.server.PiperManager.generateAudio(sanitizedText, payload.voice, payload.language)
+                    val audioData = de.jamala1111.station_voices.server.PiperManager.generateAudio(sanitizedText, payload.voice, payload.language)
                     if (audioData != null) {
                         val streamId = UUID.randomUUID()
                         val chunkSize = 30000
@@ -369,7 +369,7 @@ object ModNetworking {
             context.enqueueWork {
                 net.neoforged.fml.loading.FMLEnvironment.dist.let {
                     if (it.isClient) {
-                        de.jamala.station_voices.client.AudioPlayer.handleAudioChunk(
+                        de.jamala1111.station_voices.client.AudioPlayer.handleAudioChunk(
                             payload.pos,
                             payload.speed,
                             payload.volume,
@@ -394,7 +394,7 @@ object ModNetworking {
             PlayAnnouncerAudioPayload.STREAM_CODEC
         ) { payload, context ->
             context.enqueueWork {
-                de.jamala.station_voices.client.AudioPlayer.play(
+                de.jamala1111.station_voices.client.AudioPlayer.play(
                     payload.pos,
                     payload.text, 
                     payload.voice, 

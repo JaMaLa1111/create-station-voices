@@ -1,6 +1,6 @@
-package de.jamala.station_voices.item
+package de.jamala1111.station_voices.item
 
-import de.jamala.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.CreateStationVoices
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.CreativeModeTab

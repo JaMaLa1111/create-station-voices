@@ -1,8 +1,8 @@
-package de.jamala.station_voices.network
+package de.jamala1111.station_voices.network
 
-import de.jamala.station_voices.CreateStationVoices
-import de.jamala.station_voices.block.ConfigurableAnnouncerBlockEntity
-import de.jamala.station_voices.block.TrainProfile
+import de.jamala1111.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.block.ConfigurableAnnouncerBlockEntity
+import de.jamala1111.station_voices.block.TrainProfile
 import net.minecraft.core.BlockPos
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
@@ -19,7 +19,7 @@ import net.minecraft.server.level.ServerPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import de.jamala.station_voices.server.PiperManager
+import de.jamala1111.station_voices.server.PiperManager
 
 data class SetConfigurableAnnouncerDataPayload(
     val pos: BlockPos,
@@ -204,12 +204,12 @@ object ModNetworkingConfigurable {
                 if (player.distanceToSqr(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5) < 64) {
                     val blockEntity = level.getBlockEntity(pos)
                     if (blockEntity is ConfigurableAnnouncerBlockEntity) {
-                        val sanitizedTrainName = de.jamala.station_voices.TextSanitizer.sanitizeLabel(payload.trainName)
+                        val sanitizedTrainName = de.jamala1111.station_voices.TextSanitizer.sanitizeLabel(payload.trainName)
                         if (payload.text.isBlank()) {
                             blockEntity.profiles.remove(sanitizedTrainName)
                             blockEntity.profiles.remove(payload.trainName)
                         } else {
-                            val sanitizedText = de.jamala.station_voices.TextSanitizer.sanitizeTemplate(payload.text, payload.language)
+                            val sanitizedText = de.jamala1111.station_voices.TextSanitizer.sanitizeTemplate(payload.text, payload.language)
                             blockEntity.profiles[sanitizedTrainName] = TrainProfile(
                                 sanitizedText,
                                 payload.voice,
@@ -270,7 +270,7 @@ object ModNetworkingConfigurable {
             context.enqueueWork {
                 net.neoforged.fml.loading.FMLEnvironment.dist.let {
                     if (it.isClient) {
-                        de.jamala.station_voices.client.ClientHooks.handleModelProgress(payload.language, payload.voice, payload.progress)
+                        de.jamala1111.station_voices.client.ClientHooks.handleModelProgress(payload.language, payload.voice, payload.progress)
                     }
                 }
             }
@@ -283,7 +283,7 @@ object ModNetworkingConfigurable {
             context.enqueueWork {
                 net.neoforged.fml.loading.FMLEnvironment.dist.let {
                     if (it.isClient) {
-                        de.jamala.station_voices.client.ClientHooks.handleInstalledModels(payload.models)
+                        de.jamala1111.station_voices.client.ClientHooks.handleInstalledModels(payload.models)
                     }
                 }
             }
@@ -296,7 +296,7 @@ object ModNetworkingConfigurable {
             context.enqueueWork {
                 net.neoforged.fml.loading.FMLEnvironment.dist.let {
                     if (it.isClient) {
-                        de.jamala.station_voices.client.ClientHooks.openModelDownloadScreen()
+                        de.jamala1111.station_voices.client.ClientHooks.openModelDownloadScreen()
                     }
                 }
             }
@@ -382,7 +382,7 @@ object ModNetworkingConfigurable {
             context.enqueueWork {
                 net.neoforged.fml.loading.FMLEnvironment.dist.let {
                     if (it.isClient) {
-                        de.jamala.station_voices.client.ClientHooks.handleAutoFetchResponse(payload.trainNames)
+                        de.jamala1111.station_voices.client.ClientHooks.handleAutoFetchResponse(payload.trainNames)
                     }
                 }
             }

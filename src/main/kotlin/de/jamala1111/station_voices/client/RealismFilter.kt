@@ -1,4 +1,4 @@
-package de.jamala.station_voices.client
+package de.jamala1111.station_voices.client
 
 import javax.sound.sampled.AudioFormat
 import java.nio.ByteBuffer

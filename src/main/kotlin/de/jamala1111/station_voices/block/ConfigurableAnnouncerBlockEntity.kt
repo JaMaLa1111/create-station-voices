@@ -1,4 +1,4 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -6,7 +6,7 @@ import com.simibubi.create.content.trains.station.StationBlockEntity
 import com.simibubi.create.content.trains.observer.TrackObserverBlockEntity
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation
 import net.minecraft.network.chat.Component
-import de.jamala.station_voices.network.PlayAnnouncerAudioPayload
+import de.jamala1111.station_voices.network.PlayAnnouncerAudioPayload
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.HolderLookup
@@ -19,10 +19,10 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.neoforge.network.PacketDistributor
-import de.jamala.station_voices.ModConfig
-import de.jamala.station_voices.server.PiperManager
-import de.jamala.station_voices.network.PlayAnnouncerAudioDataChunkPayload
-import de.jamala.station_voices.JingleTiming
+import de.jamala1111.station_voices.ModConfig
+import de.jamala1111.station_voices.server.PiperManager
+import de.jamala1111.station_voices.network.PlayAnnouncerAudioDataChunkPayload
+import de.jamala1111.station_voices.JingleTiming
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -155,14 +155,14 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
         val level = level ?: return
         val profile = findProfile(trainName)
         if (profile != null && profile.text.isNotBlank()) {
-            val cleanTrainName = de.jamala.station_voices.TextSanitizer.sanitizeLabel(trainName)
-            val announcementText = de.jamala.station_voices.TextSanitizer.sanitize(
+            val cleanTrainName = de.jamala1111.station_voices.TextSanitizer.sanitizeLabel(trainName)
+            val announcementText = de.jamala1111.station_voices.TextSanitizer.sanitize(
                 profile.text
                     .replace("{train}", cleanTrainName, ignoreCase = true)
                     .replace("{name}", cleanTrainName, ignoreCase = true),
                 profile.language
             )
-            if (!de.jamala.station_voices.TextSanitizer.isSpeakable(announcementText)) return
+            if (!de.jamala1111.station_voices.TextSanitizer.isSpeakable(announcementText)) return
 
             isPlaying = true
             lastAnnouncementText = announcementText
@@ -275,7 +275,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
                 }
             } else {
                 val timing = JingleTiming.fromString(profile.jingleTiming)
-                val jingleDurationMs = de.jamala.station_voices.JingleManager.getJingleDuration(profile.jingle, profile.speed, timing)
+                val jingleDurationMs = de.jamala1111.station_voices.JingleManager.getJingleDuration(profile.jingle, profile.speed, timing)
                 val estimatedDurationMs = (announcementText.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs
                 audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
@@ -353,7 +353,7 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
             val adjustedMs = ((durationSeconds / speedFactor) * 1000.0).toLong()
             val reverbTailMs = if (reverb) 900L else 0L
             val timing = JingleTiming.fromString(jingleTiming)
-            val jingleMs = de.jamala.station_voices.JingleManager.getJingleDuration(jingle, speed, timing)
+            val jingleMs = de.jamala1111.station_voices.JingleManager.getJingleDuration(jingle, speed, timing)
             return adjustedMs + reverbTailMs + jingleMs
         } catch (e: Exception) {
             return 2000L

@@ -1,10 +1,10 @@
-package de.jamala.station_voices.client
+package de.jamala1111.station_voices.client
 
-import de.jamala.station_voices.Jingle
-import de.jamala.station_voices.JingleTiming
-import de.jamala.station_voices.block.TrainProfile
-import de.jamala.station_voices.network.AutoFetchTrainsRequestPayload
-import de.jamala.station_voices.network.SetConfigurableAnnouncerDataPayload
+import de.jamala1111.station_voices.Jingle
+import de.jamala1111.station_voices.JingleTiming
+import de.jamala1111.station_voices.block.TrainProfile
+import de.jamala1111.station_voices.network.AutoFetchTrainsRequestPayload
+import de.jamala1111.station_voices.network.SetConfigurableAnnouncerDataPayload
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.AbstractSliderButton
@@ -66,7 +66,7 @@ class ConfigurableAnnouncerScreen(
         addRenderableWidget(newTrainBox)
 
         addTrainBtn = addRenderableWidget(Button.builder(Component.literal("Add")) { _ ->
-            val name = de.jamala.station_voices.TextSanitizer.sanitizeLabel(newTrainBox.value)
+            val name = de.jamala1111.station_voices.TextSanitizer.sanitizeLabel(newTrainBox.value)
             if (name.isNotBlank() && !profiles.containsKey(name)) {
                 profiles[name] = TrainProfile()
                 trainList.updateItems(profiles.keys.toList())
@@ -157,12 +157,12 @@ class ConfigurableAnnouncerScreen(
         genBtn = addRenderableWidget(Button.builder(Component.literal("Generate & Preview")) { _ ->
             val profile = selectedTrain?.let { profiles[it] }
             if (profile != null && profile.text.isNotBlank()) {
-                val previewText = de.jamala.station_voices.TextSanitizer.sanitize(
+                val previewText = de.jamala1111.station_voices.TextSanitizer.sanitize(
                     profile.text.replace("{train}", selectedTrain ?: "", ignoreCase = true).replace("{name}", selectedTrain ?: "", ignoreCase = true),
                     profile.language
                 )
                 if (previewText.isNotBlank()) {
-                    PacketDistributor.sendToServer(de.jamala.station_voices.network.RequestPreviewAudioPayload(
+                    PacketDistributor.sendToServer(de.jamala1111.station_voices.network.RequestPreviewAudioPayload(
                         previewText, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.jingleTiming, profile.realism
                     ))
                 }
@@ -215,13 +215,13 @@ class ConfigurableAnnouncerScreen(
 
         for (key in keysToSend) {
             val profile = profiles[key]
-            val safeKey = de.jamala.station_voices.TextSanitizer.sanitizeLabel(key)
+            val safeKey = de.jamala1111.station_voices.TextSanitizer.sanitizeLabel(key)
             if (profile == null) {
                 // Deleted
                 PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, safeKey.ifBlank { key }, "", "amy", "en_US", 1.0f, 1.0f, false, 64, "OFF", "BOTH", 0.0f))
             } else {
                 // Updated/Created
-                val safeText = de.jamala.station_voices.TextSanitizer.sanitizeTemplate(profile.text, profile.language)
+                val safeText = de.jamala1111.station_voices.TextSanitizer.sanitizeTemplate(profile.text, profile.language)
                 PacketDistributor.sendToServer(SetConfigurableAnnouncerDataPayload(pos, safeKey.ifBlank { key }, safeText, profile.voice, profile.language, profile.speed, profile.volume, profile.reverb, profile.maxRange, profile.jingle, profile.jingleTiming, profile.realism))
             }
         }

@@ -1,4 +1,4 @@
-package de.jamala.station_voices
+package de.jamala1111.station_voices
 
 enum class JingleTiming(val id: String, val displayName: String) {
     BOTH("BOTH", "Both"),

@@ -1,9 +1,9 @@
-package de.jamala.station_voices
+package de.jamala1111.station_voices
 
-import de.jamala.station_voices.block.ModBlocks
-import de.jamala.station_voices.item.ModItems
-import de.jamala.station_voices.block.ModBlockEntities
-import de.jamala.station_voices.item.ModCreativeTabs
+import de.jamala1111.station_voices.block.ModBlocks
+import de.jamala1111.station_voices.item.ModItems
+import de.jamala1111.station_voices.block.ModBlockEntities
+import de.jamala1111.station_voices.item.ModCreativeTabs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -27,10 +27,10 @@ import thedarkcolour.kotlinforforge.neoforge.forge.MOD_BUS
 import thedarkcolour.kotlinforforge.neoforge.forge.runForDist
 import kotlin.time.Duration.Companion.seconds
 import net.neoforged.neoforge.common.NeoForge
-import de.jamala.station_voices.network.ModNetworking
-import de.jamala.station_voices.network.ModNetworkingConfigurable
-import de.jamala.station_voices.network.ModNetworkingTrainAnnouncer
-import de.jamala.station_voices.command.ModCommands
+import de.jamala1111.station_voices.network.ModNetworking
+import de.jamala1111.station_voices.network.ModNetworkingConfigurable
+import de.jamala1111.station_voices.network.ModNetworkingTrainAnnouncer
+import de.jamala1111.station_voices.command.ModCommands
 
 /**
  * Main mod class. Should be an `object` declaration annotated with `@Mod`.
@@ -55,7 +55,7 @@ object CreateStationVoices {
         ModBlocks.REGISTRY.register(MOD_BUS)
         ModItems.REGISTRY.register(MOD_BUS)
         ModBlockEntities.REGISTRY.register(MOD_BUS)
-        de.jamala.station_voices.block.display.ModDisplaySources.REGISTRY.register(MOD_BUS)
+        de.jamala1111.station_voices.block.display.ModDisplaySources.REGISTRY.register(MOD_BUS)
         ModCreativeTabs.REGISTRY.register(MOD_BUS)
 
         MOD_BUS.addListener(::onCommonSetup)
@@ -100,7 +100,7 @@ object CreateStationVoices {
      */
     private fun onClientSetup(event: FMLClientSetupEvent) {
         LOGGER.log(Level.INFO, "Initializing client...")
-        net.createmod.ponder.foundation.PonderIndex.addPlugin(de.jamala.station_voices.ponder.ModPonderPlugin())
+        net.createmod.ponder.foundation.PonderIndex.addPlugin(de.jamala1111.station_voices.ponder.ModPonderPlugin())
     }
 
     /**
@@ -109,7 +109,7 @@ object CreateStationVoices {
     private fun onServerSetup(event: FMLDedicatedServerSetupEvent) {
         LOGGER.log(Level.INFO, "Server starting...")
         CoroutineScope(Dispatchers.IO).launch {
-            de.jamala.station_voices.server.PiperManager.setupPiper()
+            de.jamala1111.station_voices.server.PiperManager.setupPiper()
         }
     }
 
@@ -118,32 +118,32 @@ object CreateStationVoices {
         event.enqueueWork {
             com.simibubi.create.api.behaviour.display.DisplaySource.BY_BLOCK_ENTITY.add(
                 ModBlockEntities.ANNOUNCER_BLOCK_ENTITY,
-                de.jamala.station_voices.block.display.ModDisplaySources.ANNOUNCEMENT
+                de.jamala1111.station_voices.block.display.ModDisplaySources.ANNOUNCEMENT
             )
             com.simibubi.create.api.behaviour.display.DisplaySource.BY_BLOCK_ENTITY.add(
                 ModBlockEntities.CONFIGURABLE_ANNOUNCER_BLOCK_ENTITY,
-                de.jamala.station_voices.block.display.ModDisplaySources.ANNOUNCEMENT
+                de.jamala1111.station_voices.block.display.ModDisplaySources.ANNOUNCEMENT
             )
             com.simibubi.create.api.behaviour.display.DisplaySource.BY_BLOCK_ENTITY.add(
                 ModBlockEntities.SPEAKER_BLOCK_ENTITY,
-                de.jamala.station_voices.block.display.ModDisplaySources.ANNOUNCEMENT
+                de.jamala1111.station_voices.block.display.ModDisplaySources.ANNOUNCEMENT
             )
             com.simibubi.create.api.behaviour.display.DisplaySource.BY_BLOCK_ENTITY.add(
                 ModBlockEntities.TRAIN_ANNOUNCER_BLOCK_ENTITY,
-                de.jamala.station_voices.block.display.ModDisplaySources.ANNOUNCEMENT
+                de.jamala1111.station_voices.block.display.ModDisplaySources.ANNOUNCEMENT
             )
 
             com.simibubi.create.api.behaviour.movement.MovementBehaviour.REGISTRY.register(
                 ModBlocks.TRAIN_ANNOUNCER_BLOCK,
-                de.jamala.station_voices.block.TrainAnnouncerMovementBehaviour()
+                de.jamala1111.station_voices.block.TrainAnnouncerMovementBehaviour()
             )
             com.simibubi.create.api.behaviour.interaction.MovingInteractionBehaviour.REGISTRY.register(
                 ModBlocks.TRAIN_ANNOUNCER_BLOCK,
-                de.jamala.station_voices.block.TrainAnnouncerInteractionBehaviour()
+                de.jamala1111.station_voices.block.TrainAnnouncerInteractionBehaviour()
             )
         }
         CoroutineScope(Dispatchers.IO).launch {
-            de.jamala.station_voices.server.PiperManager.setupPiper()
+            de.jamala1111.station_voices.server.PiperManager.setupPiper()
         }
     }
 }

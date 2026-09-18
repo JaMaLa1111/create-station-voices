@@ -199,6 +199,6 @@ idea {
 }
 
 tasks.register('executeDecompiler', JavaExec) {
-    mainClass = 'de.jamala.station_voices.Decompiler'
+    mainClass = 'de.jamala1111.station_voices.Decompiler'
     classpath = sourceSets.main.runtimeClasspath
 }

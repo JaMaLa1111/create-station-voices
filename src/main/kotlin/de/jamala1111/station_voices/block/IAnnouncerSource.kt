@@ -1,4 +1,4 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
 interface IAnnouncerSource {
     val isPlayingAnnouncement: Boolean

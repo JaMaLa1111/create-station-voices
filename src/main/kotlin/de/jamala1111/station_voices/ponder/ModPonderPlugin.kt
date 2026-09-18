@@ -1,6 +1,6 @@
-package de.jamala.station_voices.ponder
+package de.jamala1111.station_voices.ponder
 
-import de.jamala.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.CreateStationVoices
 import net.createmod.ponder.api.registration.PonderPlugin
 import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper
 import net.createmod.ponder.api.registration.PonderTagRegistrationHelper

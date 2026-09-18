@@ -1,4 +1,4 @@
-import de.jamala.station_voices.JingleTiming
+import de.jamala1111.station_voices.JingleTiming
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 

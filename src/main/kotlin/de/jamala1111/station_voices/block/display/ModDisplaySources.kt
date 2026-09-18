@@ -1,8 +1,8 @@
-package de.jamala.station_voices.block.display
+package de.jamala1111.station_voices.block.display
 
 import com.simibubi.create.api.behaviour.display.DisplaySource
 import com.simibubi.create.api.registry.CreateRegistries
-import de.jamala.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.CreateStationVoices
 import thedarkcolour.kotlinforforge.neoforge.forge.getValue
 import net.neoforged.neoforge.registries.DeferredRegister
 import net.neoforged.neoforge.registries.DeferredHolder

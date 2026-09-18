@@ -1,4 +1,4 @@
-package de.jamala.station_voices
+package de.jamala1111.station_voices
 
 import java.lang.Character.UnicodeScript
 import java.text.Normalizer

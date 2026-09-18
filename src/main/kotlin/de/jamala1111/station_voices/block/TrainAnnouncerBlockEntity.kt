@@ -1,4 +1,4 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

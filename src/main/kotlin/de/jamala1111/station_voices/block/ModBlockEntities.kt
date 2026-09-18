@@ -1,6 +1,6 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
-import de.jamala.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.CreateStationVoices
 import net.minecraft.core.BlockPos
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
@@ -104,7 +104,7 @@ class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBl
         if (tag.contains("TtsText")) {
             ttsVoice = tag.getString("TtsVoice")
             ttsLanguage = tag.getString("TtsLanguage")
-            ttsText = de.jamala.station_voices.TextSanitizer.sanitize(tag.getString("TtsText"), ttsLanguage)
+            ttsText = de.jamala1111.station_voices.TextSanitizer.sanitize(tag.getString("TtsText"), ttsLanguage)
             if (tag.contains("TtsSpeed")) ttsSpeed = tag.getFloat("TtsSpeed")
             if (tag.contains("TtsVolume")) ttsVolume = tag.getFloat("TtsVolume")
             if (tag.contains("TtsReverb")) ttsReverb = tag.getBoolean("TtsReverb")

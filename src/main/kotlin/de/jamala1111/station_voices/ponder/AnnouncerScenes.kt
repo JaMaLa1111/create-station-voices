@@ -1,9 +1,9 @@
-package de.jamala.station_voices.ponder
+package de.jamala1111.station_voices.ponder
 
 import com.simibubi.create.AllBlocks
 import com.simibubi.create.foundation.ponder.CreateSceneBuilder
-import de.jamala.station_voices.block.ModBlocks
-import de.jamala.station_voices.item.ModItems
+import de.jamala1111.station_voices.block.ModBlocks
+import de.jamala1111.station_voices.item.ModItems
 import net.createmod.catnip.math.Pointing
 import net.createmod.ponder.api.PonderPalette
 import net.createmod.ponder.api.scene.SceneBuilder

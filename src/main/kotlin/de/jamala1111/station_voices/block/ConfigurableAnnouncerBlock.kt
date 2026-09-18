@@ -1,4 +1,4 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
 import net.minecraft.core.BlockPos
 import net.minecraft.world.InteractionResult
@@ -60,7 +60,7 @@ class ConfigurableAnnouncerBlock(properties: Properties) : Block(properties), En
             if (be != null) {
                 runForDist(
                     clientTarget = {
-                        de.jamala.station_voices.client.ClientHooks.openConfigurableAnnouncerScreen(pos, be)
+                        de.jamala1111.station_voices.client.ClientHooks.openConfigurableAnnouncerScreen(pos, be)
                     },
                     serverTarget = {}
                 )

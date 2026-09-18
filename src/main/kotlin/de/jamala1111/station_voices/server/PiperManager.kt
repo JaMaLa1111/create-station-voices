@@ -1,8 +1,8 @@
-package de.jamala.station_voices.server
+package de.jamala1111.station_voices.server
 
-import de.jamala.station_voices.CreateStationVoices
-import de.jamala.station_voices.TextSanitizer
-import de.jamala.station_voices.VoiceModelInfo
+import de.jamala1111.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.TextSanitizer
+import de.jamala1111.station_voices.VoiceModelInfo
 import com.google.gson.JsonParser
 import io.github.jvoiceproject.piperjni.PiperJNI
 import io.github.jvoiceproject.piperjni.PiperVoice

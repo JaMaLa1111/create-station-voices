@@ -1,7 +1,7 @@
-package de.jamala.station_voices.ponder
+package de.jamala1111.station_voices.ponder
 
 import com.simibubi.create.infrastructure.ponder.AllCreatePonderTags
-import de.jamala.station_voices.block.ModBlocks
+import de.jamala1111.station_voices.block.ModBlocks
 import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation

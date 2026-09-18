@@ -1,8 +1,8 @@
-package de.jamala.station_voices.item
+package de.jamala1111.station_voices.item
 
 import com.simibubi.create.content.trains.station.StationBlockEntity
 import com.simibubi.create.content.trains.observer.TrackObserverBlockEntity
-import de.jamala.station_voices.block.ModBlocks
+import de.jamala1111.station_voices.block.ModBlocks
 import net.minecraft.core.BlockPos
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component

@@ -1,7 +1,7 @@
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import de.jamala.station_voices.block.TrainAnnouncerMovementBehaviour
-import de.jamala.station_voices.block.TrainProfile
+import de.jamala1111.station_voices.block.TrainAnnouncerMovementBehaviour
+import de.jamala1111.station_voices.block.TrainProfile
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

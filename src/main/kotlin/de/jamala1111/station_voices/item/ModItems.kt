@@ -1,7 +1,7 @@
-package de.jamala.station_voices.item
+package de.jamala1111.station_voices.item
 
-import de.jamala.station_voices.CreateStationVoices
-import de.jamala.station_voices.block.ModBlocks
+import de.jamala1111.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.block.ModBlocks
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Item
 import net.neoforged.neoforge.registries.DeferredRegister

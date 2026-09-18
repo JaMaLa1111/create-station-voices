@@ -1,4 +1,4 @@
-package de.jamala.station_voices.network
+package de.jamala1111.station_voices.network
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -6,10 +6,10 @@ import com.simibubi.create.Create
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity
 import com.simibubi.create.content.trains.graph.EdgePointType
 import com.simibubi.create.content.trains.schedule.destination.DestinationInstruction
-import de.jamala.station_voices.CreateStationVoices
-import de.jamala.station_voices.block.TrainAnnouncerBlockEntity
-import de.jamala.station_voices.block.TrainAnnouncerMovementData
-import de.jamala.station_voices.block.TrainProfile
+import de.jamala1111.station_voices.CreateStationVoices
+import de.jamala1111.station_voices.block.TrainAnnouncerBlockEntity
+import de.jamala1111.station_voices.block.TrainAnnouncerMovementData
+import de.jamala1111.station_voices.block.TrainProfile
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.RegistryFriendlyByteBuf
@@ -174,7 +174,7 @@ object ModNetworkingTrainAnnouncer {
                         } catch (e: Exception) {
                             mutableMapOf()
                         }
-                        de.jamala.station_voices.client.ClientHooks.openTrainAnnouncerScreen(
+                        de.jamala1111.station_voices.client.ClientHooks.openTrainAnnouncerScreen(
                             payload.entityId,
                             payload.pos,
                             payload.localPos,
@@ -201,9 +201,9 @@ object ModNetworkingTrainAnnouncer {
                 }
                 val map = mutableMapOf<String, TrainProfile>()
                 for ((key, profile) in rawMap) {
-                    val sanitizedKey = de.jamala.station_voices.TextSanitizer.sanitizeLabel(key)
+                    val sanitizedKey = de.jamala1111.station_voices.TextSanitizer.sanitizeLabel(key)
                     if (sanitizedKey.isNotBlank()) {
-                        profile.text = de.jamala.station_voices.TextSanitizer.sanitizeTemplate(profile.text, profile.language)
+                        profile.text = de.jamala1111.station_voices.TextSanitizer.sanitizeTemplate(profile.text, profile.language)
                         map[sanitizedKey] = profile
                     }
                 }
@@ -316,7 +316,7 @@ object ModNetworkingTrainAnnouncer {
             context.enqueueWork {
                 net.neoforged.fml.loading.FMLEnvironment.dist.let {
                     if (it.isClient) {
-                        de.jamala.station_voices.client.ClientHooks.handleAutoFetchStationsResponse(payload.stationNames)
+                        de.jamala1111.station_voices.client.ClientHooks.handleAutoFetchStationsResponse(payload.stationNames)
                     }
                 }
             }

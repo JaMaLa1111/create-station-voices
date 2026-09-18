@@ -1,4 +1,4 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -7,12 +7,12 @@ import com.simibubi.create.content.contraptions.behaviour.MovementContext
 import com.simibubi.create.content.trains.entity.CarriageContraption
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity
 import com.simibubi.create.content.trains.entity.Train
-import de.jamala.station_voices.JingleManager
-import de.jamala.station_voices.JingleTiming
-import de.jamala.station_voices.ModConfig
-import de.jamala.station_voices.network.PlayAnnouncerAudioDataChunkPayload
-import de.jamala.station_voices.network.PlayAnnouncerAudioPayload
-import de.jamala.station_voices.server.PiperManager
+import de.jamala1111.station_voices.JingleManager
+import de.jamala1111.station_voices.JingleTiming
+import de.jamala1111.station_voices.ModConfig
+import de.jamala1111.station_voices.network.PlayAnnouncerAudioDataChunkPayload
+import de.jamala1111.station_voices.network.PlayAnnouncerAudioPayload
+import de.jamala1111.station_voices.server.PiperManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -101,14 +101,14 @@ class TrainAnnouncerMovementBehaviour : MovementBehaviour {
         val profile = findProfile(data.profiles, stationName) ?: return
         if (profile.text.isBlank()) return
 
-        val cleanStationName = de.jamala.station_voices.TextSanitizer.sanitizeLabel(stationName)
-        val announcementText = de.jamala.station_voices.TextSanitizer.sanitize(
+        val cleanStationName = de.jamala1111.station_voices.TextSanitizer.sanitizeLabel(stationName)
+        val announcementText = de.jamala1111.station_voices.TextSanitizer.sanitize(
             profile.text
                 .replace("{station}", cleanStationName, ignoreCase = true)
                 .replace("{name}", cleanStationName, ignoreCase = true),
             profile.language
         )
-        if (!de.jamala.station_voices.TextSanitizer.isSpeakable(announcementText)) return
+        if (!de.jamala1111.station_voices.TextSanitizer.isSpeakable(announcementText)) return
 
         data.isPlaying = true
         data.lastAnnouncementText = announcementText

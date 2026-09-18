@@ -1,8 +1,8 @@
-package de.jamala.station_voices.client
+package de.jamala1111.station_voices.client
 
-import de.jamala.station_voices.Jingle
-import de.jamala.station_voices.JingleTiming
-import de.jamala.station_voices.network.SetAnnouncerDataPayload
+import de.jamala1111.station_voices.Jingle
+import de.jamala1111.station_voices.JingleTiming
+import de.jamala1111.station_voices.network.SetAnnouncerDataPayload
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.AbstractSliderButton
 import net.minecraft.client.gui.components.Button
@@ -126,11 +126,11 @@ class AnnouncerScreen(
 
         // Common
         genBtn = addRenderableWidget(Button.builder(Component.literal("Generate & Preview")) { _ ->
-            de.jamala.station_voices.client.ClientHooks.testAL()
-            val text = de.jamala.station_voices.TextSanitizer.sanitize(textBox.value, currentLanguage)
+            de.jamala1111.station_voices.client.ClientHooks.testAL()
+            val text = de.jamala1111.station_voices.TextSanitizer.sanitize(textBox.value, currentLanguage)
             textBox.value = text
             if (text.isNotBlank()) {
-                PacketDistributor.sendToServer(de.jamala.station_voices.network.RequestPreviewAudioPayload(
+                PacketDistributor.sendToServer(de.jamala1111.station_voices.network.RequestPreviewAudioPayload(
                     text, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange, currentJingle, currentJingleTiming, currentRealism
                 ))
             }
@@ -142,7 +142,7 @@ class AnnouncerScreen(
         }.bounds(centerX - 100, centerY + 81, 95, 20).build())
 
         doneBtn = addRenderableWidget(Button.builder(Component.literal("Done")) { _ ->
-            currentText = de.jamala.station_voices.TextSanitizer.sanitize(textBox.value, currentLanguage)
+            currentText = de.jamala1111.station_voices.TextSanitizer.sanitize(textBox.value, currentLanguage)
             textBox.value = currentText
             PacketDistributor.sendToServer(SetAnnouncerDataPayload(pos, currentText, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange, currentJingle, currentJingleTiming, currentRealism))
             onClose()

@@ -1,4 +1,4 @@
-package de.jamala.station_voices.client
+package de.jamala1111.station_voices.client
 
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
@@ -9,7 +9,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.net.HttpURLConnection
-import de.jamala.station_voices.ModConfig
+import de.jamala1111.station_voices.ModConfig
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -17,9 +17,9 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.FloatControl
 import javax.sound.sampled.LineEvent
-import de.jamala.station_voices.Jingle
-import de.jamala.station_voices.JingleManager
-import de.jamala.station_voices.JingleTiming
+import de.jamala1111.station_voices.Jingle
+import de.jamala1111.station_voices.JingleManager
+import de.jamala1111.station_voices.JingleTiming
 
 import javax.sound.sampled.SourceDataLine
 import kotlinx.coroutines.sync.Mutex
@@ -234,7 +234,7 @@ object AudioPlayer {
                 if (pos != null) {
                     try {
                         net.neoforged.neoforge.network.PacketDistributor.sendToServer(
-                            de.jamala.station_voices.network.AnnouncerAudioFinishedPayload(pos)
+                            de.jamala1111.station_voices.network.AnnouncerAudioFinishedPayload(pos)
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -245,12 +245,12 @@ object AudioPlayer {
     }
 
     fun play(pos: BlockPos?, text: String, voice: String, language: String, speed: Float, volume: Float, reverb: Boolean, maxRange: Int, jingle: String = "OFF", jingleTiming: String = "BOTH", realism: Float = 0.0f, entityId: Int? = null) {
-        val safeText = de.jamala.station_voices.TextSanitizer.sanitizeForModel(text, null, language)
+        val safeText = de.jamala1111.station_voices.TextSanitizer.sanitizeForModel(text, null, language)
         if (safeText.isNullOrBlank()) {
             if (pos != null) {
                 try {
                     net.neoforged.neoforge.network.PacketDistributor.sendToServer(
-                        de.jamala.station_voices.network.AnnouncerAudioFinishedPayload(pos)
+                        de.jamala1111.station_voices.network.AnnouncerAudioFinishedPayload(pos)
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -311,7 +311,7 @@ object AudioPlayer {
     }
 
     suspend fun getAudioFile(text: String, voice: String, language: String): File {
-        val safeText = de.jamala.station_voices.TextSanitizer.sanitizeForModel(text, null, language) ?: text.trim()
+        val safeText = de.jamala1111.station_voices.TextSanitizer.sanitizeForModel(text, null, language) ?: text.trim()
         val hash = md5("$safeText-$voice-$language")
         val file = File(CACHE_DIR, "$hash.wav")
 

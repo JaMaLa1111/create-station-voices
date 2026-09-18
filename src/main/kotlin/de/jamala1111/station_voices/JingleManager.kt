@@ -1,4 +1,4 @@
-package de.jamala.station_voices
+package de.jamala1111.station_voices
 
 import java.io.InputStream
 import java.io.ByteArrayOutputStream

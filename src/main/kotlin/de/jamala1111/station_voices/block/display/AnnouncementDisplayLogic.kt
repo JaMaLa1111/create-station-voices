@@ -1,6 +1,6 @@
-package de.jamala.station_voices.block.display
+package de.jamala1111.station_voices.block.display
 
-import de.jamala.station_voices.block.IAnnouncerSource
+import de.jamala1111.station_voices.block.IAnnouncerSource
 
 object AnnouncementDisplayLogic {
     fun getDisplayText(be: IAnnouncerSource?, mode: Int): String? {

@@ -1,6 +1,6 @@
-import de.jamala.station_voices.Jingle
-import de.jamala.station_voices.JingleManager
-import de.jamala.station_voices.JingleTiming
+import de.jamala1111.station_voices.Jingle
+import de.jamala1111.station_voices.JingleManager
+import de.jamala1111.station_voices.JingleTiming
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import javax.sound.sampled.AudioFormat

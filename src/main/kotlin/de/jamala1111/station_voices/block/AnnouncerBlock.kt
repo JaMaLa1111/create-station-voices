@@ -1,4 +1,4 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.BuiltInRegistries
@@ -19,10 +19,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties
 import net.minecraft.world.phys.BlockHitResult
 import net.neoforged.api.distmarker.Dist
 import thedarkcolour.kotlinforforge.neoforge.forge.runForDist
-import de.jamala.station_voices.ModConfig
-import de.jamala.station_voices.server.PiperManager
-import de.jamala.station_voices.network.PlayAnnouncerAudioDataChunkPayload
-import de.jamala.station_voices.JingleTiming
+import de.jamala1111.station_voices.ModConfig
+import de.jamala1111.station_voices.server.PiperManager
+import de.jamala1111.station_voices.network.PlayAnnouncerAudioDataChunkPayload
+import de.jamala1111.station_voices.JingleTiming
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,7 +72,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
             if (be != null) {
                 runForDist(
                     clientTarget = {
-                        de.jamala.station_voices.client.ClientHooks.openAnnouncerScreen(
+                        de.jamala1111.station_voices.client.ClientHooks.openAnnouncerScreen(
                             pos, 
                             be.ttsText, 
                             be.ttsVoice, 
@@ -122,8 +122,8 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
     }
 
     private fun triggerAudio(level: Level, pos: BlockPos, be: AnnouncerBlockEntity) {
-        val safeText = de.jamala.station_voices.TextSanitizer.sanitize(be.ttsText, be.ttsLanguage)
-        if (!de.jamala.station_voices.TextSanitizer.isSpeakable(safeText)) {
+        val safeText = de.jamala1111.station_voices.TextSanitizer.sanitize(be.ttsText, be.ttsLanguage)
+        if (!de.jamala1111.station_voices.TextSanitizer.isSpeakable(safeText)) {
             be.isPlaying = false
             return
         }
@@ -234,11 +234,11 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
             }
         } else {
             val timing = JingleTiming.fromString(be.ttsJingleTiming)
-            val jingleDurationMs = de.jamala.station_voices.JingleManager.getJingleDuration(be.ttsJingle, be.ttsSpeed, timing)
+            val jingleDurationMs = de.jamala1111.station_voices.JingleManager.getJingleDuration(be.ttsJingle, be.ttsSpeed, timing)
             val estimatedDurationMs = (safeText.length * 120L / be.ttsSpeed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (be.ttsReverb) 900L else 0L) + jingleDurationMs
             be.audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
-            val payload = de.jamala.station_voices.network.PlayAnnouncerAudioPayload(
+            val payload = de.jamala1111.station_voices.network.PlayAnnouncerAudioPayload(
                 pos,
                 safeText, 
                 be.ttsVoice, 
@@ -263,7 +263,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
 
             val speakers = SpeakerManager.getSpeakersFor(level, pos)
             for (speakerPos in speakers) {
-                val speakerPayload = de.jamala.station_voices.network.PlayAnnouncerAudioPayload(
+                val speakerPayload = de.jamala1111.station_voices.network.PlayAnnouncerAudioPayload(
                     speakerPos,
                     safeText, 
                     be.ttsVoice, 
@@ -311,7 +311,7 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
             val adjustedMs = ((durationSeconds / speedFactor) * 1000.0).toLong()
             val reverbTailMs = if (reverb) 900L else 0L
             val timing = JingleTiming.fromString(jingleTiming)
-            val jingleMs = de.jamala.station_voices.JingleManager.getJingleDuration(jingle, speed, timing)
+            val jingleMs = de.jamala1111.station_voices.JingleManager.getJingleDuration(jingle, speed, timing)
             return adjustedMs + reverbTailMs + jingleMs
         } catch (e: Exception) {
             return 2000L

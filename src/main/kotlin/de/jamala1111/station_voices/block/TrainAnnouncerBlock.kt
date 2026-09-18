@@ -1,4 +1,4 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
 import net.minecraft.core.BlockPos
 import net.minecraft.world.InteractionResult
@@ -59,7 +59,7 @@ class TrainAnnouncerBlock(properties: Properties) : Block(properties), EntityBlo
             if (be != null) {
                 runForDist(
                     clientTarget = {
-                        de.jamala.station_voices.client.ClientHooks.openTrainAnnouncerScreen(
+                        de.jamala1111.station_voices.client.ClientHooks.openTrainAnnouncerScreen(
                             entityId = null,
                             pos = pos,
                             localPos = null,

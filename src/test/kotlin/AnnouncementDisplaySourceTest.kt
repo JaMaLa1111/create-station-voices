@@ -1,5 +1,5 @@
-import de.jamala.station_voices.block.IAnnouncerSource
-import de.jamala.station_voices.block.display.AnnouncementDisplayLogic
+import de.jamala1111.station_voices.block.IAnnouncerSource
+import de.jamala1111.station_voices.block.display.AnnouncementDisplayLogic
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

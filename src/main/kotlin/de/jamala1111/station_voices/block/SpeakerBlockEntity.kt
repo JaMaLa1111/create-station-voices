@@ -1,4 +1,4 @@
-package de.jamala.station_voices.block
+package de.jamala1111.station_voices.block
 
 import com.simibubi.create.api.equipment.goggles.IHaveGoggleInformation
 import net.minecraft.core.BlockPos

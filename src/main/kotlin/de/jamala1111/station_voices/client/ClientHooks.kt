@@ -1,4 +1,4 @@
-package de.jamala.station_voices.client
+package de.jamala1111.station_voices.client
 
 import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
@@ -38,12 +38,12 @@ object ClientHooks {
         Minecraft.getInstance().setScreen(AnnouncerScreen(pos, currentText, currentVoice, currentLanguage, currentSpeed, currentVolume, currentReverb, currentMaxRange, currentJingle, currentJingleTiming, currentRealism))
     }
     
-    fun openConfigurableAnnouncerScreen(pos: BlockPos, be: de.jamala.station_voices.block.ConfigurableAnnouncerBlockEntity) {
+    fun openConfigurableAnnouncerScreen(pos: BlockPos, be: de.jamala1111.station_voices.block.ConfigurableAnnouncerBlockEntity) {
         val profilesMap = be.profiles.mapValues { it.value.copy() }.toMutableMap()
         Minecraft.getInstance().setScreen(ConfigurableAnnouncerScreen(pos, profilesMap, be.targetStation))
     }
 
-    fun openTrainAnnouncerScreen(entityId: Int?, pos: BlockPos?, localPos: BlockPos?, profiles: MutableMap<String, de.jamala.station_voices.block.TrainProfile>) {
+    fun openTrainAnnouncerScreen(entityId: Int?, pos: BlockPos?, localPos: BlockPos?, profiles: MutableMap<String, de.jamala1111.station_voices.block.TrainProfile>) {
         val profilesMap = profiles.mapValues { it.value.copy() }.toMutableMap()
         Minecraft.getInstance().setScreen(TrainAnnouncerScreen(entityId, pos, localPos, profilesMap))
     }
