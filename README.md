@@ -35,7 +35,7 @@
   - Audible Range (1-64 blocks)
   - A realism slider (noticeably reduces the quality of the announcement to be more in-line with real-world station announcements)
   - Jingles can be turned on in the effects menu, the selected jingle will play either before, after or before and after the announcement depending on the selected option. Supported jingles include DB Gong, SNCF, NS, and UK chime.
-* **Custom Jingles**
+* **Custom Jingles**  
   You can manage Jingles by opening the GUI using `/create_station_voices jingles`. Alternatively you can add your own jingles to the mod by placing them in the `config/create_station_voices/jingles` folder. After placing your jingles run `/create_station_voices reload_jingles` to reload the jingles. The mod supports `.wav`, `.ogg`, and `.mp3` files.
 * **Audio Falloff**  
   Announcements feature natural sound falloff (volume begins to decrease after one-third of the max range).
