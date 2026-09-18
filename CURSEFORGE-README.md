@@ -81,13 +81,13 @@ With `v1.0.0-rc1` all features I planned are added. If you wish to suggest a fea
 
 ### Questions that nobody asked (FAQ):
 
-**Q: Will there be a Fabric or Forge port?**
+**Q: Will there be a Fabric or Forge port?**  
 **A:** Main development will remain strictly on NeoForge for now. However, I might consider porting to Fabric or Forge in the future once the mod is feature-complete.
 
-**Q: Will you backport this to older Minecraft versions?**
+**Q: Will you backport this to older Minecraft versions?**  
 **A:** Similar to the modloader situation, backports (e.g., to 1.20.1) are not currently planned, but may be considered in the future.
 
-**Q: Can I use this mod in my modpack?**
+**Q: Can I use this mod in my modpack?**  
 **A:** Yes! Feel free to include Create: Station Voices in any CurseForge or Modrinth modpack, aslong as credit is given (CurseForge/Modrinth linking back to the mod in the mod list is enough).
 
 ---
