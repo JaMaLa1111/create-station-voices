@@ -2,7 +2,7 @@
 
 *A Create addon that brings automated, customizable Text-to-Speech announcements to your railway network.*
 
-> **Work in Progress:** This mod is currently in beta. You may encounter bugs. If you find any, please [open an issue](https://github.com/JaMaLa1111/create-station-voices/issues) on GitHub!
+> **Work in Progress:** While version 1.0.0 has been released most of the mod is still in beta. You may encounter bugs. If you find any, please [open an issue](https://github.com/JaMaLa1111/create-station-voices/issues) on GitHub!
 > If you want to be notified when the mod gets updated, take part in polls for new features or suggest your own, join the [dedicated Discord server](https://discord.gg/22zCpHDxnw)
 
 *Currently only available for NeoForge*
@@ -27,11 +27,13 @@
   Links to either a **Train Station** or a **Train Observer**. It supports multiple profiles for different trains, triggering the announcement when a train arrives or passes by.
 * **Custom Audio Effects**  
   Configure audio directly per announcer block/profile:
-    - Pitch & Speed
-    - Volume
-    - Audible Range (1-64 blocks)
-    - A realism slider (noticeably reduces the quality of the announcement to be more in-line with real-world station announcements)
-    - Jingles can be turned on in the effects menu, the selected jingle will play either before, after or before and after the announcement depending on the selected option. Supported jingles include DB Gong, SNCF, NS, and UK chime.
+  - Pitch & Speed
+  - Volume
+  - Audible Range (1-64 blocks)
+  - A realism slider (noticeably reduces the quality of the announcement to be more in-line with real-world station announcements)
+  - Jingles can be turned on in the effects menu, the selected jingle will play either before, after or before and after the announcement depending on the selected option. Supported jingles include DB Gong, SNCF, NS, and UK chime.
+* **Custom Jingles**
+  You can manage Jingles by opening the GUI using `/create_station_voices jingles`. Alternatively you can add your own jingles to the mod by placing them in the `config/create_station_voices/jingles` folder. After placing your jingles run `/create_station_voices reload_jingles` to reload the jingles. The mod supports `.wav`, `.ogg`, and `.mp3` files.
 * **Audio Falloff**  
   Announcements feature natural sound falloff (volume begins to decrease after one-third of the max range).
 * **Auto-Populate Profiles**  
@@ -79,13 +81,13 @@ With `v1.0.0-rc1` all features I planned are added. If you wish to suggest a fea
 
 ### Questions that nobody asked (FAQ):
 
-**Q: Will there be a Fabric or Forge port?**  
+**Q: Will there be a Fabric or Forge port?**
 **A:** Main development will remain strictly on NeoForge for now. However, I might consider porting to Fabric or Forge in the future once the mod is feature-complete.
 
-**Q: Will you backport this to older Minecraft versions?**  
+**Q: Will you backport this to older Minecraft versions?**
 **A:** Similar to the modloader situation, backports (e.g., to 1.20.1) are not currently planned, but may be considered in the future.
 
-**Q: Can I use this mod in my modpack?**  
+**Q: Can I use this mod in my modpack?**
 **A:** Yes! Feel free to include Create: Station Voices in any CurseForge or Modrinth modpack, aslong as credit is given (CurseForge/Modrinth linking back to the mod in the mod list is enough).
 
 ---
