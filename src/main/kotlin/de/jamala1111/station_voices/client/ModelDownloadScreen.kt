@@ -19,7 +19,7 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URI
 
-class ModelDownloadScreen : Screen(Component.literal("Piper Models Downloader")) {
+class ModelDownloadScreen : Screen(Component.translatable("gui.create_station_voices.model_download.title")) {
 
     private var availableData = mutableMapOf<String, List<String>>()
     private var piperManifestData = mutableMapOf<String, JsonObject>() // voiceKey -> data
@@ -55,26 +55,26 @@ class ModelDownloadScreen : Screen(Component.literal("Piper Models Downloader"))
         voiceList.setX(centerX + 5)
         addRenderableWidget(voiceList)
 
-        addRenderableWidget(Button.builder(Component.literal("Close")) { _ ->
+        addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.close")) { _ ->
             minecraft?.setScreen(null)
         }.bounds(centerX - 50, height - 30, 100, 20).build())
 
-        downloadBtn = addRenderableWidget(Button.builder(Component.literal("Download to Server")) { _ ->
+        downloadBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.model_download.download")) { _ ->
             downloadSelectedModel()
         }.bounds(panelX, panelY + 120, 150, 20).build())
         downloadBtn?.active = false
 
-        playSampleBtn = addRenderableWidget(Button.builder(Component.literal("Listen")) { _ ->
+        playSampleBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.model_download.listen")) { _ ->
             playSelectedSample()
         }.bounds(panelX, panelY + 95, 100, 20).build())
         playSampleBtn?.active = false
         
-        stopSampleBtn = addRenderableWidget(Button.builder(Component.literal("Stop")) { _ ->
+        stopSampleBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.stop")) { _ ->
             stopSelectedSample()
         }.bounds(panelX + 105, panelY + 95, 45, 20).build())
         stopSampleBtn?.active = false
 
-        refetchBtn = addRenderableWidget(Button.builder(Component.literal("Refresh Manifest")) { _ ->
+        refetchBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.model_download.refresh_manifest")) { _ ->
             fetchData()
         }.bounds(width - 110, 10, 100, 20).build())
         
@@ -221,13 +221,13 @@ class ModelDownloadScreen : Screen(Component.literal("Piper Models Downloader"))
         
         if (isDownloading) {
             downloadBtn?.active = false
-            downloadBtn?.message = Component.literal("Downloading...")
+            downloadBtn?.message = Component.translatable("gui.create_station_voices.model_download.downloading")
         } else if (isInstalled) {
             downloadBtn?.active = false
-            downloadBtn?.message = Component.literal("Installed")
+            downloadBtn?.message = Component.translatable("gui.create_station_voices.model_download.installed")
         } else {
             downloadBtn?.active = true
-            downloadBtn?.message = Component.literal("Download to Server")
+            downloadBtn?.message = Component.translatable("gui.create_station_voices.model_download.download")
         }
 
         val centerX = width / 2
@@ -242,17 +242,16 @@ class ModelDownloadScreen : Screen(Component.literal("Piper Models Downloader"))
             val data = piperManifestData[key]!!
             val modelCard = data.getAsJsonObject("model_card")
             if (modelCard != null) {
-                fun getWrappedHeight(prefix: String, value: String): Int {
-                    val text = "$prefix$value"
-                    val lines = minecraft!!.font.split(Component.literal(text), maxWidth)
+                fun getWrappedHeight(comp: Component): Int {
+                    val lines = minecraft!!.font.split(comp, maxWidth)
                     return lines.size * (minecraft!!.font.lineHeight + 2)
                 }
                 
-                if (modelCard.has("quality")) metadataHeight += getWrappedHeight("Quality: ", modelCard.get("quality").asString)
-                if (modelCard.has("speakers")) metadataHeight += getWrappedHeight("Speakers: ", modelCard.get("speakers").asString)
-                if (modelCard.has("samplerate")) metadataHeight += getWrappedHeight("Sample Rate: ", modelCard.get("samplerate").asString)
-                if (modelCard.has("url")) metadataHeight += getWrappedHeight("URL: ", modelCard.get("url").asString)
-                if (modelCard.has("license")) metadataHeight += getWrappedHeight("License: ", modelCard.get("license").asString)
+                if (modelCard.has("quality")) metadataHeight += getWrappedHeight(Component.translatable("gui.create_station_voices.model_download.quality", modelCard.get("quality").asString))
+                if (modelCard.has("speakers")) metadataHeight += getWrappedHeight(Component.translatable("gui.create_station_voices.model_download.speakers", modelCard.get("speakers").asString))
+                if (modelCard.has("samplerate")) metadataHeight += getWrappedHeight(Component.translatable("gui.create_station_voices.model_download.samplerate", modelCard.get("samplerate").asString))
+                if (modelCard.has("url")) metadataHeight += getWrappedHeight(Component.translatable("gui.create_station_voices.model_download.url", modelCard.get("url").asString))
+                if (modelCard.has("license")) metadataHeight += getWrappedHeight(Component.translatable("gui.create_station_voices.model_download.license", modelCard.get("license").asString))
             }
             
             val sampleUrlObj = data.getAsJsonObject("sample_url")
@@ -301,8 +300,8 @@ class ModelDownloadScreen : Screen(Component.literal("Piper Models Downloader"))
         super.render(guiGraphics, mouseX, mouseY, partialTick)
         guiGraphics.drawCenteredString(font, title, width / 2, 10, 0xFFFFFF)
         
-        guiGraphics.drawCenteredString(font, Component.literal("Language"), width / 2 - 60, 25, 0xAAAAAA)
-        guiGraphics.drawCenteredString(font, Component.literal("Voice"), width / 2 + 60, 25, 0xAAAAAA)
+        guiGraphics.drawCenteredString(font, Component.translatable("gui.create_station_voices.language"), width / 2 - 60, 25, 0xAAAAAA)
+        guiGraphics.drawCenteredString(font, Component.translatable("gui.create_station_voices.voice_column"), width / 2 + 60, 25, 0xAAAAAA)
 
         val centerX = width / 2
         val listWidth = 120
@@ -316,18 +315,17 @@ class ModelDownloadScreen : Screen(Component.literal("Piper Models Downloader"))
         val key = piperManifestData.keys.find { piperManifestData[it]?.get("language")?.asString == selectedLang && piperManifestData[it]?.get("voice")?.asString == selectedVoice }
         if (key != null) {
             val data = piperManifestData[key]!!
-            guiGraphics.drawString(font, Component.literal("Metadata"), panelX, panelY, 0xFFFF55)
+            guiGraphics.drawString(font, Component.translatable("gui.create_station_voices.model_download.metadata"), panelX, panelY, 0xFFFF55)
             
             var yOffset = panelY + 15
             val modelCard = data.getAsJsonObject("model_card")
             if (modelCard != null) {
-                fun drawWrapped(prefix: String, value: String, isUrl: Boolean = false) {
-                    val text = "$prefix$value"
-                    val lines = font.split(Component.literal(text), maxWidth)
+                fun drawWrapped(comp: Component, isUrl: Boolean = false, urlVal: String? = null) {
+                    val lines = font.split(comp, maxWidth)
                     
-                    if (isUrl) {
+                    if (isUrl && urlVal != null) {
                         urlRect = java.awt.Rectangle(panelX, yOffset, maxWidth, lines.size * (font.lineHeight + 2))
-                        activeUrl = value
+                        activeUrl = urlVal
                     }
                     
                     for (line in lines) {
@@ -337,11 +335,11 @@ class ModelDownloadScreen : Screen(Component.literal("Piper Models Downloader"))
                     }
                 }
                 
-                if (modelCard.has("quality")) drawWrapped("Quality: ", modelCard.get("quality").asString)
-                if (modelCard.has("speakers")) drawWrapped("Speakers: ", modelCard.get("speakers").asString)
-                if (modelCard.has("samplerate")) drawWrapped("Sample Rate: ", modelCard.get("samplerate").asString)
-                if (modelCard.has("url")) drawWrapped("URL: ", modelCard.get("url").asString, true)
-                if (modelCard.has("license")) drawWrapped("License: ", modelCard.get("license").asString)
+                if (modelCard.has("quality")) drawWrapped(Component.translatable("gui.create_station_voices.model_download.quality", modelCard.get("quality").asString))
+                if (modelCard.has("speakers")) drawWrapped(Component.translatable("gui.create_station_voices.model_download.speakers", modelCard.get("speakers").asString))
+                if (modelCard.has("samplerate")) drawWrapped(Component.translatable("gui.create_station_voices.model_download.samplerate", modelCard.get("samplerate").asString))
+                if (modelCard.has("url")) drawWrapped(Component.translatable("gui.create_station_voices.model_download.url", modelCard.get("url").asString), true, modelCard.get("url").asString)
+                if (modelCard.has("license")) drawWrapped(Component.translatable("gui.create_station_voices.model_download.license", modelCard.get("license").asString))
             }
         }
 

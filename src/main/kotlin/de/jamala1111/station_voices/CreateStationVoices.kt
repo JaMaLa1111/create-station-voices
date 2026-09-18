@@ -30,6 +30,7 @@ import net.neoforged.neoforge.common.NeoForge
 import de.jamala1111.station_voices.network.ModNetworking
 import de.jamala1111.station_voices.network.ModNetworkingConfigurable
 import de.jamala1111.station_voices.network.ModNetworkingTrainAnnouncer
+import de.jamala1111.station_voices.network.ModNetworkingJingles
 import de.jamala1111.station_voices.command.ModCommands
 
 /**
@@ -62,6 +63,7 @@ object CreateStationVoices {
         MOD_BUS.addListener(ModNetworking::register)
         MOD_BUS.addListener(ModNetworkingConfigurable::register)
         MOD_BUS.addListener(ModNetworkingTrainAnnouncer::register)
+        MOD_BUS.addListener(ModNetworkingJingles::register)
         
         NeoForge.EVENT_BUS.addListener(ModCommands::onRegisterCommands)
 
@@ -141,6 +143,8 @@ object CreateStationVoices {
                 ModBlocks.TRAIN_ANNOUNCER_BLOCK,
                 de.jamala1111.station_voices.block.TrainAnnouncerInteractionBehaviour()
             )
+
+            de.jamala1111.station_voices.JingleManager.reload()
         }
         CoroutineScope(Dispatchers.IO).launch {
             de.jamala1111.station_voices.server.PiperManager.setupPiper()

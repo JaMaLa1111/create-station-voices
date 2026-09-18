@@ -36,8 +36,12 @@ class ConfigurableAnnouncerBlockItem(block: Block, properties: Item.Properties) 
                 
                 stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag))
                 
-                val type = if (be is StationBlockEntity) "Station" else "Observer"
-                player?.displayClientMessage(Component.literal("Linked to $type at ${pos.x}, ${pos.y}, ${pos.z}"), true)
+                val typeComp = if (be is StationBlockEntity) {
+                    Component.translatable("gui.create_station_voices.target_station_short")
+                } else {
+                    Component.translatable("gui.create_station_voices.target_observer_short")
+                }
+                player?.displayClientMessage(Component.translatable("gui.create_station_voices.item.linked_to_coords", typeComp, pos.x, pos.y, pos.z), true)
                 return InteractionResult.SUCCESS
             }
         } else {

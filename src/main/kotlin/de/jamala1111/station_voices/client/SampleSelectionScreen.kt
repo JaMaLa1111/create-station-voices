@@ -7,7 +7,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 
-class SampleSelectionScreen(val parent: Screen, val samples: Map<String, String>, val onSampleSelected: (String) -> Unit) : Screen(Component.literal("Select Sample")) {
+class SampleSelectionScreen(val parent: Screen, val samples: Map<String, String>, val onSampleSelected: (String) -> Unit) : Screen(Component.translatable("gui.create_station_voices.sample_selection.title")) {
     private lateinit var sampleList: StringList
     private var selectedSample: String? = null
 
@@ -25,11 +25,11 @@ class SampleSelectionScreen(val parent: Screen, val samples: Map<String, String>
             sampleList.selectItem(selectedSample!!)
         }
 
-        addRenderableWidget(Button.builder(Component.literal("Cancel")) { _ ->
+        addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.cancel")) { _ ->
             minecraft?.setScreen(parent)
         }.bounds(centerX - 105, height - 30, 100, 20).build())
 
-        addRenderableWidget(Button.builder(Component.literal("Play")) { _ ->
+        addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.play")) { _ ->
             if (selectedSample != null) {
                 onSampleSelected(samples[selectedSample!!]!!)
             }
@@ -73,7 +73,7 @@ class SampleSelectionScreen(val parent: Screen, val samples: Map<String, String>
         inner class StringEntry(val text: String) : ObjectSelectionList.Entry<StringEntry>() {
             override fun render(guiGraphics: GuiGraphics, index: Int, top: Int, left: Int, width: Int, height: Int, mouseX: Int, mouseY: Int, isMouseOver: Boolean, partialTick: Float) {
                 val color = if (selected == this) 0x00FF00 else 0xFFFFFF
-                guiGraphics.drawString(minecraft!!.font, "Sample $text", left + 5, top + 2, color)
+                guiGraphics.drawString(minecraft!!.font, Component.translatable("gui.create_station_voices.sample_item", text), left + 5, top + 2, color)
             }
             
             override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {

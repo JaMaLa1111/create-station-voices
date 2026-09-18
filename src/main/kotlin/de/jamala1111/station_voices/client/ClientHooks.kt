@@ -65,6 +65,17 @@ object ClientHooks {
     fun openModelDownloadScreen() {
         Minecraft.getInstance().setScreen(ModelDownloadScreen())
     }
+
+    fun openJingleManagerScreen() {
+        Minecraft.getInstance().setScreen(JingleManagerScreen())
+    }
+
+    fun handleSyncJingles(jingles: List<de.jamala1111.station_voices.network.JingleNetworkData>) {
+        val screen = Minecraft.getInstance().screen
+        if (screen is JingleManagerScreen) {
+            screen.updateJingles(jingles)
+        }
+    }
     
     fun handleInstalledModels(models: List<String>) {
         val screen = Minecraft.getInstance().screen

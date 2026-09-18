@@ -36,8 +36,12 @@ class SpeakerBlockItem(block: Block, properties: Item.Properties) : BlockItem(bl
 
                 stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag))
 
-                val type = if (be is AnnouncerBlockEntity) "Redstone Announcer" else "Configurable Train Announcer"
-                player?.displayClientMessage(Component.literal("Linked to $type at ${pos.x}, ${pos.y}, ${pos.z}"), true)
+                val typeComp = if (be is AnnouncerBlockEntity) {
+                    Component.translatable("block.create_station_voices.announcer_block")
+                } else {
+                    Component.translatable("block.create_station_voices.configurable_announcer_block")
+                }
+                player?.displayClientMessage(Component.translatable("gui.create_station_voices.item.linked_to_coords", typeComp, pos.x, pos.y, pos.z), true)
             }
             return InteractionResult.SUCCESS
         }
@@ -54,9 +58,9 @@ class SpeakerBlockItem(block: Block, properties: Item.Properties) : BlockItem(bl
             val x = announcerTag.getInt("X")
             val y = announcerTag.getInt("Y")
             val z = announcerTag.getInt("Z")
-            tooltipComponents.add(Component.literal("Linked to Announcer at $x, $y, $z").withStyle(net.minecraft.ChatFormatting.GOLD))
+            tooltipComponents.add(Component.translatable("gui.create_station_voices.item.speaker.linked", x, y, z).withStyle(net.minecraft.ChatFormatting.GOLD))
         } else {
-            tooltipComponents.add(Component.literal("Not linked (Right-click an Announcer to link)").withStyle(net.minecraft.ChatFormatting.GRAY))
+            tooltipComponents.add(Component.translatable("gui.create_station_voices.item.speaker.not_linked").withStyle(net.minecraft.ChatFormatting.GRAY))
         }
     }
 }

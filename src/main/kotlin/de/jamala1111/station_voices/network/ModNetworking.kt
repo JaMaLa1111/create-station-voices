@@ -235,6 +235,23 @@ data class AnnouncerAudioFinishedPayload(val pos: BlockPos) : CustomPacketPayloa
     }
 }
 
+data class ReloadJinglesPayload(val dummy: Boolean = false) : CustomPacketPayload {
+    companion object {
+        val ID = CustomPacketPayload.Type<ReloadJinglesPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "reload_jingles"))
+        val STREAM_CODEC = StreamCodec.ofMember(ReloadJinglesPayload::write, ::read)
+
+        fun read(buf: RegistryFriendlyByteBuf): ReloadJinglesPayload {
+            return ReloadJinglesPayload(buf.readBoolean())
+        }
+    }
+
+    override fun type(): CustomPacketPayload.Type<out CustomPacketPayload> = ID
+
+    fun write(buf: RegistryFriendlyByteBuf) {
+        buf.writeBoolean(dummy)
+    }
+}
+
 object ModNetworking {
     fun register(event: RegisterPayloadHandlersEvent) {
         val registrar = event.registrar(CreateStationVoices.ID)
@@ -408,6 +425,19 @@ object ModNetworking {
                     payload.realism,
                     payload.entityId
                 )
+            }
+        }
+
+        registrar.playToClient(
+            ReloadJinglesPayload.ID,
+            ReloadJinglesPayload.STREAM_CODEC
+        ) { _, context ->
+            context.enqueueWork {
+                net.neoforged.fml.loading.FMLEnvironment.dist.let {
+                    if (it.isClient) {
+                        de.jamala1111.station_voices.JingleManager.reload()
+                    }
+                }
             }
         }
     }

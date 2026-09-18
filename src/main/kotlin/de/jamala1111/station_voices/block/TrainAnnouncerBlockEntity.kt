@@ -44,9 +44,9 @@ class TrainAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(
     }
 
     override fun addToGoggleTooltip(tooltip: MutableList<Component>, isPlayerSneaking: Boolean): Boolean {
-        tooltip.add(Component.literal("    Train-Mounted Announcer").withStyle(net.minecraft.ChatFormatting.GOLD))
-        tooltip.add(Component.literal(" Mount onto a train to announce arriving stations.").withStyle(net.minecraft.ChatFormatting.GRAY))
-        tooltip.add(Component.literal(" Station profiles configured: ").withStyle(net.minecraft.ChatFormatting.GRAY).append(Component.literal("${profiles.size}").withStyle(net.minecraft.ChatFormatting.YELLOW)))
+        tooltip.add(Component.literal("    ").append(Component.translatable("block.create_station_voices.train_announcer_block")).withStyle(net.minecraft.ChatFormatting.GOLD))
+        tooltip.add(Component.translatable("gui.create_station_voices.goggle.train_announcer_desc").withStyle(net.minecraft.ChatFormatting.GRAY))
+        tooltip.add(Component.translatable("gui.create_station_voices.goggle.station_profiles_configured").withStyle(net.minecraft.ChatFormatting.GRAY).append(Component.literal("${profiles.size}").withStyle(net.minecraft.ChatFormatting.YELLOW)))
         return true
     }
 

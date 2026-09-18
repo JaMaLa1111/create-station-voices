@@ -112,17 +112,24 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
     }
 
     override fun addToGoggleTooltip(tooltip: MutableList<Component>, isPlayerSneaking: Boolean): Boolean {
-        tooltip.add(Component.literal("    Configurable Train Announcer").withStyle(net.minecraft.ChatFormatting.GOLD))
+        tooltip.add(Component.literal("    ").append(Component.translatable("block.create_station_voices.configurable_announcer_block")).withStyle(net.minecraft.ChatFormatting.GOLD))
         
         if (targetStation != null) {
             val targetBe = level?.getBlockEntity(targetStation!!)
-            val type = if (targetBe is StationBlockEntity) "Station" else if (targetBe is TrackObserverBlockEntity) "Observer" else "Unknown"
-            tooltip.add(Component.literal(" Linked to: ").withStyle(net.minecraft.ChatFormatting.GRAY).append(Component.literal("$type at ${targetStation!!.x}, ${targetStation!!.y}, ${targetStation!!.z}").withStyle(net.minecraft.ChatFormatting.GREEN)))
+            val typeComp = if (targetBe is StationBlockEntity) {
+                Component.translatable("gui.create_station_voices.goggle.target_station")
+            } else if (targetBe is TrackObserverBlockEntity) {
+                Component.translatable("gui.create_station_voices.goggle.target_observer")
+            } else {
+                Component.translatable("gui.create_station_voices.goggle.target_unknown")
+            }
+            val atComp = Component.translatable("gui.create_station_voices.goggle.target_at", typeComp, targetStation!!.x, targetStation!!.y, targetStation!!.z).withStyle(net.minecraft.ChatFormatting.GREEN)
+            tooltip.add(Component.translatable("gui.create_station_voices.goggle.linked_to").withStyle(net.minecraft.ChatFormatting.GRAY).append(atComp))
         } else {
-            tooltip.add(Component.literal(" Linked to: ").withStyle(net.minecraft.ChatFormatting.GRAY).append(Component.literal("None").withStyle(net.minecraft.ChatFormatting.RED)))
+            tooltip.add(Component.translatable("gui.create_station_voices.goggle.linked_to").withStyle(net.minecraft.ChatFormatting.GRAY).append(Component.translatable("gui.create_station_voices.goggle.linked_none").withStyle(net.minecraft.ChatFormatting.RED)))
         }
         
-        tooltip.add(Component.literal(" Profiles configured: ").withStyle(net.minecraft.ChatFormatting.GRAY).append(Component.literal("${profiles.size}").withStyle(net.minecraft.ChatFormatting.YELLOW)))
+        tooltip.add(Component.translatable("gui.create_station_voices.goggle.profiles_configured").withStyle(net.minecraft.ChatFormatting.GRAY).append(Component.literal("${profiles.size}").withStyle(net.minecraft.ChatFormatting.YELLOW)))
         
         return true
     }

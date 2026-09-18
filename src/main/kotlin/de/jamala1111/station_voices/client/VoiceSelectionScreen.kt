@@ -19,7 +19,7 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URI
 
-class VoiceSelectionScreen(val parent: Screen, val currentLanguage: String, val currentVoice: String, val onVoiceSelected: (String, String) -> Unit) : Screen(Component.literal("Select Voice")) {
+class VoiceSelectionScreen(val parent: Screen, val currentLanguage: String, val currentVoice: String, val onVoiceSelected: (String, String) -> Unit) : Screen(Component.translatable("gui.create_station_voices.voice_selection.title")) {
 
     private var availableData = mutableMapOf<String, List<String>>()
     private var piperManifestData = mutableMapOf<String, JsonObject>() // voiceKey -> data
@@ -46,11 +46,11 @@ class VoiceSelectionScreen(val parent: Screen, val currentLanguage: String, val 
         voiceList.setX(centerX + 5)
         addRenderableWidget(voiceList)
 
-        addRenderableWidget(Button.builder(Component.literal("Cancel")) { _ ->
+        addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.cancel")) { _ ->
             minecraft?.setScreen(parent)
         }.bounds(centerX - 105, height - 30, 100, 20).build())
 
-        addRenderableWidget(Button.builder(Component.literal("Done")) { _ ->
+        addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.done")) { _ ->
             onVoiceSelected(selectedLang, selectedVoice)
             minecraft?.setScreen(parent)
         }.bounds(centerX + 5, height - 30, 100, 20).build())
@@ -143,8 +143,8 @@ class VoiceSelectionScreen(val parent: Screen, val currentLanguage: String, val 
         super.render(guiGraphics, mouseX, mouseY, partialTick)
         guiGraphics.drawCenteredString(font, title, width / 2, 10, 0xFFFFFF)
         
-        guiGraphics.drawCenteredString(font, Component.literal("Language"), width / 2 - 60, 25, 0xAAAAAA)
-        guiGraphics.drawCenteredString(font, Component.literal("Voice"), width / 2 + 60, 25, 0xAAAAAA)
+        guiGraphics.drawCenteredString(font, Component.translatable("gui.create_station_voices.language"), width / 2 - 60, 25, 0xAAAAAA)
+        guiGraphics.drawCenteredString(font, Component.translatable("gui.create_station_voices.voice_column"), width / 2 + 60, 25, 0xAAAAAA)
     }
 
     inner class StringList(mc: Minecraft, width: Int, height: Int, y0: Int, itemHeight: Int) : ObjectSelectionList<StringList.StringEntry>(mc, width, height - y0 - 40, y0, itemHeight) {

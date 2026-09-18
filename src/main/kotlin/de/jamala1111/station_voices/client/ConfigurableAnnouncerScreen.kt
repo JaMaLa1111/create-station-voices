@@ -1,6 +1,7 @@
 package de.jamala1111.station_voices.client
 
 import de.jamala1111.station_voices.Jingle
+import de.jamala1111.station_voices.JingleManager
 import de.jamala1111.station_voices.JingleTiming
 import de.jamala1111.station_voices.block.TrainProfile
 import de.jamala1111.station_voices.network.AutoFetchTrainsRequestPayload
@@ -24,7 +25,7 @@ class ConfigurableAnnouncerScreen(
     val pos: BlockPos,
     val profiles: MutableMap<String, TrainProfile>,
     val targetStation: BlockPos?
-) : Screen(Component.literal("Configurable Announcer Setup")) {
+) : Screen(Component.translatable("gui.create_station_voices.configurable.title")) {
 
     private val originalKeys = profiles.keys.toList()
     private var selectedTrain: String? = null
@@ -61,11 +62,11 @@ class ConfigurableAnnouncerScreen(
         val leftX = centerX - 180
         val rightX = centerX + 10
 
-        newTrainBox = EditBox(font, leftX, 35, 100, 20, Component.literal("Train Name"))
+        newTrainBox = EditBox(font, leftX, 35, 100, 20, Component.translatable("gui.create_station_voices.configurable.train_name"))
         newTrainBox.setMaxLength(64)
         addRenderableWidget(newTrainBox)
 
-        addTrainBtn = addRenderableWidget(Button.builder(Component.literal("Add")) { _ ->
+        addTrainBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.add")) { _ ->
             val name = de.jamala1111.station_voices.TextSanitizer.sanitizeLabel(newTrainBox.value)
             if (name.isNotBlank() && !profiles.containsKey(name)) {
                 profiles[name] = TrainProfile()
@@ -80,7 +81,7 @@ class ConfigurableAnnouncerScreen(
         addRenderableWidget(trainList)
         trainList.updateItems(profiles.keys.toList())
 
-        removeTrainBtn = addRenderableWidget(Button.builder(Component.literal("Remove")) { _ ->
+        removeTrainBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.remove")) { _ ->
             val name = selectedTrain
             if (name != null) {
                 profiles.remove(name)
@@ -90,7 +91,7 @@ class ConfigurableAnnouncerScreen(
             }
         }.bounds(leftX, height - 30, 73, 20).build())
 
-        autoPopulateBtn = addRenderableWidget(Button.builder(Component.literal("Auto-Fetch")) { _ ->
+        autoPopulateBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.auto_fetch")) { _ ->
             autoPopulateTrains()
         }.bounds(leftX + 77, height - 30, 73, 20).build())
 
@@ -99,14 +100,14 @@ class ConfigurableAnnouncerScreen(
         autoPopulateBtn.active = isLinked
 
         // Right Panel
-        textBox = EditBox(font, rightX, centerY - 52, 200, 20, Component.literal("Text"))
+        textBox = EditBox(font, rightX, centerY - 52, 200, 20, Component.translatable("gui.create_station_voices.announcer.text"))
         textBox.setMaxLength(256)
         textBox.setResponder { text ->
             selectedTrain?.let { profiles[it]?.text = text }
         }
         addRenderableWidget(textBox)
 
-        voiceBtn = addRenderableWidget(Button.builder(Component.literal("Voice")) { _ ->
+        voiceBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.voice_button")) { _ ->
             val profile = selectedTrain?.let { profiles[it] }
             if (profile != null) {
                 minecraft?.setScreen(VoiceSelectionScreen(this, profile.language, profile.voice) { lang, voice -> 
@@ -126,35 +127,35 @@ class ConfigurableAnnouncerScreen(
 
         realismSlider = addRenderableWidget(createRealismSlider(rightX, centerY - 11, 200, 20))
 
-        reverbBtn = addRenderableWidget(Button.builder(Component.literal("Reverb: OFF")) { btn ->
+        reverbBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.effects.reverb", Component.translatable("gui.create_station_voices.off"))) { btn ->
             val profile = selectedTrain?.let { profiles[it] }
             if (profile != null) {
                 profile.reverb = !profile.reverb
-                btn.message = Component.literal("Reverb: ${if (profile.reverb) "ON" else "OFF"}")
+                btn.message = Component.translatable("gui.create_station_voices.effects.reverb", Component.translatable(if (profile.reverb) "gui.create_station_voices.on" else "gui.create_station_voices.off"))
             }
         }.bounds(rightX, centerY + 12, 95, 20).build())
 
-        jingleBtn = addRenderableWidget(Button.builder(Component.literal("Jingle: OFF")) { btn ->
+        jingleBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.effects.jingle", "OFF")) { btn ->
             val profile = selectedTrain?.let { profiles[it] }
             if (profile != null) {
-                val next = Jingle.fromString(profile.jingle).next()
-                profile.jingle = next.id
-                btn.message = Component.literal("Jingle: ${next.displayName}")
-                jingleTimingBtn.active = next != Jingle.OFF
+                val next = JingleManager.getNextJingleId(profile.jingle)
+                profile.jingle = next
+                btn.message = Component.translatable("gui.create_station_voices.effects.jingle", JingleManager.getDisplayName(next))
+                jingleTimingBtn.active = !JingleManager.isOff(next)
             }
         }.bounds(rightX + 105, centerY + 12, 95, 20).build())
 
-        jingleTimingBtn = addRenderableWidget(Button.builder(Component.literal("Jingle Timing: Both")) { btn ->
+        jingleTimingBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.effects.jingle_timing", JingleTiming.BOTH.getComponent())) { btn ->
             val profile = selectedTrain?.let { profiles[it] }
             if (profile != null) {
                 val next = JingleTiming.fromString(profile.jingleTiming).next()
                 profile.jingleTiming = next.id
-                btn.message = Component.literal("Jingle Timing: ${next.displayName}")
+                btn.message = Component.translatable("gui.create_station_voices.effects.jingle_timing", next.getComponent())
             }
         }.bounds(rightX, centerY + 35, 200, 20).build())
 
         // Common
-        genBtn = addRenderableWidget(Button.builder(Component.literal("Generate & Preview")) { _ ->
+        genBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.generate_preview")) { _ ->
             val profile = selectedTrain?.let { profiles[it] }
             if (profile != null && profile.text.isNotBlank()) {
                 val previewText = de.jamala1111.station_voices.TextSanitizer.sanitize(
@@ -169,13 +170,13 @@ class ConfigurableAnnouncerScreen(
             }
         }.bounds(rightX, centerY + 58, 200, 20).build())
 
-        tabBtn = addRenderableWidget(Button.builder(Component.literal("Tab: Main")) { _ ->
+        tabBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.tab_main")) { _ ->
             isEffectsTab = !isEffectsTab
             updateRightPanelVisibility()
         }.bounds(rightX, centerY + 81, 95, 20).build())
 
         // Done Button (Saves all)
-        doneBtn = addRenderableWidget(Button.builder(Component.literal("Done")) { _ ->
+        doneBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.done")) { _ ->
             saveAndClose()
         }.bounds(rightX + 105, centerY + 81, 95, 20).build())
 
@@ -243,35 +244,28 @@ class ConfigurableAnnouncerScreen(
 
         if (profile != null) {
             textBox.value = profile.text
-            voiceBtn.message = Component.literal("Voice: ${profile.voice} (${profile.language})")
+            voiceBtn.message = Component.translatable("gui.create_station_voices.voice", profile.voice, profile.language)
             
-            // Set slider values (need reflection or direct var assignment if slider allows, else recreate or ignore warning. Wait, value is protected in AbstractSliderButton in some mappings, but public in others. We'll use a hack or recreate sliders.)
-            // AbstractSliderButton has `value` field. If it's protected, we might get compiler error. 
-            // In Neoforge 1.21, value is `protected double value`.
-            // Let's check how we accessed it in AnnouncerScreen. We accessed `value` inside the anonymous class.
-            // Outside, we might need a setter method in our anonymous class. Let's cast and set.
-            // Wait, we can't easily access `value` from outside in Kotlin without a setter.
             setSliderValue(speedSlider, ((profile.speed - 0.1) / 2.9).toDouble())
             setSliderValue(volumeSlider, profile.volume.toDouble())
             setSliderValue(rangeSlider, ((profile.maxRange - 1.0) / 63.0).toDouble())
             setSliderValue(realismSlider, profile.realism.toDouble())
             
-            reverbBtn.message = Component.literal("Reverb: ${if (profile.reverb) "ON" else "OFF"}")
-            val currentJingle = Jingle.fromString(profile.jingle)
-            jingleBtn.message = Component.literal("Jingle: ${currentJingle.displayName}")
+            reverbBtn.message = Component.translatable("gui.create_station_voices.effects.reverb", Component.translatable(if (profile.reverb) "gui.create_station_voices.on" else "gui.create_station_voices.off"))
+            val jingleName = JingleManager.getDisplayName(profile.jingle)
+            jingleBtn.message = Component.translatable("gui.create_station_voices.effects.jingle", jingleName)
             val timing = JingleTiming.fromString(profile.jingleTiming)
-            jingleTimingBtn.message = Component.literal("Jingle Timing: ${timing.displayName}")
-            jingleTimingBtn.active = currentJingle != Jingle.OFF
+            jingleTimingBtn.message = Component.translatable("gui.create_station_voices.effects.jingle_timing", timing.getComponent())
+            jingleTimingBtn.active = !JingleManager.isOff(profile.jingle)
         } else {
             textBox.value = ""
-            voiceBtn.message = Component.literal("Voice: None")
+            voiceBtn.message = Component.translatable("gui.create_station_voices.voice_none")
         }
 
         updateRightPanelVisibility()
     }
 
     private fun setSliderValue(slider: AbstractSliderButton, newValue: Double) {
-        // Reflection to set value, or just recreate. Better to add an interface.
         if (slider is CustomSlider) {
             slider.setValue(newValue)
             slider.updateMessage()
@@ -282,7 +276,7 @@ class ConfigurableAnnouncerScreen(
         val hasSelection = selectedTrain != null
         val profile = selectedTrain?.let { profiles[it] }
         
-        tabBtn.message = Component.literal(if (isEffectsTab) "Tab: Effects" else "Tab: Main")
+        tabBtn.message = Component.translatable(if (isEffectsTab) "gui.create_station_voices.tab_effects" else "gui.create_station_voices.tab_main")
         
         textBox.visible = hasSelection && !isEffectsTab
         voiceBtn.visible = hasSelection && !isEffectsTab
@@ -295,7 +289,7 @@ class ConfigurableAnnouncerScreen(
         jingleBtn.visible = hasSelection && isEffectsTab
         jingleTimingBtn.visible = hasSelection && isEffectsTab
         if (hasSelection && profile != null) {
-            jingleTimingBtn.active = Jingle.fromString(profile.jingle) != Jingle.OFF
+            jingleTimingBtn.active = !JingleManager.isOff(profile.jingle)
         }
         genBtn.visible = hasSelection
     }
@@ -306,7 +300,7 @@ class ConfigurableAnnouncerScreen(
         
         if (selectedTrain != null) {
             val rightX = width / 2 + 10
-            guiGraphics.drawString(font, "Editing: $selectedTrain", rightX, height / 2 - 95, 0xAAAAAA)
+            guiGraphics.drawString(font, Component.translatable("gui.create_station_voices.editing", selectedTrain), rightX, height / 2 - 95, 0xAAAAAA)
         }
     }
 
@@ -324,7 +318,7 @@ class ConfigurableAnnouncerScreen(
             override fun setValue(v: Double) { value = v }
             public override fun updateMessage() {
                 val act = 0.1 + value * 2.9
-                message = Component.literal(String.format(java.util.Locale.US, "Pitch/Speed: %.2fx", act))
+                message = Component.translatable("gui.create_station_voices.effects.speed", act)
             }
             override fun applyValue() {
                 selectedTrain?.let { profiles[it]?.speed = (0.1 + value * 2.9).toFloat() }
@@ -337,7 +331,7 @@ class ConfigurableAnnouncerScreen(
             init { updateMessage() }
             override fun setValue(v: Double) { value = v }
             public override fun updateMessage() {
-                message = Component.literal(String.format(java.util.Locale.US, "Volume: %d%%", (value * 100).toInt()))
+                message = Component.translatable("gui.create_station_voices.effects.volume", (value * 100).toInt())
             }
             override fun applyValue() {
                 selectedTrain?.let { profiles[it]?.volume = value.toFloat() }
@@ -351,7 +345,7 @@ class ConfigurableAnnouncerScreen(
             override fun setValue(v: Double) { value = v }
             public override fun updateMessage() {
                 val act = 1 + (value * 63).toInt()
-                message = Component.literal("Max Range: $act blocks")
+                message = Component.translatable("gui.create_station_voices.effects.range", act)
             }
             override fun applyValue() {
                 selectedTrain?.let { profiles[it]?.maxRange = 1 + (value * 63).toInt() }
@@ -365,7 +359,7 @@ class ConfigurableAnnouncerScreen(
             override fun setValue(v: Double) { value = v }
             public override fun updateMessage() {
                 val pct = (value * 100).toInt()
-                message = Component.literal(if (pct == 0) "Realism: OFF" else "Realism: $pct%")
+                message = if (pct == 0) Component.translatable("gui.create_station_voices.effects.realism_off") else Component.translatable("gui.create_station_voices.effects.realism", pct)
             }
             override fun applyValue() {
                 selectedTrain?.let { profiles[it]?.realism = value.toFloat() }

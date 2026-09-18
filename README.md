@@ -3,7 +3,7 @@
 *A Create addon that brings automated, customizable Text-to-Speech announcements to your railway network.*
 
 > [!WARNING]
-> **Work in Progress:** This mod is currently in beta. You may encounter bugs. If you find any, please [open an issue](https://github.com/JaMaLa1111/create-station-voices/issues) on GitHub!
+> **Work in Progress:** While version 1.0.0 has been released most of the mod is still in beta. You may encounter bugs. If you find any, please [open an issue](https://github.com/JaMaLa1111/create-station-voices/issues) on GitHub!
 > If you want to be notified when the mod gets updated, take part in polls for new features or suggest your own, join the [dedicated Discord server](https://discord.gg/22zCpHDxnw)
 
 *Currently only available for NeoForge*
@@ -35,6 +35,8 @@
     - Audible Range (1-64 blocks)
     - A realism slider (noticeably reduces the quality of the announcement to be more in-line with real-world station announcements)
     - Jingles can be turned on in the effects menu, the selected jingle will play either before, after or before and after the announcement depending on the selected option. Supported jingles include DB Gong, SNCF, NS, and UK chime.
+* **Custom Jingles**  
+  You can add your own jingles to the mod by placing them in the `config/create_station_voices/jingles` folder. After placing your jingles run `/create_station_voices reload_jingles` to reload the jingles. The mod supports `.wav`, `.ogg`, and `.mp3` files.
 * **Audio Falloff**  
   Announcements feature natural sound falloff (volume begins to decrease after one-third of the max range).
 * **Auto-Populate Profiles**  

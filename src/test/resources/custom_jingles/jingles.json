@@ -1,0 +1,19 @@
+{
+  "jingles": [
+    {
+      "key": "custom-chime",
+      "fileName": "custom-chime.wav",
+      "enabled": true
+    },
+    {
+      "key": "custom-gong",
+      "fileName": "custom-gong.mp3",
+      "enabled": true
+    },
+    {
+      "key": "custom-omroep",
+      "fileName": "custom-omroep.ogg",
+      "enabled": true
+    }
+  ]
+}

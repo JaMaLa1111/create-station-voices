@@ -73,9 +73,8 @@ object AudioPlayer {
                 }
 
                 val audioSegments = mutableListOf<ByteArray>()
-                val jingleType = Jingle.fromString(jingle)
-                if (jingleType != Jingle.OFF) {
-                    var jingleBytes = JingleManager.getJingleBytesForFormat(jingleType, format)
+                if (!JingleManager.isOff(jingle)) {
+                    var jingleBytes = JingleManager.getJingleBytesForFormat(jingle, format)
                     if (realism > 0.001f && jingleBytes.isNotEmpty()) {
                         jingleBytes = RealismFilter.apply(jingleBytes, format, realism)
                     }

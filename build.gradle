@@ -138,6 +138,11 @@ dependencies {
     jarJar("dev.mccue:jlayer-converter:[2024.04.19, 2100.0.0)")
     additionalRuntimeClasspath("dev.mccue:jlayer-converter:2024.04.19")
 
+    implementation("org.jcraft:jorbis:0.0.17")
+    jarJar("org.jcraft:jorbis:[0.0.17, 1.0.0)")
+    additionalRuntimeClasspath("org.jcraft:jorbis:0.0.17")
+
+    testImplementation("org.jcraft:jorbis:0.0.17")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("com.google.code.gson:gson:2.10.1")
