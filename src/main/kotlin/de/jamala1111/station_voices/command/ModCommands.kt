@@ -18,7 +18,7 @@ object ModCommands {
         event.dispatcher.register(
             Commands.literal("create_station_voices")
                 .then(Commands.literal("piper_models")
-                    .requires { it.hasPermission(2) }
+                    .requires { it.hasPermission(2) || !it.server.isDedicatedServer }
                     .executes { context ->
                         val player = context.source.playerOrException
                         PacketDistributor.sendToPlayer(player, OpenModelDownloadScreenPayload())
@@ -26,7 +26,7 @@ object ModCommands {
                     }
                 )
                 .then(Commands.literal("jingle_manager")
-                    .requires { it.hasPermission(2) }
+                    .requires { it.hasPermission(2) || !it.server.isDedicatedServer }
                     .executes { context ->
                         val player = context.source.playerOrException
                         PacketDistributor.sendToPlayer(player, OpenJingleManagerScreenPayload())
@@ -34,7 +34,7 @@ object ModCommands {
                     }
                 )
                 .then(Commands.literal("jingles")
-                    .requires { it.hasPermission(2) }
+                    .requires { it.hasPermission(2) || !it.server.isDedicatedServer }
                     .executes { context ->
                         val player = context.source.playerOrException
                         PacketDistributor.sendToPlayer(player, OpenJingleManagerScreenPayload())

@@ -24,6 +24,7 @@ build
 eclipse
 run
 runs
+net
 
 DEVELOPER_NOTES.md
 TODO.md
