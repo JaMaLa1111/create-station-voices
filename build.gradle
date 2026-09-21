@@ -118,10 +118,18 @@ dependencies {
     runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
     
-    implementation("io.github.jvoice-project:piper-jni:1.4.1")
-    jarJar("io.github.jvoice-project:piper-jni:[1.4.1, 2.0.0)")
-    additionalRuntimeClasspath("io.github.jvoice-project:piper-jni:1.4.1")
+    // --- PIPER JNI (WITH JORBIS EXCLUSIONS) ---
+    implementation("io.github.jvoice-project:piper-jni:1.4.1") {
+        exclude group: 'org.jcraft', module: 'jorbis'
+    }
+    jarJar("io.github.jvoice-project:piper-jni:[1.4.1, 2.0.0)") {
+        exclude group: 'org.jcraft', module: 'jorbis'
+    }
+    additionalRuntimeClasspath("io.github.jvoice-project:piper-jni:1.4.1") {
+        exclude group: 'org.jcraft', module: 'jorbis'
+    }
     
+    // --- JLAYER ---
     implementation("dev.mccue:jlayer:2024.04.19")
     jarJar("dev.mccue:jlayer:[2024.04.19, 2100.0.0)")
     additionalRuntimeClasspath("dev.mccue:jlayer:2024.04.19")
@@ -138,11 +146,13 @@ dependencies {
     jarJar("dev.mccue:jlayer-converter:[2024.04.19, 2100.0.0)")
     additionalRuntimeClasspath("dev.mccue:jlayer-converter:2024.04.19")
 
-    implementation("org.jcraft:jorbis:0.0.17")
-    jarJar("org.jcraft:jorbis:[0.0.17, 1.0.0)")
-    additionalRuntimeClasspath("org.jcraft:jorbis:0.0.17")
+    // --- REMOVED DIRECT JORBIS DEPENDENCIES ---
+    // (Minecraft already provides org.jcraft:jorbis:0.0.17 at runtime, 
+    // so JarJar-ing it causes the JPMS duplicate module crash).
 
-    testImplementation("org.jcraft:jorbis:0.0.17")
+    // --- TESTS ---
+    // (Test environment may still need it if it runs outside the Minecraft launch context)
+    testImplementation("org.jcraft:jorbis:0.0.17") 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("com.google.code.gson:gson:2.10.1")
