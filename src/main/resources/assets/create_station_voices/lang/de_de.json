@@ -105,6 +105,7 @@
   "gui.create_station_voices.model_download.samplerate": "Abtastrate: %s",
   "gui.create_station_voices.model_download.url": "URL: %s",
   "gui.create_station_voices.model_download.license": "Lizenz: %s",
+  "gui.create_station_voices.model_download.size": "Größe: %s MB",
 
   "gui.create_station_voices.jingle_manager.add_jingle": "+ Jingle hinzufügen",
   "gui.create_station_voices.jingle_manager.open_folder": "Ordner öffnen",

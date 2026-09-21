@@ -25,6 +25,8 @@ eclipse
 run
 runs
 net
+logs
+config
 
 DEVELOPER_NOTES.md
 TODO.md

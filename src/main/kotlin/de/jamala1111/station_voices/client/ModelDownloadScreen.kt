@@ -252,6 +252,11 @@ class ModelDownloadScreen : Screen(Component.translatable("gui.create_station_vo
                 if (modelCard.has("samplerate")) metadataHeight += getWrappedHeight(Component.translatable("gui.create_station_voices.model_download.samplerate", modelCard.get("samplerate").asString))
                 if (modelCard.has("url")) metadataHeight += getWrappedHeight(Component.translatable("gui.create_station_voices.model_download.url", modelCard.get("url").asString))
                 if (modelCard.has("license")) metadataHeight += getWrappedHeight(Component.translatable("gui.create_station_voices.model_download.license", modelCard.get("license").asString))
+                if (data.has("size")) {
+                    val sizeMb = "%.2f".format(java.util.Locale.ROOT, data.get("size").asLong / (1024.0 * 1024.0))
+                    metadataHeight += getWrappedHeight(Component.translatable("gui.create_station_voices.model_download.size", sizeMb))
+                }
+                
             }
             
             val sampleUrlObj = data.getAsJsonObject("sample_url")
@@ -340,6 +345,10 @@ class ModelDownloadScreen : Screen(Component.translatable("gui.create_station_vo
                 if (modelCard.has("samplerate")) drawWrapped(Component.translatable("gui.create_station_voices.model_download.samplerate", modelCard.get("samplerate").asString))
                 if (modelCard.has("url")) drawWrapped(Component.translatable("gui.create_station_voices.model_download.url", modelCard.get("url").asString), true, modelCard.get("url").asString)
                 if (modelCard.has("license")) drawWrapped(Component.translatable("gui.create_station_voices.model_download.license", modelCard.get("license").asString))
+                if (data.has("size")) {
+                    val sizeMb = "%.2f".format(java.util.Locale.ROOT, data.get("size").asLong / (1024.0 * 1024.0))
+                    drawWrapped(Component.translatable("gui.create_station_voices.model_download.size", sizeMb))
+                }
             }
         }
 
