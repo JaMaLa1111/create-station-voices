@@ -96,6 +96,13 @@ With `v1.0.0-rc1` all features I planned are added. If you wish to suggest a fea
 
 ---
 
+### Known Issues and Fixes
+
+* **Issue:** Download fails due to missing or wrong certificates.  
+  **Fix:** If you have an external firewall or antivirus software, try adding `-Djavax.net.ssl.trustStoreType=WINDOWS-ROOT` to your JVM arguments. If that doesn't work, try disabling your firewall/antivirus temporarily and re-download the voice models.
+
+---
+
 ## Dependencies
 
 - **Minecraft:** `1.21.1`
