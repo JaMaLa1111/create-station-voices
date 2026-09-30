@@ -160,5 +160,12 @@
   "gui.create_station_voices.target_station_short": "Station",
   "gui.create_station_voices.target_observer_short": "Observer",
 
-  "command.create_station_voices.reload_jingles.success": "Reloaded jingles. Found %d custom jingle(s)."
+  "command.create_station_voices.reload_jingles.success": "Reloaded jingles. Found %d custom jingle(s).",
+
+  "create_station_voices.configuration.title": "Create: Station Voices Configuration",
+  "create_station_voices.configuration.tts": "Text-to-Speech",
+  "create_station_voices.configuration.ttsMode": "TTS Mode",
+  "create_station_voices.configuration.webApiUrl": "Web API URL",
+  "create_station_voices.configuration.permissions": "Permissions",
+  "create_station_voices.configuration.commandPermissionLevel": "Command Permission Level"
 }
