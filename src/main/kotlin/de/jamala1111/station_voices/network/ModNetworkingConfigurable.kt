@@ -85,6 +85,16 @@ data class RequestInstalledModelsPayload(val dummy: Boolean = false) : CustomPac
     fun write(buf: RegistryFriendlyByteBuf) = buf.writeBoolean(dummy)
 }
 
+data class PromptModelDownloadPayload(val serverId: String) : CustomPacketPayload {
+    companion object {
+        val ID = CustomPacketPayload.Type<PromptModelDownloadPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "prompt_model_download"))
+        val STREAM_CODEC = StreamCodec.ofMember(PromptModelDownloadPayload::write, ::read)
+        fun read(buf: RegistryFriendlyByteBuf) = PromptModelDownloadPayload(buf.readUtf())
+    }
+    override fun type() = ID
+    fun write(buf: RegistryFriendlyByteBuf) { buf.writeUtf(serverId) }
+}
+
 data class InstalledModelsPayload(val models: List<String>) : CustomPacketPayload {
     companion object {
         val ID = CustomPacketPayload.Type<InstalledModelsPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "installed_models"))
@@ -239,6 +249,19 @@ object ModNetworkingConfigurable {
                 CoroutineScope(Dispatchers.IO).launch {
                     val models = PiperManager.getInstalledModels()
                     PacketDistributor.sendToPlayer(player, InstalledModelsPayload(models))
+                }
+            }
+        }
+
+        registrar.playToClient(
+            PromptModelDownloadPayload.ID,
+            PromptModelDownloadPayload.STREAM_CODEC
+        ) { payload, context ->
+            context.enqueueWork {
+                net.neoforged.fml.loading.FMLEnvironment.dist.let {
+                    if (it.isClient) {
+                        de.jamala1111.station_voices.client.ClientHooks.handlePromptModelDownload(payload.serverId)
+                    }
                 }
             }
         }

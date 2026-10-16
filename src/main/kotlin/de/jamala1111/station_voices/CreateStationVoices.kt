@@ -66,6 +66,7 @@ object CreateStationVoices {
         MOD_BUS.addListener(ModNetworkingJingles::register)
         
         NeoForge.EVENT_BUS.addListener(ModCommands::onRegisterCommands)
+        NeoForge.EVENT_BUS.addListener(::onPlayerLoggedIn)
 
         val obj = runForDist(
             clientTarget = {
@@ -148,6 +149,23 @@ object CreateStationVoices {
         }
         CoroutineScope(Dispatchers.IO).launch {
             de.jamala1111.station_voices.server.PiperManager.setupPiper()
+        }
+    }
+
+    private fun onPlayerLoggedIn(event: net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent) {
+        val player = event.entity as? net.minecraft.server.level.ServerPlayer ?: return
+        
+        if (player.hasPermissions(ModConfig.SERVER.modelManagementPermissionRequirement.get()) || !player.server.isDedicatedServer) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val models = de.jamala1111.station_voices.server.PiperManager.getInstalledModels()
+                if (models.isEmpty()) {
+                    val serverId = if (player.server.isDedicatedServer) player.server.localIp else "local"
+                    net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
+                        player, 
+                        de.jamala1111.station_voices.network.PromptModelDownloadPayload(serverId)
+                    )
+                }
+            }
         }
     }
 }

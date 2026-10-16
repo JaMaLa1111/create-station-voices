@@ -92,4 +92,10 @@ object ClientHooks {
             screen.updateDownloadProgress(language, voice, progress)
         }
     }
+
+    fun handlePromptModelDownload(serverId: String) {
+        if (!ModelDownloadPromptScreen.isHiddenForEnvironment(serverId)) {
+            Minecraft.getInstance().setScreen(ModelDownloadPromptScreen(serverId))
+        }
+    }
 }
