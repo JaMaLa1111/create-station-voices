@@ -4,6 +4,7 @@ import de.jamala1111.station_voices.CreateStationVoices
 import de.jamala1111.station_voices.TextSanitizer
 import de.jamala1111.station_voices.VoiceModelInfo
 import com.google.gson.JsonParser
+import com.sun.jna.platform.win32.Kernel32
 import io.github.jvoiceproject.piperjni.PiperJNI
 import io.github.jvoiceproject.piperjni.PiperVoice
 import kotlinx.coroutines.Dispatchers
@@ -19,10 +20,50 @@ import java.net.URI
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
+import java.nio.file.Path
 import java.security.MessageDigest
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
+fun getSafePiperPath(path: Path): Path {
+    val os = System.getProperty("os.name")?.lowercase(Locale.ENGLISH) ?: ""
+    if (!os.contains("win")) {
+        return path
+    }
+
+    val absolutePath = path.toAbsolutePath().toString()
+
+    // If the path is already pure ASCII, no need to convert
+    if (absolutePath.all { it.code < 128 }) {
+        return path
+    }
+
+    return try {
+        val buffer = CharArray(260)
+        val len = Kernel32.INSTANCE.GetShortPathName(absolutePath, buffer, buffer.size)
+        if (len > 0 && len <= buffer.size) {
+            Path.of(String(buffer, 0, len))
+        } else if (len > buffer.size) {
+            // If the buffer was too small, allocate required size and retry
+            val largeBuffer = CharArray(len)
+            val retryLen = Kernel32.INSTANCE.GetShortPathName(absolutePath, largeBuffer, largeBuffer.size)
+            if (retryLen > 0 && retryLen <= largeBuffer.size) {
+                Path.of(String(largeBuffer, 0, retryLen))
+            } else {
+                path
+            }
+        } else {
+            path
+        }
+    } catch (e: Throwable) {
+        // Fallback if 8.3 generation is disabled on the drive
+        path
+    }
+}
+
 object PiperManager {
+    fun getSafePiperPath(path: Path): Path = de.jamala1111.station_voices.server.getSafePiperPath(path)
+
     private var piperInstance: PiperJNI? = null
     private val piperMutex = Mutex()
     private val loadedVoices = ConcurrentHashMap<String, PiperVoice>()
@@ -239,7 +280,9 @@ object PiperManager {
                     val key = "$language:$voice"
                     var piperVoice = loadedVoices[key]
                     if (piperVoice == null) {
-                        piperVoice = piper.loadVoice(onnxFile!!.toPath(), jsonFile!!.toPath())
+                        val safeOnnxPath = getSafePiperPath(onnxFile!!.toPath())
+                        val safeJsonPath = getSafePiperPath(jsonFile!!.toPath())
+                        piperVoice = piper.loadVoice(safeOnnxPath, safeJsonPath)
                         loadedVoices[key] = piperVoice
                     }
 
