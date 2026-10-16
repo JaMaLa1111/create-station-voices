@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import de.jamala1111.station_voices.server.PiperManager
+import de.jamala1111.station_voices.ModConfig
 
 data class SetConfigurableAnnouncerDataPayload(
     val pos: BlockPos,
@@ -246,6 +247,10 @@ object ModNetworkingConfigurable {
         ) { payload, context ->
             context.enqueueWork {
                 val player = context.player() as? ServerPlayer ?: return@enqueueWork
+                val requiredPermission = ModConfig.SERVER.modelManagementPermissionRequirement.get()
+                if (!player.hasPermissions(requiredPermission) && player.server.isDedicatedServer) {
+                    return@enqueueWork
+                }
                 CoroutineScope(Dispatchers.IO).launch {
                     val models = PiperManager.getInstalledModels()
                     PacketDistributor.sendToPlayer(player, InstalledModelsPayload(models))
@@ -272,6 +277,12 @@ object ModNetworkingConfigurable {
         ) { payload, context ->
             context.enqueueWork {
                 val player = context.player() as? ServerPlayer
+                if (player != null) {
+                    val requiredPermission = ModConfig.SERVER.modelManagementPermissionRequirement.get()
+                    if (!player.hasPermissions(requiredPermission) && player.server.isDedicatedServer) {
+                        return@enqueueWork
+                    }
+                }
                 CoroutineScope(Dispatchers.IO).launch {
                     PiperManager.downloadModel(payload.language, payload.voice, payload.onnxUrl, payload.jsonUrl) { progress ->
                         if (player != null) {
