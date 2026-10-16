@@ -48,6 +48,8 @@ class AnnouncerScreen(
     private lateinit var tabBtn: Button
     private lateinit var doneBtn: Button
 
+    private var installedModels: List<String>? = null
+
     override fun init() {
         val centerX = width / 2
         val centerY = height / 2
@@ -58,7 +60,7 @@ class AnnouncerScreen(
         textBox.setMaxLength(256)
         addRenderableWidget(textBox)
 
-        voiceBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.voice", currentVoice, currentLanguage)) { _ ->
+        voiceBtn = addRenderableWidget(Button.builder(if (currentVoice.isBlank()) Component.translatable("gui.create_station_voices.voice_none") else Component.translatable("gui.create_station_voices.voice", currentVoice, currentLanguage)) { _ ->
             minecraft?.setScreen(VoiceSelectionScreen(this, currentLanguage, currentVoice) { lang, voice -> updateVoice(lang, voice) })
         }.bounds(centerX - 100, centerY - 29, 200, 20).build())
 
@@ -149,18 +151,41 @@ class AnnouncerScreen(
             onClose()
         }.bounds(centerX + 5, centerY + 81, 95, 20).build())
 
+        PacketDistributor.sendToServer(de.jamala1111.station_voices.network.RequestInstalledModelsPayload())
+        updateVisibility()
+    }
+
+    fun updateInstalledModels(models: List<String>) {
+        installedModels = models
+        if (models.isNotEmpty()) {
+            if (currentVoice.isBlank() || currentLanguage.isBlank()) {
+                val first = models[0]
+                val parts = first.split(":")
+                if (parts.size == 2) {
+                    updateVoice(parts[0], parts[1])
+                }
+            }
+        } else {
+            updateVoice("", "")
+        }
         updateVisibility()
     }
 
     fun updateVoice(lang: String, voice: String) {
         currentLanguage = lang
         currentVoice = voice
-        voiceBtn.message = Component.translatable("gui.create_station_voices.voice", currentVoice, currentLanguage)
+        if (voice.isBlank()) {
+            voiceBtn.message = Component.translatable("gui.create_station_voices.voice_none")
+        } else {
+            voiceBtn.message = Component.translatable("gui.create_station_voices.voice", currentVoice, currentLanguage)
+        }
     }
 
     private fun updateVisibility() {
         tabBtn.message = Component.translatable(if (isEffectsTab) "gui.create_station_voices.tab_effects" else "gui.create_station_voices.tab_main")
         
+        val hasModels = installedModels?.isNotEmpty() ?: true
+
         textBox.visible = !isEffectsTab
         voiceBtn.visible = !isEffectsTab
         
@@ -171,12 +196,30 @@ class AnnouncerScreen(
         reverbBtn.visible = isEffectsTab
         jingleBtn.visible = isEffectsTab
         jingleTimingBtn.visible = isEffectsTab
-        jingleTimingBtn.active = !JingleManager.isOff(currentJingle)
+        
+        textBox.active = hasModels
+        voiceBtn.active = hasModels
+        genBtn.active = hasModels
+        speedSlider.active = hasModels
+        volumeSlider.active = hasModels
+        rangeSlider.active = hasModels
+        realismSlider.active = hasModels
+        reverbBtn.active = hasModels
+        jingleBtn.active = hasModels
+        jingleTimingBtn.active = hasModels && !JingleManager.isOff(currentJingle)
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.render(guiGraphics, mouseX, mouseY, partialTick)
         guiGraphics.drawCenteredString(font, title, width / 2, 20, 0xFFFFFF)
+        
+        if (installedModels != null && installedModels!!.isEmpty() && !isEffectsTab) {
+            val warning = Component.translatable("gui.create_station_voices.no_models_warning")
+            val instruction = Component.translatable("gui.create_station_voices.no_models_instruction")
+            val centerY = height / 2
+            guiGraphics.drawCenteredString(font, warning, width / 2, centerY, 0xFF5555)
+            guiGraphics.drawCenteredString(font, instruction, width / 2, centerY + 15, 0xAAAAAA)
+        }
     }
 
     override fun isPauseScreen(): Boolean = false

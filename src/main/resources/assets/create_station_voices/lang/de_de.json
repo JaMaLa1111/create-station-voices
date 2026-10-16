@@ -63,6 +63,8 @@
   "gui.create_station_voices.voice": "Stimme: %s (%s)",
   "gui.create_station_voices.voice_button": "Stimme",
   "gui.create_station_voices.voice_none": "Stimme: Keine",
+  "gui.create_station_voices.no_models_warning": "Es sind derzeit keine Sprachmodelle installiert.",
+  "gui.create_station_voices.no_models_instruction": "Nutze /create_station_voices piper_models, um Modelle herunterzuladen.",
   "gui.create_station_voices.effects.speed": "Tonhöhe/Geschw.: %.2fx",
   "gui.create_station_voices.effects.volume": "Lautstärke: %d%%",
   "gui.create_station_voices.effects.range": "Max. Reichweite: %d Blöcke",
@@ -141,6 +143,12 @@
   "gui.create_station_voices.jingle_manager.supported_formats": "Unterstützte Formate: .wav, .ogg, .mp3",
   "gui.create_station_voices.jingle_manager.select_hint": "Wähle einen Jingle aus der Liste, um Details anzusehen oder zu bearbeiten.",
   "gui.create_station_voices.jingle_manager.file_dialog_title": "Audiodatei auswählen (.wav, .ogg, .mp3)",
+
+  "gui.create_station_voices.model_prompt.title": "Fehlende Sprachmodelle",
+  "gui.create_station_voices.model_prompt.message": "Es sieht so aus, als ob in dieser Umgebung keine Piper Text-to-Speech-Sprachmodelle installiert sind. Text-to-Speech-Funktionen funktionieren erst, wenn mindestens ein Modell heruntergeladen wurde.\n\nMöchtest du jetzt den Modell-Manager öffnen, um ein Modell herunterzuladen?",
+  "gui.create_station_voices.model_prompt.open_manager": "Modell-Manager öffnen",
+  "gui.create_station_voices.model_prompt.not_now": "Nicht jetzt",
+  "gui.create_station_voices.model_prompt.dont_show_again": "Nicht mehr anzeigen",
 
   "gui.create_station_voices.goggle.text": " Text: ",
   "gui.create_station_voices.goggle.voice": " Stimme: ",

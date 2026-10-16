@@ -50,8 +50,8 @@ object ModBlockEntities {
 
 class AnnouncerBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlockEntities.ANNOUNCER_BLOCK_ENTITY, pos, state), IHaveGoggleInformation, IAnnouncerSource {
     var ttsText: String = "Hello"
-    var ttsVoice: String = "amy"
-    var ttsLanguage: String = "en_US"
+    var ttsVoice: String = ""
+    var ttsLanguage: String = ""
     var ttsSpeed: Float = 1.0f
     var ttsVolume: Float = 1.0f
     var ttsReverb: Boolean = false

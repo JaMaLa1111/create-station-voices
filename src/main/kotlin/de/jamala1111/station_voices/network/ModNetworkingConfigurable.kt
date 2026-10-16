@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import de.jamala1111.station_voices.server.PiperManager
+import de.jamala1111.station_voices.ModConfig
 
 data class SetConfigurableAnnouncerDataPayload(
     val pos: BlockPos,
@@ -83,6 +84,16 @@ data class RequestInstalledModelsPayload(val dummy: Boolean = false) : CustomPac
     }
     override fun type() = ID
     fun write(buf: RegistryFriendlyByteBuf) = buf.writeBoolean(dummy)
+}
+
+data class PromptModelDownloadPayload(val serverId: String) : CustomPacketPayload {
+    companion object {
+        val ID = CustomPacketPayload.Type<PromptModelDownloadPayload>(ResourceLocation.fromNamespaceAndPath(CreateStationVoices.ID, "prompt_model_download"))
+        val STREAM_CODEC = StreamCodec.ofMember(PromptModelDownloadPayload::write, ::read)
+        fun read(buf: RegistryFriendlyByteBuf) = PromptModelDownloadPayload(buf.readUtf())
+    }
+    override fun type() = ID
+    fun write(buf: RegistryFriendlyByteBuf) { buf.writeUtf(serverId) }
 }
 
 data class InstalledModelsPayload(val models: List<String>) : CustomPacketPayload {
@@ -236,9 +247,26 @@ object ModNetworkingConfigurable {
         ) { payload, context ->
             context.enqueueWork {
                 val player = context.player() as? ServerPlayer ?: return@enqueueWork
+                val requiredPermission = ModConfig.SERVER.modelManagementPermissionRequirement.get()
+                if (!player.hasPermissions(requiredPermission) && player.server.isDedicatedServer) {
+                    return@enqueueWork
+                }
                 CoroutineScope(Dispatchers.IO).launch {
                     val models = PiperManager.getInstalledModels()
                     PacketDistributor.sendToPlayer(player, InstalledModelsPayload(models))
+                }
+            }
+        }
+
+        registrar.playToClient(
+            PromptModelDownloadPayload.ID,
+            PromptModelDownloadPayload.STREAM_CODEC
+        ) { payload, context ->
+            context.enqueueWork {
+                net.neoforged.fml.loading.FMLEnvironment.dist.let {
+                    if (it.isClient) {
+                        de.jamala1111.station_voices.client.ClientHooks.handlePromptModelDownload(payload.serverId)
+                    }
                 }
             }
         }
@@ -249,6 +277,12 @@ object ModNetworkingConfigurable {
         ) { payload, context ->
             context.enqueueWork {
                 val player = context.player() as? ServerPlayer
+                if (player != null) {
+                    val requiredPermission = ModConfig.SERVER.modelManagementPermissionRequirement.get()
+                    if (!player.hasPermissions(requiredPermission) && player.server.isDedicatedServer) {
+                        return@enqueueWork
+                    }
+                }
                 CoroutineScope(Dispatchers.IO).launch {
                     PiperManager.downloadModel(payload.language, payload.voice, payload.onnxUrl, payload.jsonUrl) { progress ->
                         if (player != null) {

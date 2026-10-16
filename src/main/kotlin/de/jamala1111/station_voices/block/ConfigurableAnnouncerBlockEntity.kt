@@ -30,8 +30,8 @@ import java.util.UUID
 
 data class TrainProfile(
     var text: String = "",
-    var voice: String = "amy",
-    var language: String = "en_US",
+    var voice: String = "",
+    var language: String = "",
     var speed: Float = 1.0f,
     var volume: Float = 1.0f,
     var reverb: Boolean = false,

@@ -54,6 +54,8 @@ class ConfigurableAnnouncerScreen(
     // Common
     private lateinit var doneBtn: Button
 
+    private var installedModels: List<String>? = null
+
     override fun init() {
         val centerX = width / 2
         val centerY = height / 2
@@ -180,11 +182,18 @@ class ConfigurableAnnouncerScreen(
             saveAndClose()
         }.bounds(rightX + 105, centerY + 81, 95, 20).build())
 
+        PacketDistributor.sendToServer(de.jamala1111.station_voices.network.RequestInstalledModelsPayload())
+
         if (profiles.isNotEmpty()) {
             trainList.selectItem(profiles.keys.first())
         } else {
             updateRightPanel()
         }
+    }
+
+    fun updateInstalledModels(models: List<String>) {
+        installedModels = models
+        updateRightPanel()
     }
 
     private fun autoPopulateTrains() {
@@ -237,14 +246,30 @@ class ConfigurableAnnouncerScreen(
     private fun updateRightPanel() {
         val profile = selectedTrain?.let { profiles[it] }
         val hasSelection = profile != null
+        val hasModels = installedModels?.isNotEmpty() ?: true
+
+        if (profile != null && hasModels && (profile.voice.isBlank() || profile.language.isBlank())) {
+            val first = installedModels?.firstOrNull()
+            if (first != null) {
+                val parts = first.split(":")
+                if (parts.size == 2) {
+                    profile.language = parts[0]
+                    profile.voice = parts[1]
+                }
+            }
+        }
 
         removeTrainBtn.active = hasSelection
-        tabBtn.active = hasSelection
+        tabBtn.active = hasSelection && hasModels
         doneBtn.active = true // Always can save and close
 
         if (profile != null) {
             textBox.value = profile.text
-            voiceBtn.message = Component.translatable("gui.create_station_voices.voice", profile.voice, profile.language)
+            if (profile.voice.isBlank()) {
+                voiceBtn.message = Component.translatable("gui.create_station_voices.voice_none")
+            } else {
+                voiceBtn.message = Component.translatable("gui.create_station_voices.voice", profile.voice, profile.language)
+            }
             
             setSliderValue(speedSlider, ((profile.speed - 0.1) / 2.9).toDouble())
             setSliderValue(volumeSlider, profile.volume.toDouble())
@@ -275,6 +300,7 @@ class ConfigurableAnnouncerScreen(
     private fun updateRightPanelVisibility() {
         val hasSelection = selectedTrain != null
         val profile = selectedTrain?.let { profiles[it] }
+        val hasModels = installedModels?.isNotEmpty() ?: true
         
         tabBtn.message = Component.translatable(if (isEffectsTab) "gui.create_station_voices.tab_effects" else "gui.create_station_voices.tab_main")
         
@@ -288,8 +314,20 @@ class ConfigurableAnnouncerScreen(
         reverbBtn.visible = hasSelection && isEffectsTab
         jingleBtn.visible = hasSelection && isEffectsTab
         jingleTimingBtn.visible = hasSelection && isEffectsTab
+        
+        textBox.active = hasModels
+        voiceBtn.active = hasModels
+        genBtn.active = hasModels
+        speedSlider.active = hasModels
+        volumeSlider.active = hasModels
+        rangeSlider.active = hasModels
+        realismSlider.active = hasModels
+        reverbBtn.active = hasModels
+        jingleBtn.active = hasModels
         if (hasSelection && profile != null) {
-            jingleTimingBtn.active = !JingleManager.isOff(profile.jingle)
+            jingleTimingBtn.active = hasModels && !JingleManager.isOff(profile.jingle)
+        } else {
+            jingleTimingBtn.active = false
         }
         genBtn.visible = hasSelection
     }
@@ -298,9 +336,31 @@ class ConfigurableAnnouncerScreen(
         super.render(guiGraphics, mouseX, mouseY, partialTick)
         guiGraphics.drawCenteredString(font, title, width / 2, 10, 0xFFFFFF)
         
+        val rightX = width / 2 + 10
         if (selectedTrain != null) {
-            val rightX = width / 2 + 10
             guiGraphics.drawString(font, Component.translatable("gui.create_station_voices.editing", selectedTrain), rightX, height / 2 - 95, 0xAAAAAA)
+        }
+
+        if (selectedTrain != null && installedModels != null && installedModels!!.isEmpty() && !isEffectsTab) {
+            val warning = Component.translatable("gui.create_station_voices.no_models_warning")
+            val instruction = Component.translatable("gui.create_station_voices.no_models_instruction")
+            
+            // Limit text width
+            val warningLines = font.split(warning, 200)
+            val instructionLines = font.split(instruction, 200)
+            
+            val textX = rightX + 100 // Center of right panel
+            var textY = (height / 2)
+            
+            for (line in warningLines) {
+                guiGraphics.drawCenteredString(font, line, textX, textY, 0xFF5555)
+                textY += font.lineHeight + 2
+            }
+            textY += 5
+            for (line in instructionLines) {
+                guiGraphics.drawCenteredString(font, line, textX, textY, 0xAAAAAA)
+                textY += font.lineHeight + 2
+            }
         }
     }
 

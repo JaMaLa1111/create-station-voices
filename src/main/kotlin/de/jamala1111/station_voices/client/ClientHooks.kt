@@ -83,6 +83,12 @@ object ClientHooks {
             screen.updateInstalledModels(models)
         } else if (screen is ModelDownloadScreen) {
             screen.updateInstalledModels(models)
+        } else if (screen is AnnouncerScreen) {
+            screen.updateInstalledModels(models)
+        } else if (screen is ConfigurableAnnouncerScreen) {
+            screen.updateInstalledModels(models)
+        } else if (screen is TrainAnnouncerScreen) {
+            screen.updateInstalledModels(models)
         }
     }
 
@@ -90,6 +96,12 @@ object ClientHooks {
         val screen = Minecraft.getInstance().screen
         if (screen is ModelDownloadScreen) {
             screen.updateDownloadProgress(language, voice, progress)
+        }
+    }
+
+    fun handlePromptModelDownload(serverId: String) {
+        if (!ModelDownloadPromptScreen.isHiddenForEnvironment(serverId)) {
+            Minecraft.getInstance().setScreen(ModelDownloadPromptScreen(serverId))
         }
     }
 }
