@@ -142,6 +142,12 @@
   "gui.create_station_voices.jingle_manager.select_hint": "Wähle einen Jingle aus der Liste, um Details anzusehen oder zu bearbeiten.",
   "gui.create_station_voices.jingle_manager.file_dialog_title": "Audiodatei auswählen (.wav, .ogg, .mp3)",
 
+  "gui.create_station_voices.model_prompt.title": "Fehlende Sprachmodelle",
+  "gui.create_station_voices.model_prompt.message": "Es sieht so aus, als ob in dieser Umgebung keine Piper Text-to-Speech-Sprachmodelle installiert sind. Text-to-Speech-Funktionen funktionieren erst, wenn mindestens ein Modell heruntergeladen wurde.\n\nMöchtest du jetzt den Modell-Manager öffnen, um ein Modell herunterzuladen?",
+  "gui.create_station_voices.model_prompt.open_manager": "Modell-Manager öffnen",
+  "gui.create_station_voices.model_prompt.not_now": "Nicht jetzt",
+  "gui.create_station_voices.model_prompt.dont_show_again": "Nicht mehr anzeigen",
+
   "gui.create_station_voices.goggle.text": " Text: ",
   "gui.create_station_voices.goggle.voice": " Stimme: ",
   "gui.create_station_voices.goggle.linked_to": " Verbunden mit: ",
