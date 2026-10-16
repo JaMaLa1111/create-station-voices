@@ -16,6 +16,7 @@ object ModConfig {
         val ttsMode: ModConfigSpec.EnumValue<TtsMode>
         val webApiUrl: ModConfigSpec.ConfigValue<String>
         val modelManagementPermissionRequirement: ModConfigSpec.ConfigValue<Int>
+        val jingleManagementPermissionRequirement: ModConfigSpec.ConfigValue<Int>
 
         init {
             builder.push("tts")
@@ -35,6 +36,16 @@ object ModConfig {
                     "4 = Owner (Stop server / Save-all)"
                 )
                 .define("modelManagementPermissionRequirement", 2);
+            jingleManagementPermissionRequirement = builder
+                .comment(
+                    "Minimum permission level required to manage jingles.",
+                    "0 = All players",
+                    "1 = Moderators (Bypass spawn protection)",
+                    "2 = Gamemasters (Standard OP / Cheats / Command Blocks)",
+                    "3 = Admins (Ban / Kick / OP)",
+                    "4 = Owner (Stop server / Save-all)"
+                )
+                .define("jingleManagementPermissionRequirement", 2);
             builder.pop()
         }
     }

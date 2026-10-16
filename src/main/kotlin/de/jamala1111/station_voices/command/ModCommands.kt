@@ -27,7 +27,7 @@ object ModCommands {
                     }
                 )
                 .then(Commands.literal("jingle_manager")
-                    .requires { it.hasPermission(2) || !it.server.isDedicatedServer }
+                    .requires { it.hasPermission(ModConfig.SERVER.jingleManagementPermissionRequirement.get()) || !it.server.isDedicatedServer }
                     .executes { context ->
                         val player = context.source.playerOrException
                         PacketDistributor.sendToPlayer(player, OpenJingleManagerScreenPayload())
@@ -35,7 +35,7 @@ object ModCommands {
                     }
                 )
                 .then(Commands.literal("jingles")
-                    .requires { it.hasPermission(2) || !it.server.isDedicatedServer }
+                    .requires { it.hasPermission(ModConfig.SERVER.jingleManagementPermissionRequirement.get()) || !it.server.isDedicatedServer }
                     .executes { context ->
                         val player = context.source.playerOrException
                         PacketDistributor.sendToPlayer(player, OpenJingleManagerScreenPayload())
@@ -43,7 +43,7 @@ object ModCommands {
                     }
                 )
                 .then(Commands.literal("reload_jingles")
-                    .requires { it.hasPermission(2) || !it.server.isDedicatedServer }
+                    .requires { it.hasPermission(ModConfig.SERVER.jingleManagementPermissionRequirement.get()) || !it.server.isDedicatedServer }
                     .executes { context ->
                         val count = JingleManager.reload()
                         PacketDistributor.sendToAllPlayers(ReloadJinglesPayload())

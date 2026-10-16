@@ -2,6 +2,7 @@ package de.jamala1111.station_voices.network
 
 import de.jamala1111.station_voices.CreateStationVoices
 import de.jamala1111.station_voices.JingleManager
+import de.jamala1111.station_voices.ModConfig
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
@@ -137,7 +138,7 @@ object ModNetworkingJingles {
             RequestJingleListPayload.STREAM_CODEC
         ) { _, context ->
             val player = context.player() as? ServerPlayer ?: return@playToServer
-            if (!player.hasPermissions(2) && player.server.isDedicatedServer) return@playToServer
+            if (!player.hasPermissions(ModConfig.SERVER.jingleManagementPermissionRequirement.get()) && player.server.isDedicatedServer) return@playToServer
             context.enqueueWork {
                 val list = JingleManager.getCustomJingles().map {
                     JingleNetworkData(it.key, it.fileName, it.enabled, JingleManager.getJingleDuration(it.key))
@@ -164,7 +165,7 @@ object ModNetworkingJingles {
             UpdateJingleKeyPayload.STREAM_CODEC
         ) { payload, context ->
             val player = context.player() as? ServerPlayer ?: return@playToServer
-            if (!player.hasPermissions(2) && player.server.isDedicatedServer) return@playToServer
+            if (!player.hasPermissions(ModConfig.SERVER.jingleManagementPermissionRequirement.get()) && player.server.isDedicatedServer) return@playToServer
             context.enqueueWork {
                 JingleManager.setJingleKey(payload.oldKey, payload.newKey)
                 broadcastJingleList()
@@ -176,7 +177,7 @@ object ModNetworkingJingles {
             SetJingleEnabledPayload.STREAM_CODEC
         ) { payload, context ->
             val player = context.player() as? ServerPlayer ?: return@playToServer
-            if (!player.hasPermissions(2) && player.server.isDedicatedServer) return@playToServer
+            if (!player.hasPermissions(ModConfig.SERVER.jingleManagementPermissionRequirement.get()) && player.server.isDedicatedServer) return@playToServer
             context.enqueueWork {
                 JingleManager.setJingleEnabled(payload.key, payload.enabled)
                 broadcastJingleList()
@@ -188,7 +189,7 @@ object ModNetworkingJingles {
             DeleteJinglePayload.STREAM_CODEC
         ) { payload, context ->
             val player = context.player() as? ServerPlayer ?: return@playToServer
-            if (!player.hasPermissions(2) && player.server.isDedicatedServer) return@playToServer
+            if (!player.hasPermissions(ModConfig.SERVER.jingleManagementPermissionRequirement.get()) && player.server.isDedicatedServer) return@playToServer
             context.enqueueWork {
                 JingleManager.deleteCustomJingle(payload.key)
                 broadcastJingleList()
@@ -200,7 +201,7 @@ object ModNetworkingJingles {
             AddJinglePayload.STREAM_CODEC
         ) { payload, context ->
             val player = context.player() as? ServerPlayer ?: return@playToServer
-            if (!player.hasPermissions(2) && player.server.isDedicatedServer) return@playToServer
+            if (!player.hasPermissions(ModConfig.SERVER.jingleManagementPermissionRequirement.get()) && player.server.isDedicatedServer) return@playToServer
             context.enqueueWork {
                 JingleManager.addCustomJingle(payload.key, payload.fileName, payload.data)
                 broadcastJingleList()
