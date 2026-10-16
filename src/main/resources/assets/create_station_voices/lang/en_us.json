@@ -63,6 +63,8 @@
   "gui.create_station_voices.voice": "Voice: %s (%s)",
   "gui.create_station_voices.voice_button": "Voice",
   "gui.create_station_voices.voice_none": "Voice: None",
+  "gui.create_station_voices.no_models_warning": "No voice models are currently installed.",
+  "gui.create_station_voices.no_models_instruction": "Use /create_station_voices piper_models to download models.",
   "gui.create_station_voices.effects.speed": "Pitch/Speed: %.2fx",
   "gui.create_station_voices.effects.volume": "Volume: %d%%",
   "gui.create_station_voices.effects.range": "Max Range: %d blocks",

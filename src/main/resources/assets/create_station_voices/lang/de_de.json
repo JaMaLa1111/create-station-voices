@@ -63,6 +63,8 @@
   "gui.create_station_voices.voice": "Stimme: %s (%s)",
   "gui.create_station_voices.voice_button": "Stimme",
   "gui.create_station_voices.voice_none": "Stimme: Keine",
+  "gui.create_station_voices.no_models_warning": "Es sind derzeit keine Sprachmodelle installiert.",
+  "gui.create_station_voices.no_models_instruction": "Nutze /create_station_voices piper_models, um Modelle herunterzuladen.",
   "gui.create_station_voices.effects.speed": "Tonhöhe/Geschw.: %.2fx",
   "gui.create_station_voices.effects.volume": "Lautstärke: %d%%",
   "gui.create_station_voices.effects.range": "Max. Reichweite: %d Blöcke",

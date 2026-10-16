@@ -83,6 +83,12 @@ object ClientHooks {
             screen.updateInstalledModels(models)
         } else if (screen is ModelDownloadScreen) {
             screen.updateInstalledModels(models)
+        } else if (screen is AnnouncerScreen) {
+            screen.updateInstalledModels(models)
+        } else if (screen is ConfigurableAnnouncerScreen) {
+            screen.updateInstalledModels(models)
+        } else if (screen is TrainAnnouncerScreen) {
+            screen.updateInstalledModels(models)
         }
     }
 
