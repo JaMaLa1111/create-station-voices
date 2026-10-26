@@ -228,6 +228,11 @@ object PiperManager {
             val nativeDir = getNativeLibraryDirectory()
             val nativePath = nativeDir.toPath()
 
+            // Deploy the bundled Visual C++ runtime DLLs so that onnxruntime.dll's
+            // DllMain can find vcruntime140.dll / msvcp140.dll / vcruntime140_1.dll
+            // without requiring the user to install the VC++ Redistributable.
+            ensureVCRuntimeDeployed(nativeDir)
+
             // Add the native directory to the Windows DLL search path so that
             // onnxruntime.dll's DllMain can locate its companion DLLs
             // (e.g. onnxruntime_providers_shared.dll) by name.
@@ -267,6 +272,28 @@ object PiperManager {
             }
         } catch (e: Throwable) {
             CreateStationVoices.LOGGER.warn("Could not add native directory to DLL search path", e)
+        }
+    }
+
+    private fun ensureVCRuntimeDeployed(nativeDir: File) {
+        val os = System.getProperty("os.name")?.lowercase(Locale.ENGLISH) ?: ""
+        if (!os.contains("win")) return
+        val vcrtNames = listOf("vcruntime140.dll", "msvcp140.dll", "vcruntime140_1.dll")
+        for (name in vcrtNames) {
+            val resourcePath = "/create_station_voices_native/vcrt/$name"
+            val target = File(nativeDir, name)
+            try {
+                val bytes = PiperManager::class.java.getResourceAsStream(resourcePath)?.use { it.readBytes() }
+                if (bytes == null) {
+                    CreateStationVoices.LOGGER.warn("Bundled VC++ runtime resource not found: $resourcePath")
+                    continue
+                }
+                if (target.exists() && target.length() == bytes.size.toLong()) continue
+                target.writeBytes(bytes)
+                CreateStationVoices.LOGGER.info("Deployed VC++ runtime DLL: ${target.absolutePath}")
+            } catch (e: Exception) {
+                CreateStationVoices.LOGGER.warn("Failed to deploy VC++ runtime DLL $name", e)
+            }
         }
     }
 
