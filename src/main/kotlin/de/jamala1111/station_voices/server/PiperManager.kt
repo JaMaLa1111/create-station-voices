@@ -352,8 +352,12 @@ object PiperManager {
                 CreateStationVoices.LOGGER.warn("Could not rename JVM $name", e)
             }
         }
+
         if (anyRenamed) {
             CreateStationVoices.LOGGER.error("VC++ Runtime fix applied. Please RESTART the server for the changes to take effect.")
+        } else {
+            CreateStationVoices.LOGGER.error("Could not rename JVM's bundled VC++ runtime DLLs (permission denied). Generating fix script...")
+            generateVcRuntimeFixScript()
         }
     }
 
@@ -363,36 +367,42 @@ object PiperManager {
         val gameDir = FMLPaths.GAMEDIR.get().toFile()
         val script = File(gameDir, "fix-vc-runtime.bat")
 
+        val jvmPath = jvmBin.absolutePath
+        val dllNames = listOf("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll")
+
         val sb = StringBuilder()
         sb.appendLine("@echo off")
+        sb.appendLine(":: Check for admin rights")
+        sb.appendLine("net session >nul 2>&1")
+        sb.appendLine("if %errorlevel% neq 0 (")
+        sb.appendLine("  echo This script requires administrator privileges.")
+        sb.appendLine("  echo Right-click and select 'Run as administrator'.")
+        sb.appendLine("  pause")
+        sb.appendLine("  exit /b 1")
+        sb.appendLine(")")
         sb.appendLine("echo === Fixing VC++ Runtime for Piper TTS ===")
         sb.appendLine("echo.")
-        sb.appendLine("echo Downloading Microsoft Visual C++ Redistributable...")
-        sb.appendLine("powershell -Command \"Invoke-WebRequest -Uri 'https://aka.ms/vs/17/release/vc_redist.x64.exe' -OutFile 'vc_redist.x64.exe'\"")
-        sb.appendLine("if errorlevel 1 (")
-        sb.appendLine("  echo Failed to download. Please download manually from:")
-        sb.appendLine("  echo https://aka.ms/vs/17/release/vc_redist.x64.exe")
-        sb.appendLine("  pause")
-        sb.appendLine("  exit /b 1")
-        sb.appendLine(")")
+        sb.appendLine("echo JVM bin: $jvmPath")
         sb.appendLine("echo.")
-        sb.appendLine("echo Installing VC++ Redistributable...")
-        sb.appendLine("vc_redist.x64.exe /install /quiet /norestart")
-        sb.appendLine("if errorlevel 1 (")
-        sb.appendLine("  echo Installer failed. Try running it manually.")
-        sb.appendLine("  pause")
-        sb.appendLine("  exit /b 1")
-        sb.appendLine(")")
-        sb.appendLine("echo Installed successfully.")
+        sb.appendLine("echo Renaming JVM's bundled VC++ runtime DLLs so the JVM uses")
+        sb.appendLine("echo the newer system-installed versions from C:\\Windows\\System32...")
         sb.appendLine("echo.")
-        sb.appendLine("echo Renaming JVM's bundled VC++ runtime DLLs...")
-        val jvmPath = jvmBin.absolutePath
-        for (name in listOf("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll")) {
+        for (name in dllNames) {
             sb.appendLine("if exist \"$jvmPath\\$name\" (")
             sb.appendLine("  if not exist \"$jvmPath\\$name.bak\" (")
+            sb.appendLine("    takeown /f \"$jvmPath\\$name\" >nul 2>&1")
+            sb.appendLine("    icacls \"$jvmPath\\$name\" /grant administrators:F >nul 2>&1")
             sb.appendLine("    ren \"$jvmPath\\$name\" $name.bak")
-            sb.appendLine("    echo Renamed $name")
+            sb.appendLine("    if errorlevel 1 (")
+            sb.appendLine("      echo FAILED to rename $name")
+            sb.appendLine("    ) else (")
+            sb.appendLine("      echo Renamed $name to $name.bak")
+            sb.appendLine("    )")
+            sb.appendLine("  ) else (")
+            sb.appendLine("    echo $name already renamed")
             sb.appendLine("  )")
+            sb.appendLine(") else (")
+            sb.appendLine("  echo $name not found in JVM bin")
             sb.appendLine(")")
         }
         sb.appendLine("echo.")
@@ -400,7 +410,7 @@ object PiperManager {
         sb.appendLine("pause")
         script.writeText(sb.toString())
         CreateStationVoices.LOGGER.error("A fix script has been generated: ${script.absolutePath}")
-        CreateStationVoices.LOGGER.error("Run fix-vc-runtime.bat as administrator, then restart the server.")
+        CreateStationVoices.LOGGER.error("Run fix-vc-runtime.bat as administrator (right-click > Run as administrator), then restart the server.")
     }
 
     suspend fun setupPiper() {

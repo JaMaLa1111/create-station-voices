@@ -2,7 +2,8 @@
 - Fixed a crash on servers with restrictive folder permissions where the native Piper TTS engine could not extract its files.
 - Fixed a startup crash caused by an incompatible library update.
 - Fixed a secondary crash that could occur on dedicated servers during Piper initialization.
-- The mod now automatically downloads and installs the Microsoft Visual C++ Redistributable when the Piper TTS engine fails to start due to an outdated runtime on the server. If automatic installation fails, a helper script (`fix-vc-runtime.bat`) is generated for manual installation.
+- Fixed Piper TTS failing to start on Windows servers where the Java installation bundles an outdated Visual C++ runtime. The mod can now automatically download and install the Microsoft Visual C++ Redistributable (if enabled in the config) and generate a helper script (`fix-vc-runtime.bat`) for manual installation. A server restart is required after applying the fix.
+- Added a new config option `allowVcRedistAutoInstall` (default: false) to control whether the mod may automatically download and install the VC++ Redistributable.
 - Improved reliability of the Piper TTS engine startup on Windows.
 - Added clearer error messages in the logs when the Piper TTS engine fails to start.
 
