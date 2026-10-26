@@ -119,13 +119,15 @@ dependencies {
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
     
     // --- PIPER JNI (WITH JORBIS EXCLUSIONS) ---
-    implementation("io.github.jvoice-project:piper-jni:1.4.1") {
+    // NOTE: 1.4.2.1 is a breaking redesign (static API + private ctor).
+    // Pin below 1.4.2.1 so the instance-based API the code targets stays usable.
+    implementation("io.github.jvoice-project:piper-jni:1.4.2") {
         exclude group: 'org.jcraft', module: 'jorbis'
     }
-    jarJar("io.github.jvoice-project:piper-jni:[1.4.1, 2.0.0)") {
+    jarJar("io.github.jvoice-project:piper-jni:[1.4.1, 1.4.2.1)") {
         exclude group: 'org.jcraft', module: 'jorbis'
     }
-    additionalRuntimeClasspath("io.github.jvoice-project:piper-jni:1.4.1") {
+    additionalRuntimeClasspath("io.github.jvoice-project:piper-jni:1.4.2") {
         exclude group: 'org.jcraft', module: 'jorbis'
     }
     

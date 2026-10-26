@@ -25,6 +25,10 @@ import java.security.MessageDigest
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
+interface ExtKernel32 : com.sun.jna.Library {
+    fun SetDllDirectoryW(path: com.sun.jna.WString?): Boolean
+}
+
 fun getSafePiperPath(path: Path): Path {
     val os = System.getProperty("os.name")?.lowercase(Locale.ENGLISH) ?: ""
     if (!os.contains("win")) {
@@ -65,6 +69,8 @@ object PiperManager {
     fun getSafePiperPath(path: Path): Path = de.jamala1111.station_voices.server.getSafePiperPath(path)
 
     private var piperInstance: PiperJNI? = null
+    @Volatile
+    private var setupAttempted = false
     private val piperMutex = Mutex()
     private val loadedVoices = ConcurrentHashMap<String, PiperVoice>()
     private val loadedVoiceModels = ConcurrentHashMap<String, VoiceModelInfo>()
@@ -90,6 +96,12 @@ object PiperManager {
 
     fun getCacheDirectory(): File {
         val dir = File(getPiperDirectory(), "cache")
+        if (!dir.exists()) dir.mkdirs()
+        return dir
+    }
+
+    fun getNativeLibraryDirectory(): File {
+        val dir = File(getPiperDirectory(), "native")
         if (!dir.exists()) dir.mkdirs()
         return dir
     }
@@ -211,19 +223,73 @@ object PiperManager {
         return null
     }
 
+    private fun configurePiperNativeExtraction() {
+        try {
+            val nativeDir = getNativeLibraryDirectory()
+            val nativePath = nativeDir.toPath()
+
+            // Add the native directory to the Windows DLL search path so that
+            // onnxruntime.dll's DllMain can locate its companion DLLs
+            // (e.g. onnxruntime_providers_shared.dll) by name.
+            addToDllSearchPath(nativeDir)
+
+            // Load NativeUtils through PiperJNI's classloader (NeoForge serves piper-jni
+            // from a separate plugin layer) so we patch the very class piper-jni uses,
+            // not a copy on PiperManager's own loader.
+            val nativeUtilsClass = Class.forName(
+                "io.github.jvoiceproject.piperjni.internal.NativeUtils",
+                false,
+                PiperJNI::class.java.classLoader
+            )
+            val field = nativeUtilsClass.getDeclaredField("temporaryDir")
+            field.isAccessible = true
+            val current = field.get(null) as? Path
+            if (current == null || current.toAbsolutePath() != nativePath.toAbsolutePath()) {
+                field.set(null, nativePath)
+                CreateStationVoices.LOGGER.info("Configured Piper native library extraction directory: ${nativePath.toAbsolutePath()}")
+            }
+        } catch (e: Throwable) {
+            CreateStationVoices.LOGGER.warn("Could not configure Piper native extraction directory; falling back to default temp dir", e)
+        }
+    }
+
+    private fun addToDllSearchPath(dir: File) {
+        val os = System.getProperty("os.name")?.lowercase(Locale.ENGLISH) ?: ""
+        if (!os.contains("win")) return
+        try {
+            val extKernel32 = com.sun.jna.Native.load("kernel32", ExtKernel32::class.java) as ExtKernel32
+            val result = extKernel32.SetDllDirectoryW(com.sun.jna.WString(dir.absolutePath))
+            if (result) {
+                CreateStationVoices.LOGGER.info("Added native directory to DLL search path: ${dir.absolutePath}")
+            } else {
+                val err = com.sun.jna.Native.getLastError()
+                CreateStationVoices.LOGGER.warn("SetDllDirectoryW failed (Win32 error $err) for ${dir.absolutePath}")
+            }
+        } catch (e: Throwable) {
+            CreateStationVoices.LOGGER.warn("Could not add native directory to DLL search path", e)
+        }
+    }
+
+    private fun createPiperJNI(): PiperJNI {
+        configurePiperNativeExtraction()
+        return PiperJNI()
+    }
+
     suspend fun setupPiper() {
         withContext(Dispatchers.IO) {
             piperMutex.withLock {
-                if (piperInstance == null) {
-                    try {
-                        CreateStationVoices.LOGGER.info("Initializing native Piper ONNX runtime...")
-                        val piper = PiperJNI()
-                        piper.initialize(true)
-                        piperInstance = piper
-                        CreateStationVoices.LOGGER.info("Successfully initialized native Piper ONNX runtime v${piper.piperVersion}.")
-                    } catch (e: Exception) {
-                        CreateStationVoices.LOGGER.error("Failed to initialize native Piper ONNX runtime", e)
-                    }
+                if (piperInstance != null || setupAttempted) return@withLock
+                setupAttempted = true
+                try {
+                    CreateStationVoices.LOGGER.info("Initializing native Piper ONNX runtime...")
+                    val piper = createPiperJNI()
+                    piper.initialize(true)
+                    piperInstance = piper
+                    CreateStationVoices.LOGGER.info("Successfully initialized native Piper ONNX runtime v${piper.piperVersion}.")
+                } catch (e: Throwable) {
+                    CreateStationVoices.LOGGER.error("Failed to initialize native Piper ONNX runtime. " +
+                        "This is often caused by missing Visual C++ Redistributable on the server, " +
+                        "or by antivirus/permissions blocking DLL loading.", e)
                 }
             }
         }
@@ -272,7 +338,11 @@ object PiperManager {
                 piperMutex.withLock {
                     var piper = piperInstance
                     if (piper == null) {
-                        piper = PiperJNI()
+                        if (setupAttempted) {
+                            CreateStationVoices.LOGGER.error("Piper runtime initialization previously failed; skipping audio generation. Check earlier logs for the initialization error.")
+                            return@withContext null
+                        }
+                        piper = createPiperJNI()
                         piper.initialize(true)
                         piperInstance = piper
                     }

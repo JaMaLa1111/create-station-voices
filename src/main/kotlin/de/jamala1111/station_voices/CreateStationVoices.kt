@@ -111,9 +111,10 @@ object CreateStationVoices {
      */
     private fun onServerSetup(event: FMLDedicatedServerSetupEvent) {
         LOGGER.log(Level.INFO, "Server starting...")
-        CoroutineScope(Dispatchers.IO).launch {
-            de.jamala1111.station_voices.server.PiperManager.setupPiper()
-        }
+        // setupPiper() is already called in onCommonSetup which fires on both
+        // client and dedicated server. Don't call it again here — doing so causes
+        // a second extraction attempt that fails with AccessDeniedException on
+        // Windows because the first attempt already loaded the native DLLs.
     }
 
     private fun onCommonSetup(event: FMLCommonSetupEvent) {
