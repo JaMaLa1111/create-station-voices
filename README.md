@@ -101,6 +101,10 @@ With `v1.0.0-rc1` all features I planned are added. If you wish to suggest a fea
 * **Issue:** Download fails due to missing or wrong certificates.  
   **Fix:** If you have an external firewall or antivirus software, try adding `-Djavax.net.ssl.trustStoreType=WINDOWS-ROOT` to your JVM arguments. If that doesn't work, try disabling your firewall/antivirus temporarily and re-download the voice models.
 
+* **Issue:** Piper TTS fails to start on Windows servers with `ERROR_DLL_INIT_FAILED` / `UnsatisfiedLinkError`.  
+  **Cause:** The Java installation bundles an outdated Visual C++ runtime that is incompatible with the ONNX Runtime used by Piper.  
+  **Fix:** Set `allowVcRedistAutoInstall = true` in the server config (`create_station_voices-server.toml`) and restart. The mod will download and install the Microsoft Visual C++ Redistributable and rename the JVM's outdated DLLs. Alternatively, run the generated `fix-vc-runtime.bat` script as administrator (right-click > Run as administrator), then restart the server. A server restart is always required after applying the fix.
+
 ---
 
 ## Dependencies

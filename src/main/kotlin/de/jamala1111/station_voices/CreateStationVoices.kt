@@ -67,6 +67,7 @@ object CreateStationVoices {
         
         NeoForge.EVENT_BUS.addListener(ModCommands::onRegisterCommands)
         NeoForge.EVENT_BUS.addListener(::onPlayerLoggedIn)
+        NeoForge.EVENT_BUS.addListener(::onServerAboutToStart)
 
         val obj = runForDist(
             clientTarget = {
@@ -111,9 +112,10 @@ object CreateStationVoices {
      */
     private fun onServerSetup(event: FMLDedicatedServerSetupEvent) {
         LOGGER.log(Level.INFO, "Server starting...")
-        CoroutineScope(Dispatchers.IO).launch {
-            de.jamala1111.station_voices.server.PiperManager.setupPiper()
-        }
+        // setupPiper() is already called in onCommonSetup which fires on both
+        // client and dedicated server. Don't call it again here — doing so causes
+        // a second extraction attempt that fails with AccessDeniedException on
+        // Windows because the first attempt already loaded the native DLLs.
     }
 
     private fun onCommonSetup(event: FMLCommonSetupEvent) {
@@ -147,6 +149,12 @@ object CreateStationVoices {
 
             de.jamala1111.station_voices.JingleManager.reload()
         }
+    }
+
+    private fun onServerAboutToStart(event: net.neoforged.neoforge.event.server.ServerAboutToStartEvent) {
+        // setupPiper is called here (not in onCommonSetup) because the server config
+        // is not loaded until the server is about to start. We need the config to check
+        // allowVcRedistAutoInstall.
         CoroutineScope(Dispatchers.IO).launch {
             de.jamala1111.station_voices.server.PiperManager.setupPiper()
         }

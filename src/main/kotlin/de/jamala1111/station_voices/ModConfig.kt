@@ -17,6 +17,7 @@ object ModConfig {
         val webApiUrl: ModConfigSpec.ConfigValue<String>
         val modelManagementPermissionRequirement: ModConfigSpec.ConfigValue<Int>
         val jingleManagementPermissionRequirement: ModConfigSpec.ConfigValue<Int>
+        val allowVcRedistAutoInstall: ModConfigSpec.ConfigValue<Boolean>
 
         init {
             builder.push("tts")
@@ -46,6 +47,15 @@ object ModConfig {
                     "4 = Owner (Stop server / Save-all)"
                 )
                 .define("jingleManagementPermissionRequirement", 2);
+            allowVcRedistAutoInstall = builder
+                .comment(
+                    "Whether the mod is allowed to automatically download and install the",
+                    "Microsoft Visual C++ Redistributable if the Piper TTS engine fails to",
+                    "start due to an outdated VC++ runtime on the server.",
+                    "If false, a fix-vc-runtime.bat script is generated instead for manual",
+                    "installation. Set to true to allow automatic installation."
+                )
+                .define("allowVcRedistAutoInstall", false);
             builder.pop()
         }
     }
