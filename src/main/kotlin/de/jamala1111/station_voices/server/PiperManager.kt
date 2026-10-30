@@ -451,15 +451,38 @@ object PiperManager {
             try {
                 if (text.isBlank()) return@withContext null
 
-                // Load voice model metadata if available for guardrails
                 val voiceModel = getVoiceModelInfo(language, voice)
-                val safeText = TextSanitizer.sanitizeForModel(text, voiceModel, language)
-                if (safeText.isNullOrBlank()) {
+
+                // Split text by [s:X] tags
+                data class TextPart(val text: String, val silenceSeconds: Int)
+                val parsedParts = mutableListOf<TextPart>()
+                
+                val matcher = java.util.regex.Pattern.compile("\\[s:(\\d+)\\]").matcher(text)
+                var lastEnd = 0
+                while (matcher.find()) {
+                    if (matcher.start() > lastEnd) {
+                        parsedParts.add(TextPart(text.substring(lastEnd, matcher.start()), 0))
+                    }
+                    parsedParts.add(TextPart("", matcher.group(1).toInt()))
+                    lastEnd = matcher.end()
+                }
+                if (lastEnd < text.length) {
+                    val remaining = text.substring(lastEnd)
+                    if (remaining.isNotBlank()) {
+                        parsedParts.add(TextPart(remaining, 0))
+                    }
+                }
+
+                // Check speakability
+                val hasSpeakableContent = parsedParts.any { it.silenceSeconds == 0 && !TextSanitizer.sanitizeForModel(it.text, voiceModel, language).isNullOrBlank() }
+                if (!hasSpeakableContent) {
                     CreateStationVoices.LOGGER.debug("Text sanitized to blank or unspeakable for model $language-$voice: '$text'")
                     return@withContext null
                 }
 
-                val hash = md5("$safeText-$voice-$language")
+                // Use the raw text with [s:X] for cache hashing so that changing silences re-generates
+                val safeTextCache = TextSanitizer.sanitizeForModel(text, voiceModel, language) ?: text
+                val hash = md5("$safeTextCache-$voice-$language")
                 val cacheFile = File(getCacheDirectory(), "$hash.wav")
 
                 if (cacheFile.exists() && cacheFile.length() > 0) {
@@ -507,13 +530,32 @@ object PiperManager {
                         loadedVoices[key] = piperVoice
                     }
 
-                    val samples = piper.textToAudio(piperVoice, safeText)
-                    if (samples.isEmpty()) {
-                        CreateStationVoices.LOGGER.warn("Piper generated empty audio for '$safeText' (raw: '$text')")
+                    val allSamples = mutableListOf<Short>()
+                    for (part in parsedParts) {
+                        if (part.silenceSeconds > 0) {
+                            val sampleCount = part.silenceSeconds * piperVoice.sampleRate
+                            for (i in 0 until sampleCount) {
+                                allSamples.add(0)
+                            }
+                        } else {
+                            val safePart = TextSanitizer.sanitizeForModel(part.text, voiceModel, language)
+                            if (!safePart.isNullOrBlank()) {
+                                // Strip any residual [s:X] just in case
+                                val cleanSafePart = safePart.replace(Regex("\\[s:\\d+\\]"), "")
+                                if (cleanSafePart.isNotBlank()) {
+                                    val samples = piper.textToAudio(piperVoice, cleanSafePart)
+                                    allSamples.addAll(samples.toList())
+                                }
+                            }
+                        }
+                    }
+
+                    if (allSamples.isEmpty()) {
+                        CreateStationVoices.LOGGER.warn("Piper generated empty audio for raw text: '$text'")
                         return@withContext null
                     }
 
-                    val wavBytes = pcmToWav(samples, piperVoice.sampleRate)
+                    val wavBytes = pcmToWav(allSamples.toShortArray(), piperVoice.sampleRate)
                     cacheFile.writeBytes(wavBytes)
                     return@withContext wavBytes
                 }

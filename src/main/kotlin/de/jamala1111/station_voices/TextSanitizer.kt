@@ -13,7 +13,7 @@ data class VoiceModelInfo(
 
 object TextSanitizer {
 
-    const val DEFAULT_MAX_LENGTH = 500
+    const val DEFAULT_MAX_LENGTH = 1000
     const val MAX_LABEL_LENGTH = 64
 
     // Minecraft formatting patterns:
@@ -435,8 +435,18 @@ object TextSanitizer {
     fun sanitize(text: String, language: String = "en_US", maxLength: Int = DEFAULT_MAX_LENGTH): String {
         if (text.isBlank()) return ""
 
+        // Temporarily protect silence tags
+        var protectedText = text
+        val silenceMap = mutableMapOf<String, String>()
+        val silenceRegex = Regex("\\[s:\\d+\\]")
+        silenceRegex.findAll(text).forEachIndexed { index, matchResult ->
+            val token = "XSILENCEX${index}X"
+            protectedText = protectedText.replaceFirst(matchResult.value, token)
+            silenceMap[token] = matchResult.value
+        }
+
         // 1. Unicode NFC Canonical Normalization (ensures precomposed characters like ä, ö, ü, é)
-        var sanitized = Normalizer.normalize(text, Normalizer.Form.NFC)
+        var sanitized = Normalizer.normalize(protectedText, Normalizer.Form.NFC)
 
         // 2. Strip Minecraft color codes and formatting
         sanitized = stripMinecraftFormatting(sanitized)
@@ -458,6 +468,11 @@ object TextSanitizer {
 
         // 8. Truncate to maximum length
         sanitized = truncateLength(sanitized, maxLength)
+
+        // Restore silence tags
+        for ((token, original) in silenceMap) {
+            sanitized = sanitized.replace(token, original)
+        }
 
         return sanitized
     }
@@ -512,26 +527,66 @@ object TextSanitizer {
     fun filterForModel(text: String, voiceModel: VoiceModelInfo?, language: String): String {
         if (text.isBlank()) return ""
 
+        // Temporarily protect silence tokens
+        var protectedText = text
+        val silenceMap = mutableMapOf<String, String>()
+        val silenceTokenRegex = Regex("XSILENCEX\\d+X")
+        silenceTokenRegex.findAll(text).forEachIndexed { index, matchResult ->
+            val token = "YPROTECTY${index}Y"
+            protectedText = protectedText.replaceFirst(matchResult.value, token)
+            silenceMap[token] = matchResult.value
+        }
+
         // Case 1: Character-based model ("text")
         if (voiceModel?.phonemeType.equals("text", ignoreCase = true) && voiceModel?.phonemeIdMap?.isNotEmpty() == true) {
             val allowedChars = voiceModel.phonemeIdMap
-            val sb = StringBuilder(text.length)
-            for (ch in text) {
+            val sb = StringBuilder(protectedText.length)
+            
+            // We need to match YPROTECTY tokens during character iteration
+            var i = 0
+            while (i < protectedText.length) {
+                var matchedProtect = false
+                for ((token, _) in silenceMap) {
+                    if (protectedText.startsWith(token, i)) {
+                        sb.append(token)
+                        i += token.length
+                        matchedProtect = true
+                        break
+                    }
+                }
+                if (matchedProtect) continue
+
+                val ch = protectedText[i]
                 val str = ch.toString()
                 if (allowedChars.contains(str) || allowedChars.contains(str.lowercase()) || ch == ' ') {
                     sb.append(ch)
                 }
+                i++
             }
-            return normalizeWhitespace(sb.toString())
+            var result = normalizeWhitespace(sb.toString())
+            for ((token, original) in silenceMap) {
+                result = result.replace(token, original)
+            }
+            return result
         }
 
         // Case 2: General / Espeak-based model:
-        // Validate characters against allowed scripts for this model's language
         val allowedScripts = getAllowedScriptsForLanguage(language)
-        val sb = StringBuilder(text.length)
+        val sb = StringBuilder(protectedText.length)
         var i = 0
-        while (i < text.length) {
-            val codePoint = text.codePointAt(i)
+        while (i < protectedText.length) {
+            var matchedProtect = false
+            for ((token, _) in silenceMap) {
+                if (protectedText.startsWith(token, i)) {
+                    sb.append(token)
+                    i += token.length
+                    matchedProtect = true
+                    break
+                }
+            }
+            if (matchedProtect) continue
+
+            val codePoint = protectedText.codePointAt(i)
             val charCount = Character.charCount(codePoint)
 
             val isSpace = Character.isWhitespace(codePoint) || codePoint == ' '.code
@@ -569,7 +624,6 @@ object TextSanitizer {
             }
 
             // Letters and combining marks:
-            // Must belong to one of the allowed Unicode scripts for the model's language!
             if (Character.isLetter(codePoint) || Character.getType(codePoint) == Character.NON_SPACING_MARK.toInt() ||
                 Character.getType(codePoint) == Character.COMBINING_SPACING_MARK.toInt()) {
                 val script = try { UnicodeScript.of(codePoint) } catch (_: Exception) { UnicodeScript.UNKNOWN }
@@ -581,7 +635,11 @@ object TextSanitizer {
             i += charCount
         }
 
-        return normalizeWhitespace(sb.toString())
+        var result = normalizeWhitespace(sb.toString())
+        for ((token, original) in silenceMap) {
+            result = result.replace(token, original)
+        }
+        return result
     }
 
     /**
@@ -601,13 +659,41 @@ object TextSanitizer {
     }
 
     /**
+     * Calculates the total forced silence duration from [s:X] tags in milliseconds.
+     */
+    fun getSilenceDurationMs(text: String): Long {
+        var totalMs = 0L
+        val silenceRegex = Regex("\\[s:(\\d+)\\]")
+        silenceRegex.findAll(text).forEach { match ->
+            totalMs += (match.groupValues[1].toLongOrNull() ?: 0L) * 1000L
+        }
+        return totalMs
+    }
+
+    /**
      * Complete pipeline: sanitizes text, applies model guardrails matching the model's language,
      * and returns the final safe string, or null if the string is empty or unspeakable.
      */
     fun sanitizeForModel(text: String, voiceModel: VoiceModelInfo?, language: String): String? {
-        val sanitized = sanitize(text, language)
-        val filtered = filterForModel(sanitized, voiceModel, language)
-        if (!isSpeakable(filtered)) {
+        // Temporarily protect silence tags
+        var protectedText = text
+        val silenceMap = mutableMapOf<String, String>()
+        val silenceRegex = Regex("\\[s:\\d+\\]")
+        silenceRegex.findAll(text).forEachIndexed { index, matchResult ->
+            val token = "XSILENCEX${index}X"
+            protectedText = protectedText.replaceFirst(matchResult.value, token)
+            silenceMap[token] = matchResult.value
+        }
+
+        val sanitized = sanitize(protectedText, language)
+        var filtered = filterForModel(sanitized, voiceModel, language)
+
+        // Restore silence tags
+        for ((token, original) in silenceMap) {
+            filtered = filtered.replace(token, original)
+        }
+
+        if (!isSpeakable(filtered.replace(Regex("\\[s:\\d+\\]"), ""))) {
             return null
         }
         return filtered

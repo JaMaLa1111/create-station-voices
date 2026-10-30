@@ -39,7 +39,7 @@ data class OpenTrainAnnouncerScreenPayload(
             val pos = if (hasPos) buf.readBlockPos() else null
             val hasLocalPos = buf.readBoolean()
             val localPos = if (hasLocalPos) buf.readBlockPos() else null
-            val profilesJson = buf.readUtf()
+            val profilesJson = buf.readUtf(262144)
             return OpenTrainAnnouncerScreenPayload(entityId, pos, localPos, profilesJson)
         }
     }
@@ -76,7 +76,7 @@ data class SaveTrainAnnouncerProfilesPayload(
             val entityId = if (hasEntity) buf.readVarInt() else null
             val hasLocalPos = buf.readBoolean()
             val localPos = if (hasLocalPos) buf.readBlockPos() else null
-            val profilesJson = buf.readUtf()
+            val profilesJson = buf.readUtf(262144)
             return SaveTrainAnnouncerProfilesPayload(pos, entityId, localPos, profilesJson)
         }
     }

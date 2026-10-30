@@ -44,7 +44,7 @@ data class SetConfigurableAnnouncerDataPayload(
             return SetConfigurableAnnouncerDataPayload(
                 buf.readBlockPos(),
                 buf.readUtf(),
-                buf.readUtf(),
+                buf.readUtf(1000),
                 buf.readUtf(),
                 buf.readUtf(),
                 buf.readFloat(),

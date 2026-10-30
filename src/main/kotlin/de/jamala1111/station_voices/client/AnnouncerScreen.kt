@@ -57,7 +57,7 @@ class AnnouncerScreen(
         // Main Tab
         textBox = EditBox(font, centerX - 100, centerY - 52, 200, 20, Component.translatable("gui.create_station_voices.announcer.text"))
         textBox.value = currentText
-        textBox.setMaxLength(256)
+        textBox.setMaxLength(1000)
         addRenderableWidget(textBox)
 
         voiceBtn = addRenderableWidget(Button.builder(if (currentVoice.isBlank()) Component.translatable("gui.create_station_voices.voice_none") else Component.translatable("gui.create_station_voices.voice", currentVoice, currentLanguage)) { _ ->

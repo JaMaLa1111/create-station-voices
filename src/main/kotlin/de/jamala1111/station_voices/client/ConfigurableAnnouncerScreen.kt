@@ -103,7 +103,7 @@ class ConfigurableAnnouncerScreen(
 
         // Right Panel
         textBox = EditBox(font, rightX, centerY - 52, 200, 20, Component.translatable("gui.create_station_voices.announcer.text"))
-        textBox.setMaxLength(256)
+        textBox.setMaxLength(1000)
         textBox.setResponder { text ->
             selectedTrain?.let { profiles[it]?.text = text }
         }
