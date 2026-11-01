@@ -1,4 +1,11 @@
-## 1.1.1
+## 1.2.0
+- Added a "Forced Silence" option: You can now insert `[s:X]` in the announcement text to add `X` seconds of silence at that point (e.g., `[s:2]` for 2 seconds).
+- Added a help button (`?`) to the announcer screens to explain the forced silence feature.
+- Increased the maximum announcement text length from 256 to 1000 characters.
+- Added a new client config setting `allowNetworkUsage` to control whether the mod can connect to the internet to download voice models or fetch Web API voices. A consent screen will prompt you when attempting to use network features for the first time.
+
+## 1.1.1 (Retracted)
+*Note: Version 1.1.1 was retracted, but all of its changes remain and are included in version 1.2.0.*
 - Fixed a crash on servers with restrictive folder permissions where the native Piper TTS engine could not extract its files.
 - Fixed a startup crash caused by an incompatible library update.
 - Fixed a secondary crash that could occur on dedicated servers during Piper initialization.
