@@ -3,6 +3,7 @@
 - Added a help button (`?`) to the announcer screens to explain the forced silence feature.
 - Increased the maximum announcement text length from 256 to 1000 characters.
 - Added a new client config setting `allowNetworkUsage` to control whether the mod can connect to the internet to download voice models or fetch Web API voices. A consent screen will prompt you when attempting to use network features for the first time.
+- Fixed all announcer block items spinning off-center when dropped on the ground.
 
 ## 1.1.1 (Retracted)
 *Note: Version 1.1.1 was retracted, but all of its changes remain and are included in version 1.2.0.*
