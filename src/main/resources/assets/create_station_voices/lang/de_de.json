@@ -76,6 +76,8 @@
   "gui.create_station_voices.effects.timing": "Zeitpunkt: %s",
   "gui.create_station_voices.effects.train_only": "Nur im Zug: %s",
   "gui.create_station_voices.effects.train_only.tooltip": "Nur Spieler, die sich im Zug befinden (sitzend und stehend), können die Ansage hören.\n\nHinweis: Es kann zu Ungenauigkeiten kommen, aufgrund der Art und Weise, wie Create die Kollisionsboxen für Züge berechnet.",
+  "gui.create_station_voices.help": "?",
+  "gui.create_station_voices.help.silence.tooltip": "Erzwungene Stille\nFüge [s:X] im Text ein, um die Ansage an dieser Stelle für X Sekunden zu pausieren.\nBeispiel: \"Achtung bitte[s:2]nächster Halt: Hauptbahnhof\" pausiert für 2 Sekunden.\nTags können kombiniert werden: [s:1][s:3] = 4 Sekunden.",
   "gui.create_station_voices.on": "AN",
   "gui.create_station_voices.off": "AUS",
   "gui.create_station_voices.generate_preview": "Generieren & Vorschau",

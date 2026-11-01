@@ -76,6 +76,8 @@
   "gui.create_station_voices.effects.timing": "Timing: %s",
   "gui.create_station_voices.effects.train_only": "Train Only: %s",
   "gui.create_station_voices.effects.train_only.tooltip": "Only players on the train (seated and standing) can hear the announcement.\n\nNote: Inaccuracies can occur because of the way Create calculates bounding boxes for trains.",
+  "gui.create_station_voices.help": "?",
+  "gui.create_station_voices.help.silence.tooltip": "Forced Silence\nInsert [s:X] in the text to pause the announcement for X seconds at that point.\nExample: \"Attention please[s:2]next stop: Central\" pauses for 2 seconds.\nTags can be combined: [s:1][s:3] = 4 seconds.",
   "gui.create_station_voices.on": "ON",
   "gui.create_station_voices.off": "OFF",
   "gui.create_station_voices.generate_preview": "Generate & Preview",

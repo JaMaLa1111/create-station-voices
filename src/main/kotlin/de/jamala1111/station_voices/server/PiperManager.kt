@@ -272,7 +272,19 @@ object PiperManager {
 
     private fun createPiperJNI(): PiperJNI {
         configurePiperNativeExtraction()
+        cleanEspeakNgDataDirectory()
         return PiperJNI()
+    }
+
+    private fun cleanEspeakNgDataDirectory() {
+        val espeakDir = File(getNativeLibraryDirectory(), "espeak-ng-data")
+        if (!espeakDir.exists()) return
+        try {
+            espeakDir.deleteRecursively()
+            CreateStationVoices.LOGGER.debug("Cleared existing espeak-ng-data directory for re-extraction.")
+        } catch (e: Exception) {
+            CreateStationVoices.LOGGER.warn("Could not clear espeak-ng-data directory; Piper initialization may fail on repeat runs.", e)
+        }
     }
 
     private fun downloadAndInstallVcRedist() {

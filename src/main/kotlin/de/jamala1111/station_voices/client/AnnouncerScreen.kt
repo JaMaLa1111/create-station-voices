@@ -34,6 +34,7 @@ class AnnouncerScreen(
     // Main Tab
     private lateinit var voiceBtn: Button
     private lateinit var genBtn: Button
+    private lateinit var helpBtn: Button
 
     // Effects Tab
     private lateinit var speedSlider: AbstractSliderButton
@@ -56,8 +57,8 @@ class AnnouncerScreen(
 
         // Main Tab
         textBox = EditBox(font, centerX - 100, centerY - 52, 200, 20, Component.translatable("gui.create_station_voices.announcer.text"))
-        textBox.value = currentText
         textBox.setMaxLength(1000)
+        textBox.value = currentText
         addRenderableWidget(textBox)
 
         voiceBtn = addRenderableWidget(Button.builder(if (currentVoice.isBlank()) Component.translatable("gui.create_station_voices.voice_none") else Component.translatable("gui.create_station_voices.voice", currentVoice, currentLanguage)) { _ ->
@@ -151,6 +152,11 @@ class AnnouncerScreen(
             onClose()
         }.bounds(centerX + 5, centerY + 81, 95, 20).build())
 
+        helpBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.help")) { _ -> }
+            .bounds(width - 28, 8, 20, 20)
+            .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.create_station_voices.help.silence.tooltip")))
+            .build())
+
         PacketDistributor.sendToServer(de.jamala1111.station_voices.network.RequestInstalledModelsPayload())
         updateVisibility()
     }
@@ -183,12 +189,12 @@ class AnnouncerScreen(
 
     private fun updateVisibility() {
         tabBtn.message = Component.translatable(if (isEffectsTab) "gui.create_station_voices.tab_effects" else "gui.create_station_voices.tab_main")
-        
+
         val hasModels = installedModels?.isNotEmpty() ?: true
 
         textBox.visible = !isEffectsTab
         voiceBtn.visible = !isEffectsTab
-        
+
         speedSlider.visible = isEffectsTab
         volumeSlider.visible = isEffectsTab
         rangeSlider.visible = isEffectsTab
@@ -196,7 +202,7 @@ class AnnouncerScreen(
         reverbBtn.visible = isEffectsTab
         jingleBtn.visible = isEffectsTab
         jingleTimingBtn.visible = isEffectsTab
-        
+
         textBox.active = hasModels
         voiceBtn.active = hasModels
         genBtn.active = hasModels
@@ -212,7 +218,7 @@ class AnnouncerScreen(
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.render(guiGraphics, mouseX, mouseY, partialTick)
         guiGraphics.drawCenteredString(font, title, width / 2, 20, 0xFFFFFF)
-        
+
         if (installedModels != null && installedModels!!.isEmpty() && !isEffectsTab) {
             val warning = Component.translatable("gui.create_station_voices.no_models_warning")
             val instruction = Component.translatable("gui.create_station_voices.no_models_instruction")

@@ -40,6 +40,7 @@ class TrainAnnouncerScreen(
     private lateinit var textBox: EditBox
     private lateinit var voiceBtn: Button
     private lateinit var genBtn: Button
+    private lateinit var helpBtn: Button
     private lateinit var speedSlider: AbstractSliderButton
     private lateinit var volumeSlider: AbstractSliderButton
     private lateinit var rangeSlider: AbstractSliderButton
@@ -184,6 +185,11 @@ class TrainAnnouncerScreen(
             saveAndClose()
         }.bounds(rightX + 105, centerY + 81, 95, 20).build())
 
+        helpBtn = addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.help")) { _ -> }
+            .bounds(width - 28, 8, 20, 20)
+            .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("gui.create_station_voices.help.silence.tooltip")))
+            .build())
+
         PacketDistributor.sendToServer(de.jamala1111.station_voices.network.RequestInstalledModelsPayload())
 
         if (profiles.isNotEmpty()) {
@@ -297,12 +303,12 @@ class TrainAnnouncerScreen(
         val hasSelection = selectedStation != null
         val profile = selectedStation?.let { profiles[it] }
         val hasModels = installedModels?.isNotEmpty() ?: true
-        
+
         tabBtn.message = Component.translatable(if (isEffectsTab) "gui.create_station_voices.tab_effects" else "gui.create_station_voices.tab_main")
-        
+
         textBox.visible = hasSelection && !isEffectsTab
         voiceBtn.visible = hasSelection && !isEffectsTab
-        
+
         speedSlider.visible = hasSelection && isEffectsTab
         volumeSlider.visible = hasSelection && isEffectsTab
         rangeSlider.visible = hasSelection && isEffectsTab
@@ -311,7 +317,7 @@ class TrainAnnouncerScreen(
         jingleBtn.visible = hasSelection && isEffectsTab
         jingleTimingBtn.visible = hasSelection && isEffectsTab
         contraptionOnlyBtn.visible = hasSelection && isEffectsTab
-        
+
         textBox.active = hasModels
         voiceBtn.active = hasModels
         genBtn.active = hasModels
@@ -333,7 +339,7 @@ class TrainAnnouncerScreen(
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.render(guiGraphics, mouseX, mouseY, partialTick)
         guiGraphics.drawCenteredString(font, title, width / 2, 10, 0xFFFFFF)
-        
+
         val rightX = width / 2 + 10
         if (selectedStation != null) {
             guiGraphics.drawString(font, Component.translatable("gui.create_station_voices.station", selectedStation), rightX, height / 2 - 95, 0xAAAAAA)
@@ -342,13 +348,13 @@ class TrainAnnouncerScreen(
         if (selectedStation != null && installedModels != null && installedModels!!.isEmpty() && !isEffectsTab) {
             val warning = Component.translatable("gui.create_station_voices.no_models_warning")
             val instruction = Component.translatable("gui.create_station_voices.no_models_instruction")
-            
+
             val warningLines = font.split(warning, 200)
             val instructionLines = font.split(instruction, 200)
-            
+
             val textX = rightX + 100 // Center of right panel
             var textY = (height / 2)
-            
+
             for (line in warningLines) {
                 guiGraphics.drawCenteredString(font, line, textX, textY, 0xFF5555)
                 textY += font.lineHeight + 2
