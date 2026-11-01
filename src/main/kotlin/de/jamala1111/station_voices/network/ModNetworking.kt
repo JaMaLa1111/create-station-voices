@@ -32,7 +32,7 @@ data class SetAnnouncerDataPayload(
         val STREAM_CODEC = StreamCodec.ofMember(SetAnnouncerDataPayload::write, ::read)
 
         fun read(buf: RegistryFriendlyByteBuf): SetAnnouncerDataPayload {
-            return SetAnnouncerDataPayload(buf.readBlockPos(), buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt(), buf.readUtf(), buf.readUtf(), buf.readFloat())
+            return SetAnnouncerDataPayload(buf.readBlockPos(), buf.readUtf(1000), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt(), buf.readUtf(), buf.readUtf(), buf.readFloat())
         }
     }
 
@@ -74,7 +74,7 @@ data class PlayAnnouncerAudioPayload(
         fun read(buf: RegistryFriendlyByteBuf): PlayAnnouncerAudioPayload {
             val hasPos = buf.readBoolean()
             val pos = if (hasPos) buf.readBlockPos() else null
-            val text = buf.readUtf()
+            val text = buf.readUtf(1000)
             val voice = buf.readUtf()
             val language = buf.readUtf()
             val speed = buf.readFloat()
@@ -198,7 +198,7 @@ data class RequestPreviewAudioPayload(
         val STREAM_CODEC = StreamCodec.ofMember(RequestPreviewAudioPayload::write, ::read)
 
         fun read(buf: RegistryFriendlyByteBuf): RequestPreviewAudioPayload {
-            return RequestPreviewAudioPayload(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt(), buf.readUtf(), buf.readUtf(), buf.readFloat())
+            return RequestPreviewAudioPayload(buf.readUtf(1000), buf.readUtf(), buf.readUtf(), buf.readFloat(), buf.readFloat(), buf.readBoolean(), buf.readInt(), buf.readUtf(), buf.readUtf(), buf.readFloat())
         }
     }
 

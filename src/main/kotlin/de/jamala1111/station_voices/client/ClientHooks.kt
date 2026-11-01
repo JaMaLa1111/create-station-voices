@@ -63,7 +63,11 @@ object ClientHooks {
     }
     
     fun openModelDownloadScreen() {
-        Minecraft.getInstance().setScreen(ModelDownloadScreen())
+        if (de.jamala1111.station_voices.ModConfig.CLIENT.allowNetworkUsage.get()) {
+            Minecraft.getInstance().setScreen(ModelDownloadScreen())
+        } else {
+            Minecraft.getInstance().setScreen(NetworkConsentScreen(ModelDownloadScreen()))
+        }
     }
 
     fun openJingleManagerScreen() {

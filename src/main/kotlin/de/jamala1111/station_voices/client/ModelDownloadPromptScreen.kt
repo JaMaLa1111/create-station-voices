@@ -22,7 +22,11 @@ class ModelDownloadPromptScreen(private val environmentId: String) : Screen(Comp
         val buttonStartY = (height / 2 - 60) + 20 + textHeight + 20
 
         addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.model_prompt.open_manager")) { _ ->
-            minecraft?.setScreen(ModelDownloadScreen())
+            if (de.jamala1111.station_voices.ModConfig.CLIENT.allowNetworkUsage.get()) {
+                minecraft?.setScreen(ModelDownloadScreen())
+            } else {
+                minecraft?.setScreen(NetworkConsentScreen(ModelDownloadScreen()))
+            }
         }.bounds(centerX - 100, buttonStartY, 200, 20).build())
 
         addRenderableWidget(Button.builder(Component.translatable("gui.create_station_voices.model_prompt.not_now")) { _ ->

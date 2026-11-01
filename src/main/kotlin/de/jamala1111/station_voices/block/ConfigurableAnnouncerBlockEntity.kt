@@ -283,7 +283,8 @@ class ConfigurableAnnouncerBlockEntity(pos: BlockPos, state: BlockState) : Block
             } else {
                 val timing = JingleTiming.fromString(profile.jingleTiming)
                 val jingleDurationMs = de.jamala1111.station_voices.JingleManager.getJingleDuration(profile.jingle, profile.speed, timing)
-                val estimatedDurationMs = (announcementText.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs
+                val extraSilenceMs = de.jamala1111.station_voices.TextSanitizer.getSilenceDurationMs(announcementText)
+                val estimatedDurationMs = (announcementText.length * 120L / profile.speed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (profile.reverb) 900L else 0L) + jingleDurationMs + extraSilenceMs
                 audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
                 val payload = PlayAnnouncerAudioPayload(

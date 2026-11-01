@@ -5,11 +5,29 @@ import net.neoforged.neoforge.common.ModConfigSpec
 object ModConfig {
     val SERVER_SPEC: ModConfigSpec
     val SERVER: Server
+    val CLIENT_SPEC: ModConfigSpec
+    val CLIENT: Client
 
     init {
-        val specPair = ModConfigSpec.Builder().configure(::Server)
-        SERVER_SPEC = specPair.right
-        SERVER = specPair.left
+        val serverSpecPair = ModConfigSpec.Builder().configure(::Server)
+        SERVER_SPEC = serverSpecPair.right
+        SERVER = serverSpecPair.left
+
+        val clientSpecPair = ModConfigSpec.Builder().configure(::Client)
+        CLIENT_SPEC = clientSpecPair.right
+        CLIENT = clientSpecPair.left
+    }
+
+    class Client(builder: ModConfigSpec.Builder) {
+        val allowNetworkUsage: ModConfigSpec.ConfigValue<Boolean>
+
+        init {
+            builder.push("network")
+            allowNetworkUsage = builder
+                .comment("Allow network usage for fetching manifests, downloading voice models, etc.")
+                .define("allowNetworkUsage", false)
+            builder.pop()
+        }
     }
 
     class Server(builder: ModConfigSpec.Builder) {

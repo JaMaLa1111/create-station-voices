@@ -235,7 +235,8 @@ class AnnouncerBlock(properties: Properties) : Block(properties), EntityBlock {
         } else {
             val timing = JingleTiming.fromString(be.ttsJingleTiming)
             val jingleDurationMs = de.jamala1111.station_voices.JingleManager.getJingleDuration(be.ttsJingle, be.ttsSpeed, timing)
-            val estimatedDurationMs = (safeText.length * 120L / be.ttsSpeed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (be.ttsReverb) 900L else 0L) + jingleDurationMs
+            val extraSilenceMs = de.jamala1111.station_voices.TextSanitizer.getSilenceDurationMs(safeText)
+            val estimatedDurationMs = (safeText.length * 120L / be.ttsSpeed.coerceAtLeast(0.1f).toDouble()).toLong() + 2500L + (if (be.ttsReverb) 900L else 0L) + jingleDurationMs + extraSilenceMs
             be.audioEndTimeMillis = System.currentTimeMillis() + estimatedDurationMs
 
             val payload = de.jamala1111.station_voices.network.PlayAnnouncerAudioPayload(

@@ -87,6 +87,7 @@ class VoiceSelectionScreen(val parent: Screen, val currentLanguage: String, val 
         if (ModConfig.SERVER.ttsMode.get() == ModConfig.TtsMode.LOCAL_PIPER) {
             PacketDistributor.sendToServer(RequestInstalledModelsPayload())
         } else {
+            if (!ModConfig.CLIENT.allowNetworkUsage.get()) return
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val baseUrl = ModConfig.SERVER.webApiUrl.get()

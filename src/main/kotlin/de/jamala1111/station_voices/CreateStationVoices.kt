@@ -49,6 +49,7 @@ object CreateStationVoices {
 
     init {
         ModLoadingContext.get().activeContainer.registerConfig(Type.SERVER, ModConfig.SERVER_SPEC)
+        ModLoadingContext.get().activeContainer.registerConfig(Type.CLIENT, ModConfig.CLIENT_SPEC)
         
         LOGGER.log(Level.INFO, "Hello world!")
 

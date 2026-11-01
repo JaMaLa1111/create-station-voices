@@ -13,6 +13,7 @@ import de.jamala1111.station_voices.ModConfig
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.nio.ByteBuffer
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.FloatControl
@@ -310,8 +311,8 @@ object AudioPlayer {
     }
 
     suspend fun getAudioFile(text: String, voice: String, language: String): File {
-        val safeText = de.jamala1111.station_voices.TextSanitizer.sanitizeForModel(text, null, language) ?: text.trim()
-        val hash = md5("$safeText-$voice-$language")
+        val safeTextCache = de.jamala1111.station_voices.TextSanitizer.sanitizeForModel(text, null, language) ?: text.trim()
+        val hash = md5("$safeTextCache-$voice-$language")
         val file = File(CACHE_DIR, "$hash.wav")
 
         if (file.exists() && file.length() > 0) {
@@ -323,34 +324,145 @@ object AudioPlayer {
                 return file
             }
 
+            data class TextPart(val text: String, val silenceSeconds: Int)
+            val parsedParts = mutableListOf<TextPart>()
+            val matcher = java.util.regex.Pattern.compile("\\[s:(\\d+)\\]").matcher(text)
+            var lastEnd = 0
+            while (matcher.find()) {
+                if (matcher.start() > lastEnd) {
+                    parsedParts.add(TextPart(text.substring(lastEnd, matcher.start()), 0))
+                }
+                parsedParts.add(TextPart("", matcher.group(1).toInt()))
+                lastEnd = matcher.end()
+            }
+            if (lastEnd < text.length) {
+                val remaining = text.substring(lastEnd)
+                if (remaining.isNotBlank()) {
+                    parsedParts.add(TextPart(remaining, 0))
+                }
+            }
+
+            val fetchedChunks = mutableListOf<ByteArray>()
+
             val baseUrl = ModConfig.SERVER.webApiUrl.get()
             if (baseUrl.isBlank()) {
                 throw Exception("Web API URL is not configured in create_station_voices-server.toml")
             }
-            val url = URI("$baseUrl/api/generate").toURL()
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "POST"
-            connection.setRequestProperty("Content-Type", "application/json")
-            connection.doOutput = true
-
-            val json = JsonObject()
-            json.addProperty("text", safeText)
-            json.addProperty("voice", voice)
-            json.addProperty("language", language)
-            json.addProperty("no-cache", false)
-
-            connection.outputStream.use { os ->
-                val input = json.toString().toByteArray(StandardCharsets.UTF_8)
-                os.write(input, 0, input.size)
+            if (!ModConfig.CLIENT.allowNetworkUsage.get()) {
+                throw Exception("Network usage is disabled in client config. Cannot use Web API TTS.")
             }
 
-            if (connection.responseCode == 200) {
-                val inputStream: InputStream = connection.inputStream
-                FileOutputStream(file).use { outputStream ->
-                    inputStream.copyTo(outputStream)
+            for (part in parsedParts) {
+                if (part.silenceSeconds > 0) {
+                    // For Web API, we don't immediately know the sample rate, but generally it's 22050.
+                    // We will generate a dummy WAV for the silence and concatenate.
+                    // Instead, we just pad the fetchedChunks with silence byte arrays!
+                    val sampleRate = 22050
+                    val numChannels = 1
+                    val bitsPerSample = 16
+                    val sampleCount = part.silenceSeconds * sampleRate
+                    val dataSize = sampleCount * (bitsPerSample / 8) * numChannels
+                    val silenceData = ByteArray(dataSize) // all zeros
+                    
+                    val header = ByteBuffer.allocate(44).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                    header.put("RIFF".toByteArray(StandardCharsets.US_ASCII))
+                    header.putInt(36 + dataSize)
+                    header.put("WAVE".toByteArray(StandardCharsets.US_ASCII))
+                    header.put("fmt ".toByteArray(StandardCharsets.US_ASCII))
+                    header.putInt(16)
+                    header.putShort(1.toShort())
+                    header.putShort(numChannels.toShort())
+                    header.putInt(sampleRate)
+                    header.putInt(sampleRate * numChannels * (bitsPerSample / 8))
+                    header.putShort((numChannels * (bitsPerSample / 8)).toShort())
+                    header.putShort(bitsPerSample.toShort())
+                    header.put("data".toByteArray(StandardCharsets.US_ASCII))
+                    header.putInt(dataSize)
+                    
+                    val combined = ByteArray(44 + dataSize)
+                    System.arraycopy(header.array(), 0, combined, 0, 44)
+                    System.arraycopy(silenceData, 0, combined, 44, dataSize)
+                    
+                    fetchedChunks.add(combined)
+                } else {
+                    val safePart = de.jamala1111.station_voices.TextSanitizer.sanitizeForModel(part.text, null, language)
+                    if (!safePart.isNullOrBlank()) {
+                        val cleanSafePart = safePart.replace(Regex("\\[s:\\d+\\]"), "")
+                        if (cleanSafePart.isNotBlank()) {
+                            val url = URI("$baseUrl/api/generate").toURL()
+                            val connection = url.openConnection() as HttpURLConnection
+                            connection.requestMethod = "POST"
+                            connection.setRequestProperty("Content-Type", "application/json")
+                            connection.doOutput = true
+
+                            val json = JsonObject()
+                            json.addProperty("text", cleanSafePart)
+                            json.addProperty("voice", voice)
+                            json.addProperty("language", language)
+                            json.addProperty("no-cache", false)
+
+                            connection.outputStream.use { os ->
+                                val input = json.toString().toByteArray(StandardCharsets.UTF_8)
+                                os.write(input, 0, input.size)
+                            }
+
+                            if (connection.responseCode == 200) {
+                                fetchedChunks.add(connection.inputStream.readAllBytes())
+                            } else {
+                                throw Exception("Failed to generate audio part. HTTP Code: ${connection.responseCode}")
+                            }
+                        }
+                    }
                 }
-            } else {
-                throw Exception("Failed to generate audio. HTTP Code: ${connection.responseCode}")
+            }
+
+            if (fetchedChunks.isNotEmpty()) {
+                if (fetchedChunks.size == 1) {
+                    file.writeBytes(fetchedChunks[0])
+                } else {
+                    // Read all WAV chunks, extract their PCM data, and write a new combined WAV
+                    var totalDataSize = 0
+                    var sampleRate = 22050
+                    var numChannels = 1
+                    var bitsPerSample = 16
+
+                    val pcmDataList = mutableListOf<ByteArray>()
+                    for (chunk in fetchedChunks) {
+                        try {
+                            val bais = java.io.ByteArrayInputStream(chunk)
+                            val ais = javax.sound.sampled.AudioSystem.getAudioInputStream(bais)
+                            sampleRate = ais.format.sampleRate.toInt()
+                            numChannels = ais.format.channels
+                            bitsPerSample = ais.format.sampleSizeInBits
+                            val pcmBytes = ais.readAllBytes()
+                            pcmDataList.add(pcmBytes)
+                            totalDataSize += pcmBytes.size
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+
+                    val combinedFormatBytes = ByteBuffer.allocate(44 + totalDataSize).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                    combinedFormatBytes.put("RIFF".toByteArray(StandardCharsets.US_ASCII))
+                    combinedFormatBytes.putInt(36 + totalDataSize)
+                    combinedFormatBytes.put("WAVE".toByteArray(StandardCharsets.US_ASCII))
+                    combinedFormatBytes.put("fmt ".toByteArray(StandardCharsets.US_ASCII))
+                    combinedFormatBytes.putInt(16)
+                    combinedFormatBytes.putShort(1.toShort())
+                    combinedFormatBytes.putShort(numChannels.toShort())
+                    combinedFormatBytes.putInt(sampleRate)
+                    combinedFormatBytes.putInt(sampleRate * numChannels * (bitsPerSample / 8))
+                    combinedFormatBytes.putShort((numChannels * (bitsPerSample / 8)).toShort())
+                    combinedFormatBytes.putShort(bitsPerSample.toShort())
+                    combinedFormatBytes.put("data".toByteArray(StandardCharsets.US_ASCII))
+                    combinedFormatBytes.putInt(totalDataSize)
+                    
+                    for (pcm in pcmDataList) {
+                        combinedFormatBytes.put(pcm)
+                    }
+                    
+                    file.writeBytes(combinedFormatBytes.array())
+                }
             }
         }
         
