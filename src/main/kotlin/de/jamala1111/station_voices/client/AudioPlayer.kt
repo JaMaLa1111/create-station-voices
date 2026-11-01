@@ -348,6 +348,9 @@ object AudioPlayer {
             if (baseUrl.isBlank()) {
                 throw Exception("Web API URL is not configured in create_station_voices-server.toml")
             }
+            if (!ModConfig.CLIENT.allowNetworkUsage.get()) {
+                throw Exception("Network usage is disabled in client config. Cannot use Web API TTS.")
+            }
 
             for (part in parsedParts) {
                 if (part.silenceSeconds > 0) {

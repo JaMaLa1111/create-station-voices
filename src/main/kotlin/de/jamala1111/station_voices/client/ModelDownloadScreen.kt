@@ -121,6 +121,7 @@ class ModelDownloadScreen : Screen(Component.translatable("gui.create_station_vo
     }
 
     private fun playSampleUrl(url: String) {
+        if (!ModConfig.CLIENT.allowNetworkUsage.get()) return
         currentPlayer?.close()
         currentPlayer = null
         CoroutineScope(Dispatchers.IO).launch {
@@ -163,6 +164,7 @@ class ModelDownloadScreen : Screen(Component.translatable("gui.create_station_vo
     }
 
     private fun fetchData() {
+        if (!ModConfig.CLIENT.allowNetworkUsage.get()) return
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val url = URI("https://huggingface.co/Ja-Ma-La1111/piper-voice-mirror/resolve/main/manifest.json").toURL()

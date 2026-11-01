@@ -152,6 +152,11 @@
   "gui.create_station_voices.model_prompt.not_now": "Not Now",
   "gui.create_station_voices.model_prompt.dont_show_again": "Don't show again",
 
+  "gui.create_station_voices.network_consent.title": "Network Usage Consent",
+  "gui.create_station_voices.network_consent.message": "This mod requires an internet connection to fetch the list of available voice models and download them from external servers (e.g. HuggingFace). Do you consent to allowing this mod to use your network for these purposes? You can change this later in the client config.",
+  "gui.create_station_voices.network_consent.allow": "Allow",
+  "gui.create_station_voices.network_consent.deny": "Deny",
+
   "gui.create_station_voices.goggle.text": " Text: ",
   "gui.create_station_voices.goggle.voice": " Voice: ",
   "gui.create_station_voices.goggle.linked_to": " Linked to: ",
