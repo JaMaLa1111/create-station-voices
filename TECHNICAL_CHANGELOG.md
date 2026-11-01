@@ -1,11 +1,15 @@
 ## 1.2.0
+
 - Implemented forced silence tag parsing (`[s:X]`) in `TextSanitizer` and both audio generation pipelines (Web API and local Piper), injecting appropriately padded silent audio buffers.
 - Increased max string lengths in network payloads: announcement text limits raised to 1000 characters, and train profile JSON payloads raised to 262144 characters.
 - Added `NetworkConsentScreen` and client config option `allowNetworkUsage` to guard external API and model download requests.
 - `PiperManager` now explicitly clears the `espeak-ng-data` directory prior to re-extraction to prevent initialization issues on repeat runs.
+- Fixed `ground` display transform in all announcer block models (`ra_noconfig_*`, `ar_*`, `speaker_*`, `train_announcer_block`), replaced off-center `translation: [0, 6, 9]` with the vanilla standard `rotation: [0, 0, 0], translation: [0, 3, 0]` so dropped items spin on-center.
 
 ## 1.1.1 (Retracted)
+
 *Note: Version 1.1.1 was retracted, but all of its changes remain and are included in version 1.2.0.*
+
 - Fixed native Piper ONNX runtime failing to initialize on servers with restrictive temp-folder permissions. Native DLLs now extract to `<game>/create_station_voices_piper/native` (alongside voice models) instead of the system temp folder.
 - Fixed `IllegalAccessError` crash caused by piper-jni 1.4.2.1's breaking API change. Pinned piper-jni to 1.4.2 (last instance-API version) via jarJar range `[1.4.1, 1.4.2.1)`.
 - Fixed duplicate `setupPiper()` call on dedicated servers (onCommonSetup + onServerSetup both firing) that caused a secondary `AccessDeniedException` from re-extracting already-loaded DLLs.
